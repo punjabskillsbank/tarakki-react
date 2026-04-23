@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
-import type { OnboardingData } from '../OnboardingFlow';
+import type { OnboardingData } from '../types';
 
 interface Step1Props {
   onNext: () => void;
@@ -10,11 +10,19 @@ interface Step1Props {
 
 export function Step1Signup({ onNext, updateData }: Step1Props) {
   const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
+
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
 
   const handleContinue = () => {
-    if (email) {
+    if (isValidEmail(email)) {
+      setError('');
       updateData({ email });
       onNext();
+    } else {
+      setError('Please enter a valid email address');
     }
   };
 
@@ -73,18 +81,24 @@ export function Step1Signup({ onNext, updateData }: Step1Props) {
             type="email"
             placeholder="name@company.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (error) setError('');
+            }}
             onKeyPress={(e) => e.key === 'Enter' && handleContinue()}
-            className="w-full px-4 py-3 border-2 border-[#D1D5DB] rounded-lg focus:border-[#0073EA] focus:outline-none transition-colors duration-200"
+            className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors duration-200 ${
+              error ? 'border-red-500' : 'border-[#D1D5DB] focus:border-[#0073EA]'
+            }`}
           />
+          {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
         </div>
 
         {/* Continue Button */}
         <button
           onClick={handleContinue}
-          disabled={!email}
+          disabled={!email || (email.length > 0 && !isValidEmail(email) && error === '')}
           className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 ${
-            email 
+            email && isValidEmail(email)
               ? 'bg-[#0073EA] text-white hover:bg-[#0062C9] hover:scale-[1.02] active:scale-[0.98]' 
               : 'bg-gray-200 text-gray-400 cursor-not-allowed'
           }`}

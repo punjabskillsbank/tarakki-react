@@ -1,55 +1,47 @@
 import { useState } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
-import type { OnboardingData } from '../OnboardingFlow';
+import type { OnboardingData } from '../types';
 import { PillButton } from '../PillButton';
 
-interface Step3Props {
+interface Step7Props {
   onNext: () => void;
   onBack: () => void;
   data: OnboardingData;
   updateData: (data: Partial<OnboardingData>) => void;
 }
 
-const roles = [
-  'Business owner',
-  'Team leader',
-  'Team member',
-  'Freelancer',
-  'Director',
-  'C-Level',
-  'VP'
-];
+const focusAreas = ['CRM', 'Task management', 'IT service desk', 'Project management', 'Team collaboration', 'Marketing campaigns'];
 
-export function Step3Role({ onNext, onBack, data, updateData }: Step3Props) {
-  const [selected, setSelected] = useState(data.role || '');
+export function Step7FocusArea({ onNext, onBack, data, updateData }: Step7Props) {
+  const [selected, setSelected] = useState(data.focusArea || 'Task management');
 
   const handleContinue = () => {
-    updateData({ role: selected });
+    updateData({ focusArea: selected });
     onNext();
   };
 
   return (
     <OnboardingLayout 
-      illustration="https://images.unsplash.com/photo-1630672790237-38eeb57cb60b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0ZWFtJTIwbWVldGluZyUyMG9mZmljZSUyMHdvcmtzcGFjZXxlbnwxfHx8fDE3NzYyNzIxMjV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-      gradientType="purple"
+      illustration="https://images.unsplash.com/photo-1636956040469-fec02ed01ab5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBkYXNoYm9hcmQlMjBpbGx1c3RyYXRpb24lMjBwdXJwbGUlMjBncmFkaWVudHxlbnwxfHx8fDE3NzYyNzIxMjN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+      gradientType="yellow"
     >
       <div className="space-y-8">
         {/* Heading */}
         <div className="space-y-3">
           <h1 className="text-[32px] font-semibold text-gray-900">
-            👤 What best describes your current role?
+            🎯 Select what you'd like to focus on first
           </h1>
         </div>
 
         {/* Options */}
         <div className="flex flex-wrap gap-3">
-          {roles.map((role) => (
+          {focusAreas.map((area) => (
             <PillButton
-              key={role}
-              selected={selected === role}
-              onClick={() => setSelected(role)}
+              key={area}
+              selected={selected === area}
+              onClick={() => setSelected(area)}
             >
-              {role}
+              {area}
             </PillButton>
           ))}
         </div>

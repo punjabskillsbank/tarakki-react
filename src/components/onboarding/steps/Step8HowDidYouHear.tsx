@@ -1,75 +1,73 @@
 import { useState } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
-import type { OnboardingData } from '../OnboardingFlow';
+import type { OnboardingData } from '../types';
 import { Check } from 'lucide-react';
 
-interface Step10Props {
+interface Step8Props {
   onNext: () => void;
   onBack: () => void;
   data: OnboardingData;
   updateData: (data: Partial<OnboardingData>) => void;
 }
 
-const availableColumns = [
-  'Owner',
-  'Status',
-  'Due date',
-  'Priority',
-  'Notes',
-  'Files',
-  'Timeline',
-  'Budget'
+const sources = [
+  'Software review site',
+  'AI chatbots',
+  'Email',
+  'YouTube',
+  'LinkedIn',
+  'Facebook',
+  'Google search',
+  'Friend or colleague'
 ];
 
-export function Step10ColumnSelection({ onNext, onBack, data, updateData }: Step10Props) {
-  const [selectedColumns, setSelectedColumns] = useState<string[]>(
-    data.columns || ['Owner', 'Status', 'Due date']
-  );
+export function Step8HowDidYouHear({ onNext, onBack, data, updateData }: Step8Props) {
+  const [selected, setSelected] = useState<string[]>(data.howDidYouHear || []);
 
-  const toggleColumn = (column: string) => {
-    setSelectedColumns(prev =>
-      prev.includes(column)
-        ? prev.filter(c => c !== column)
-        : [...prev, column]
+  const toggleSource = (source: string) => {
+    setSelected(prev => 
+      prev.includes(source) 
+        ? prev.filter(s => s !== source)
+        : [...prev, source]
     );
   };
 
   const handleContinue = () => {
-    updateData({ columns: selectedColumns });
+    updateData({ howDidYouHear: selected });
     onNext();
   };
 
   return (
     <OnboardingLayout 
-      illustration="https://images.unsplash.com/photo-1758876202980-0a28b744fb24?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxidXNpbmVzcyUyMGFuYWx5dGljcyUyMGNoYXJ0cyUyMGRhc2hib2FyZHxlbnwxfHx8fDE3NzYyNzIxMjV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+      illustration="https://images.unsplash.com/photo-1642132652859-3ef5a1048fd1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0ZWFtJTIwY29sbGFib3JhdGlvbiUyMHdvcmtzcGFjZSUyMGlsbHVzdHJhdGlvbnxlbnwxfHx8fDE3NzYyNDcwMDB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
       gradientType="yellow"
     >
       <div className="space-y-8">
         {/* Heading */}
         <div className="space-y-3">
           <h1 className="text-[32px] font-semibold text-gray-900">
-            🧱 Let's select the relevant columns for your board
+            📣 One last question, how did you hear about us?
           </h1>
         </div>
 
-        {/* Column Options */}
+        {/* Checkboxes */}
         <div className="space-y-3">
-          {availableColumns.map((column) => (
-            <label
-              key={column}
-              className="flex items-center gap-3 p-4 rounded-lg border-2 border-[#E5E7EB] hover:border-[#0073EA] cursor-pointer transition-all duration-200"
+          {sources.map((source) => (
+            <label 
+              key={source}
+              className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-all duration-200"
             >
-              <div
+              <div 
                 className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
-                  selectedColumns.includes(column)
+                  selected.includes(source)
                     ? 'bg-[#0073EA] border-[#0073EA]'
                     : 'border-[#D1D5DB]'
                 }`}
-                onClick={() => toggleColumn(column)}
+                onClick={() => toggleSource(source)}
               >
-                {selectedColumns.includes(column) && <Check className="w-3 h-3 text-white" />}
+                {selected.includes(source) && <Check className="w-3 h-3 text-white" />}
               </div>
-              <span className="text-[16px] font-medium text-gray-900">{column}</span>
+              <span className="text-[16px] text-gray-900">{source}</span>
             </label>
           ))}
         </div>
@@ -84,9 +82,9 @@ export function Step10ColumnSelection({ onNext, onBack, data, updateData }: Step
           </button>
           <button
             onClick={handleContinue}
-            disabled={selectedColumns.length === 0}
+            disabled={selected.length === 0}
             className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-200 ${
-              selectedColumns.length > 0
+              selected.length > 0
                 ? 'bg-[#0073EA] text-white hover:bg-[#0062C9] hover:scale-[1.02] active:scale-[0.98]'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}

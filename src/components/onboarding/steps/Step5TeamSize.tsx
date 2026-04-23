@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
-import type { OnboardingData } from '../OnboardingFlow';
+import type { OnboardingData } from '../types';
 import { PillButton } from '../PillButton';
 
-interface Step4Props {
+interface Step5Props {
   onNext: () => void;
   onBack: () => void;
   data: OnboardingData;
@@ -13,7 +13,7 @@ interface Step4Props {
 const teamSizes = ['Only me', '2–5', '6–10', '11–15', '16–25', '26+'];
 const companySizes = ['1–10', '11–50', '51–200', '201–500', '501–1000', '1000+'];
 
-export function Step4TeamSize({ onNext, onBack, data, updateData }: Step4Props) {
+export function Step5TeamSize({ onNext, onBack, data, updateData }: Step5Props) {
   const [teamSize, setTeamSize] = useState(data.teamSize || '');
   const [companySize, setCompanySize] = useState(data.companySize || '');
 

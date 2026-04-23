@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
-import type { OnboardingData } from '../OnboardingFlow';
+import type { OnboardingData } from '../types';
 import { PillButton } from '../PillButton';
 
-interface Step2Props {
+interface Step3Props {
   onNext: () => void;
   onBack: () => void;
   data: OnboardingData;
@@ -12,7 +12,7 @@ interface Step2Props {
 
 const purposes = ['Work', 'Personal', 'School', 'Nonprofits'];
 
-export function Step2Purpose({ onNext, data, updateData }: Step2Props) {
+export function Step3Purpose({ onNext, data, updateData }: Step3Props) {
   const [selected, setSelected] = useState(data.purpose || 'Work');
 
   const handleContinue = () => {
@@ -29,7 +29,7 @@ export function Step2Purpose({ onNext, data, updateData }: Step2Props) {
         {/* Heading */}
         <div className="space-y-3">
           <h1 className="text-[32px] font-semibold text-gray-900">
-            👋 Hey there, what brings you here today?
+            Hi {data.firstName}, what brings you here today?
           </h1>
         </div>
 

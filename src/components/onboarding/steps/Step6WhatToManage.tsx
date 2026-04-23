@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
-import type { OnboardingData } from '../OnboardingFlow';
+import type { OnboardingData } from '../types';
 import { PillButton } from '../PillButton';
 
 interface Step6Props {
@@ -10,38 +10,38 @@ interface Step6Props {
   updateData: (data: Partial<OnboardingData>) => void;
 }
 
-const focusAreas = ['CRM', 'Task management', 'IT service desk', 'Project management', 'Team collaboration', 'Marketing campaigns'];
+const categories = ['HR', 'Operations', 'Marketing', 'Sales', 'IT', 'Finance', 'Product', 'Customer Success'];
 
-export function Step6FocusArea({ onNext, onBack, data, updateData }: Step6Props) {
-  const [selected, setSelected] = useState(data.focusArea || 'Task management');
+export function Step6WhatToManage({ onNext, onBack, data, updateData }: Step6Props) {
+  const [selected, setSelected] = useState(data.whatToManage || '');
 
   const handleContinue = () => {
-    updateData({ focusArea: selected });
+    updateData({ whatToManage: selected });
     onNext();
   };
 
   return (
     <OnboardingLayout 
-      illustration="https://images.unsplash.com/photo-1636956040469-fec02ed01ab5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBkYXNoYm9hcmQlMjBpbGx1c3RyYXRpb24lMjBwdXJwbGUlMjBncmFkaWVudHxlbnwxfHx8fDE3NzYyNzIxMjN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+      illustration="https://images.unsplash.com/photo-1758876202980-0a28b744fb24?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxidXNpbmVzcyUyMGFuYWx5dGljcyUyMGNoYXJ0cyUyMGRhc2hib2FyZHxlbnwxfHx8fDE3NzYyNzIxMjV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
       gradientType="yellow"
     >
       <div className="space-y-8">
         {/* Heading */}
         <div className="space-y-3">
           <h1 className="text-[32px] font-semibold text-gray-900">
-            🎯 Select what you'd like to focus on first
+            🏢 Select what you'd like to manage first
           </h1>
         </div>
 
         {/* Options */}
         <div className="flex flex-wrap gap-3">
-          {focusAreas.map((area) => (
+          {categories.map((category) => (
             <PillButton
-              key={area}
-              selected={selected === area}
-              onClick={() => setSelected(area)}
+              key={category}
+              selected={selected === category}
+              onClick={() => setSelected(category)}
             >
-              {area}
+              {category}
             </PillButton>
           ))}
         </div>

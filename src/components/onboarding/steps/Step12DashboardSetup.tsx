@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
-import type { OnboardingData } from '../OnboardingFlow';
+import type { OnboardingData } from '../types';
 import { BarChart3, PieChart, Users } from 'lucide-react';
 
-interface Step11Props {
+interface Step12Props {
   onNext: () => void;
   onBack: () => void;
   data: OnboardingData;
@@ -16,7 +16,7 @@ const dashboardOptions = [
   { id: 'tasks-by-owner', label: 'Tasks by owner', icon: Users }
 ];
 
-export function Step11DashboardSetup({ onNext, onBack, data, updateData }: Step11Props) {
+export function Step12DashboardSetup({ onNext, onBack, data, updateData }: Step12Props) {
   const [selectedDashboards, setSelectedDashboards] = useState<string[]>(
     data.dashboards || ['tasks-overview']
   );

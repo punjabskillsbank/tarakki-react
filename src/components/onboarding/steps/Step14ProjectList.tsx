@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { OnboardingLayout } from '../OnboardingLayout';
-import type { OnboardingData } from '../OnboardingFlow';
+import type { OnboardingData } from '../types';
 import { Plus, X } from 'lucide-react';
 import { EntranceTransition } from '../EntranceTransition';
 
-interface Step13Props {
+interface Step14Props {
   onBack: () => void;
   data: OnboardingData;
   updateData: (data: Partial<OnboardingData>) => void;
 }
 
-export function Step13ProjectList({ onBack, data, updateData }: Step13Props) {
+export function Step14ProjectList({ onBack, data, updateData }: Step14Props) {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<string[]>(
     data.projects || ['Task 1', 'Task 2', 'Task 3']

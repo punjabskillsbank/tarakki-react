@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
-import type { OnboardingData } from '../OnboardingFlow';
+import type { OnboardingData } from '../types';
 import { Plus, X } from 'lucide-react';
 
-interface Step8Props {
+interface Step9Props {
   onNext: () => void;
   onBack: () => void;
   data: OnboardingData;
@@ -15,7 +15,7 @@ interface TeamMember {
   role: string;
 }
 
-export function Step8InviteTeam({ onNext, onBack, data, updateData }: Step8Props) {
+export function Step9InviteTeam({ onNext, onBack, data, updateData }: Step9Props) {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(
     data.teamMembers || [{ email: '', role: 'Admin' }]
   );

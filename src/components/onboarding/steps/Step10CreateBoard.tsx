@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
-import type { OnboardingData } from '../OnboardingFlow';
+import type { OnboardingData } from '../types';
 import { Info } from 'lucide-react';
 
-interface Step9Props {
+interface Step10Props {
   onNext: () => void;
   onBack: () => void;
   data: OnboardingData;
   updateData: (data: Partial<OnboardingData>) => void;
 }
 
-export function Step9CreateBoard({ onNext, onBack, data, updateData }: Step9Props) {
+export function Step10CreateBoard({ onNext, onBack, data, updateData }: Step10Props) {
   const [boardName, setBoardName] = useState(data.boardName || 'My first project');
 
   const handleContinue = () => {

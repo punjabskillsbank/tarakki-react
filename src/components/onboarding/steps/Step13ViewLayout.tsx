@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
-import type { OnboardingData } from '../OnboardingFlow';
+import type { OnboardingData } from '../types';
 import { Table, Kanban, GanttChart, Calendar } from 'lucide-react';
 
-interface Step12Props {
+interface Step13Props {
   onNext: () => void;
   onBack: () => void;
   data: OnboardingData;
@@ -17,7 +17,7 @@ const viewOptions = [
   { id: 'calendar', label: 'Calendar', icon: Calendar }
 ];
 
-export function Step12ViewLayout({ onNext, onBack, data, updateData }: Step12Props) {
+export function Step13ViewLayout({ onNext, onBack, data, updateData }: Step13Props) {
   const [selectedView, setSelectedView] = useState(data.viewLayout || 'table');
 
   const handleContinue = () => {

@@ -1,47 +1,55 @@
 import { useState } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
-import type { OnboardingData } from '../OnboardingFlow';
+import type { OnboardingData } from '../types';
 import { PillButton } from '../PillButton';
 
-interface Step5Props {
+interface Step4Props {
   onNext: () => void;
   onBack: () => void;
   data: OnboardingData;
   updateData: (data: Partial<OnboardingData>) => void;
 }
 
-const categories = ['HR', 'Operations', 'Marketing', 'Sales', 'IT', 'Finance', 'Product', 'Customer Success'];
+const roles = [
+  'Business owner',
+  'Team leader',
+  'Team member',
+  'Freelancer',
+  'Director',
+  'C-Level',
+  'VP'
+];
 
-export function Step5WhatToManage({ onNext, onBack, data, updateData }: Step5Props) {
-  const [selected, setSelected] = useState(data.whatToManage || '');
+export function Step4Role({ onNext, onBack, data, updateData }: Step4Props) {
+  const [selected, setSelected] = useState(data.role || '');
 
   const handleContinue = () => {
-    updateData({ whatToManage: selected });
+    updateData({ role: selected });
     onNext();
   };
 
   return (
     <OnboardingLayout 
-      illustration="https://images.unsplash.com/photo-1758876202980-0a28b744fb24?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxidXNpbmVzcyUyMGFuYWx5dGljcyUyMGNoYXJ0cyUyMGRhc2hib2FyZHxlbnwxfHx8fDE3NzYyNzIxMjV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-      gradientType="yellow"
+      illustration="https://images.unsplash.com/photo-1630672790237-38eeb57cb60b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0ZWFtJTIwbWVldGluZyUyMG9mZmljZSUyMHdvcmtzcGFjZXxlbnwxfHx8fDE3NzYyNzIxMjV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+      gradientType="purple"
     >
       <div className="space-y-8">
         {/* Heading */}
         <div className="space-y-3">
           <h1 className="text-[32px] font-semibold text-gray-900">
-            🏢 Select what you'd like to manage first
+            👤 What best describes your current role?
           </h1>
         </div>
 
         {/* Options */}
         <div className="flex flex-wrap gap-3">
-          {categories.map((category) => (
+          {roles.map((role) => (
             <PillButton
-              key={category}
-              selected={selected === category}
-              onClick={() => setSelected(category)}
+              key={role}
+              selected={selected === role}
+              onClick={() => setSelected(role)}
             >
-              {category}
+              {role}
             </PillButton>
           ))}
         </div>
