@@ -5,6 +5,9 @@ export default {
     '^.+\\.tsx?$': ['ts-jest', {
       tsconfig: {
         module: 'commonjs',
+        target: 'es2020',
+        lib: ['es2020', 'dom'],
+        types: ['jest', 'node'],
         verbatimModuleSyntax: false,
         jsx: 'react-jsx',
       },

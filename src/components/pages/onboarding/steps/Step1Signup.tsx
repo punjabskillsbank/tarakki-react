@@ -96,9 +96,9 @@ export function Step1Signup({ onNext, updateData }: Step1Props) {
         {/* Continue Button */}
         <button
           onClick={handleContinue}
-          disabled={!email || (email.length > 0 && !isValidEmail(email) && error === '')}
+          disabled={!email}
           className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 ${
-            email && isValidEmail(email)
+            email
               ? 'bg-[#0073EA] text-white hover:bg-[#0062C9] hover:scale-[1.02] active:scale-[0.98]' 
               : 'bg-gray-200 text-gray-400 cursor-not-allowed'
           }`}

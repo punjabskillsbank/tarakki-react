@@ -1,10 +1,12 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import App from './App';
 
 describe('App Component', () => {
-  test('renders Tarakki-React heading', () => {
+  test('renders the application and shows onboarding', async () => {
     render(<App />);
-    const headingElement = screen.getByText(/Tarakki-React/i);
-    expect(headingElement).toBeInTheDocument();
+    // Since it starts with an entrance transition, we wait for Step 1 or the transition
+    await waitFor(() => {
+      expect(screen.getByText(/Welcome to Tarakki/i) || screen.getByText(/Setting up your workspace/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
   });
 });

@@ -9,11 +9,15 @@ export function EntranceTransition({ onComplete }: { onComplete: () => void }) {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(timer);
-          // Wait a bit after 100% to let the user see it
+          return 100;
+        }
+        const next = prev + 1.5;
+        if (next >= 100) {
+          clearInterval(timer);
           setTimeout(onComplete, 800);
           return 100;
         }
-        return prev + 1.5;
+        return next;
       });
     }, 20);
     return () => clearInterval(timer);

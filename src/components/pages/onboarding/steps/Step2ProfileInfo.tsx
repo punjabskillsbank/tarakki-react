@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
 import type { OnboardingData } from '../types';
-import MemberServices from '../../../services/MemberServices';
+import MemberServices from '../../../../services/MemberServices';
 
 interface Step2Props {
   onNext: () => void;
