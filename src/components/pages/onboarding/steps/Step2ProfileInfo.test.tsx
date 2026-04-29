@@ -48,7 +48,7 @@ describe('Step2ProfileInfo', () => {
         profilePhotoS3Key: "",
         accountStatus: "ACTIVE"
       });
-      expect(updateData).toHaveBeenCalledWith({ firstName: 'John', lastName: 'Doe', profilePhoto: undefined });
+      expect(updateData).toHaveBeenCalledWith({ firstName: 'John', lastName: 'Doe' });
       expect(onNext).toHaveBeenCalledTimes(1);
     });
   });

@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import App from './App';
+import '@testing-library/jest-dom';
 
 describe('App Component', () => {
   test('renders the application and shows onboarding', async () => {
