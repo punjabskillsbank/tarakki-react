@@ -7,9 +7,10 @@ interface Step2Props {
   onNext: () => void;
   onBack: () => void;
   email: string;
+  onErrorBack: (message: string) => void;
 }
 
-export function Step2ProfileInfo({ onNext, onBack, email }: Step2Props) {
+export function Step2ProfileInfo({ onNext, onBack, email, onErrorBack }: Step2Props) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
@@ -30,9 +31,15 @@ export function Step2ProfileInfo({ onNext, onBack, email }: Step2Props) {
           accountStatus: "ACTIVE"
         });
         onNext();
-      } catch (error) {
-        console.log('Error connecting to API:', error);
-        setApiError('Failed to create account. Please try again.');
+      } catch (error: any) {
+        console.log('Error creating member:', error);
+        const errorMessage = error.message || '';
+        
+        if (errorMessage.toLowerCase().includes('already exists')) {
+          onErrorBack('Member with this email already exists.');
+        } else {
+          setApiError('Failed to create account. Please try again.');
+        }
       } finally {
         setLoading(false);
       }

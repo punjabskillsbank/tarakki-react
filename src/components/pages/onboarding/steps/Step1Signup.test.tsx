@@ -11,13 +11,13 @@ describe('Step1Signup', () => {
   });
 
   it('renders correctly', () => {
-    render(<Step1Signup onNext={onNext} setEmail={setEmail} />);
+    render(<Step1Signup onNext={onNext} email={''} setEmail={setEmail} />);
     expect(screen.getByText('Welcome to Tarakki')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('name@company.com')).toBeInTheDocument();
   });
 
   it('validates email and calls onNext and updateData on success', () => {
-    render(<Step1Signup onNext={onNext} setEmail={setEmail} />);
+    render(<Step1Signup onNext={onNext} email={''} setEmail={setEmail} />);
     const input = screen.getByPlaceholderText('name@company.com');
     const button = screen.getByRole('button', { name: /^continue$/i });
 
@@ -29,7 +29,7 @@ describe('Step1Signup', () => {
   });
 
   it('shows error for invalid email', () => {
-    render(<Step1Signup onNext={onNext} setEmail={setEmail} />);
+    render(<Step1Signup onNext={onNext} email={''} setEmail={setEmail} />);
     const input = screen.getByPlaceholderText('name@company.com');
     const button = screen.getByRole('button', { name: /^continue$/i });
 

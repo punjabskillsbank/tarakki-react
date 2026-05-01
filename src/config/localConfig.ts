@@ -1,6 +1,6 @@
 const localConfig = {
   baseURLs: {
-    apiRoot: 'http://localhost:8080/api',
+    apiRoot: '/api',
   },
 };
 

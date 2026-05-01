@@ -18,6 +18,7 @@ export function OnboardingFlow() {
   const [currentStep, setCurrentStep] = useState(1);
   const [email, setEmail] = useState('');
   const [direction, setDirection] = useState(1);
+  const [signupError, setSignupError] = useState<string | null>(null);
 
   const nextStep = useCallback(() => {
     setDirection(1);
@@ -29,7 +30,10 @@ export function OnboardingFlow() {
     setCurrentStep(prev => prev - 1);
   }, []);
 
-  // updateData removed as we are passing email directly now
+  const handleStep2ErrorBack = useCallback((errorMessage: string) => {
+    setSignupError(errorMessage);
+    prevStep();
+  }, [prevStep]);
 
   const slideVariants = {
     enter: (direction: number) => ({
@@ -64,8 +68,23 @@ export function OnboardingFlow() {
           transition={transition}
           className="h-full"
         >
-          {currentStep === 1 && <Step1Signup onNext={nextStep} setEmail={setEmail} />}
-          {currentStep === 2 && <Step2ProfileInfo onNext={nextStep} onBack={prevStep} email={email} />}
+          {currentStep === 1 && (
+            <Step1Signup 
+              onNext={nextStep} 
+              email={email}
+              setEmail={setEmail} 
+              externalError={signupError}
+              onClearError={() => setSignupError(null)}
+            />
+          )}
+          {currentStep === 2 && (
+            <Step2ProfileInfo 
+              onNext={nextStep} 
+              onBack={prevStep} 
+              email={email} 
+              onErrorBack={handleStep2ErrorBack}
+            />
+          )}
           {currentStep === 3 && <EntranceTransition onComplete={nextStep} />}
           {currentStep === 4 && null}
 

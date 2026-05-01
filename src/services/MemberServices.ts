@@ -12,8 +12,9 @@ export default class MemberServices {
       const response = await API.post('/members', memberData);
       return response.data;
     } catch (error: any) {
-      console.log('Error creating member:', error);
-      throw new Error(error.response?.data?.message || 'Failed to create member');
+      console.log('Error creating member at members:', error.response?.data?.message || error.message);
+      const message = error.response?.data?.message || error.response?.data || 'Failed to create member';
+      throw new Error(typeof message === 'string' ? message : 'Failed to create member');
     }
   }
 }

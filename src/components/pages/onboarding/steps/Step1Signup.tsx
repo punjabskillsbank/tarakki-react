@@ -1,15 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
 import signupIllustration from '../../../../assets/images/onboarding-signup.jpg';
 
 interface Step1Props {
   onNext: () => void;
+  email: string;
   setEmail: (email: string) => void;
+  externalError?: string | null;
+  onClearError?: () => void;
 }
 
-export function Step1Signup({ onNext, setEmail }: Step1Props) {
-  const [localEmail, setLocalEmail] = useState('');
+export function Step1Signup({ onNext, email, setEmail, externalError, onClearError }: Step1Props) {
+  const [localEmail, setLocalEmail] = useState(email);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    setError(externalError || '');
+  }, [externalError]);
 
   const isValidEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -18,6 +25,7 @@ export function Step1Signup({ onNext, setEmail }: Step1Props) {
   const handleContinue = () => {
     if (isValidEmail(localEmail)) {
       setError('');
+      onClearError?.();
       setEmail(localEmail);
       onNext();
     } else {
@@ -51,7 +59,10 @@ export function Step1Signup({ onNext, setEmail }: Step1Props) {
             value={localEmail}
             onChange={(e) => {
               setLocalEmail(e.target.value);
-              if (error) setError('');
+              if (error) {
+                setError('');
+                onClearError?.();
+              }
             }}
             onKeyPress={(e) => e.key === 'Enter' && handleContinue()}
             className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors duration-200 ${
