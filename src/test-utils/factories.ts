@@ -9,6 +9,7 @@ export const memberFactory = (overrides = {}) => {
   };
 };
 
+/*
 export const onboardingDataFactory = (overrides = {}) => {
   return {
     email: 'test@example.com',
@@ -20,3 +21,4 @@ export const onboardingDataFactory = (overrides = {}) => {
     ...overrides,
   };
 };
+*/

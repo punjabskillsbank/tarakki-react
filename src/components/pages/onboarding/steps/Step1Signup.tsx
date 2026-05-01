@@ -1,15 +1,14 @@
 import { useState } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
-import type { OnboardingData } from '../OnboardingFlow';
+import signupIllustration from '../../../../assets/images/onboarding-signup.jpg';
 
 interface Step1Props {
   onNext: () => void;
-  data: OnboardingData;
-  updateData: (data: Partial<OnboardingData>) => void;
+  setEmail: (email: string) => void;
 }
 
-export function Step1Signup({ onNext, updateData }: Step1Props) {
-  const [email, setEmail] = useState('');
+export function Step1Signup({ onNext, setEmail }: Step1Props) {
+  const [localEmail, setLocalEmail] = useState('');
   const [error, setError] = useState('');
 
   const isValidEmail = (email: string) => {
@@ -17,9 +16,9 @@ export function Step1Signup({ onNext, updateData }: Step1Props) {
   };
 
   const handleContinue = () => {
-    if (isValidEmail(email)) {
+    if (isValidEmail(localEmail)) {
       setError('');
-      updateData({ email });
+      setEmail(localEmail);
       onNext();
     } else {
       setError('Please enter a valid email address');
@@ -28,7 +27,7 @@ export function Step1Signup({ onNext, updateData }: Step1Props) {
 
   return (
     <OnboardingLayout 
-      illustration="https://images.unsplash.com/photo-1636956040469-fec02ed01ab5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBkYXNoYm9hcmQlMjBpbGx1c3RyYXRpb24lMjBwdXJwbGUlMjBncmFkaWVudHxlbnwxfHx8fDE3NzYyNzIxMjN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+      illustration={signupIllustration}
       gradientType="purple"
     >
       <div className="space-y-8">
@@ -49,9 +48,9 @@ export function Step1Signup({ onNext, updateData }: Step1Props) {
           <input
             type="email"
             placeholder="name@company.com"
-            value={email}
+            value={localEmail}
             onChange={(e) => {
-              setEmail(e.target.value);
+              setLocalEmail(e.target.value);
               if (error) setError('');
             }}
             onKeyPress={(e) => e.key === 'Enter' && handleContinue()}
@@ -65,9 +64,9 @@ export function Step1Signup({ onNext, updateData }: Step1Props) {
         {/* Continue Button */}
         <button
           onClick={handleContinue}
-          disabled={!email}
+          disabled={!localEmail}
           className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 ${
-            email
+            localEmail
               ? 'bg-[#0073EA] text-white hover:bg-[#0062C9] hover:scale-[1.02] active:scale-[0.98]' 
               : 'bg-gray-200 text-gray-400 cursor-not-allowed'
           }`}

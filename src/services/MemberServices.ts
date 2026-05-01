@@ -12,7 +12,7 @@ export default class MemberServices {
       const response = await API.post('/members', memberData);
       return response.data;
     } catch (error: any) {
-      console.error('Error creating member:', error);
+      console.log('Error creating member:', error);
       throw new Error(error.response?.data?.message || 'Failed to create member');
     }
   }

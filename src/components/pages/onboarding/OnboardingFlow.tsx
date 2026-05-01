@@ -4,16 +4,19 @@ import { Step1Signup } from './steps/Step1Signup';
 import { Step2ProfileInfo } from './steps/Step2ProfileInfo';
 import { EntranceTransition } from './EntranceTransition';
 
+// This will only be used further when more steps are added to onboarding
+/*
 export interface OnboardingData {
   email?: string;
   firstName?: string;
   lastName?: string;
   profilePhoto?: string;
 }
+*/
 
 export function OnboardingFlow() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [data, setData] = useState<OnboardingData>({});
+  const [email, setEmail] = useState('');
   const [direction, setDirection] = useState(1);
 
   const nextStep = useCallback(() => {
@@ -26,9 +29,7 @@ export function OnboardingFlow() {
     setCurrentStep(prev => prev - 1);
   }, []);
 
-  const updateData = (newData: Partial<OnboardingData>) => {
-    setData(prev => ({ ...prev, ...newData }));
-  };
+  // updateData removed as we are passing email directly now
 
   const slideVariants = {
     enter: (direction: number) => ({
@@ -63,8 +64,8 @@ export function OnboardingFlow() {
           transition={transition}
           className="h-full"
         >
-          {currentStep === 1 && <Step1Signup onNext={nextStep} data={data} updateData={updateData} />}
-          {currentStep === 2 && <Step2ProfileInfo onNext={nextStep} onBack={prevStep} data={data} updateData={updateData} />}
+          {currentStep === 1 && <Step1Signup onNext={nextStep} setEmail={setEmail} />}
+          {currentStep === 2 && <Step2ProfileInfo onNext={nextStep} onBack={prevStep} email={email} />}
           {currentStep === 3 && <EntranceTransition onComplete={nextStep} />}
           {currentStep === 4 && null}
 

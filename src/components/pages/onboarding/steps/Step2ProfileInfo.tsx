@@ -1,18 +1,17 @@
 import { useState } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
-import type { OnboardingData } from '../OnboardingFlow';
+import profileIllustration from '../../../../assets/images/onboarding-profile.jpg';
 import MemberServices from '../../../../services/MemberServices';
 
 interface Step2Props {
   onNext: () => void;
   onBack: () => void;
-  data: OnboardingData;
-  updateData: (data: Partial<OnboardingData>) => void;
+  email: string;
 }
 
-export function Step2ProfileInfo({ onNext, onBack, data, updateData }: Step2Props) {
-  const [firstName, setFirstName] = useState(data.firstName || '');
-  const [lastName, setLastName] = useState(data.lastName || '');
+export function Step2ProfileInfo({ onNext, onBack, email }: Step2Props) {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -26,14 +25,13 @@ export function Step2ProfileInfo({ onNext, onBack, data, updateData }: Step2Prop
         await MemberServices.createMember({
           firstName,
           lastName,
-          email: data.email,
+          email: email,
           profilePhotoS3Key: "",
           accountStatus: "ACTIVE"
         });
-        updateData({ firstName, lastName });
         onNext();
       } catch (error) {
-        console.error('Error connecting to API:', error);
+        console.log('Error connecting to API:', error);
         setApiError('Failed to create account. Please try again.');
       } finally {
         setLoading(false);
@@ -47,7 +45,7 @@ export function Step2ProfileInfo({ onNext, onBack, data, updateData }: Step2Prop
 
   return (
     <OnboardingLayout 
-      illustration="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw1fHx0ZWFtJTIwd29ya2luZ3xlbnwxfHx8fDE3NzYyNzIxMjN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+      illustration={profileIllustration}
       gradientType="purple"
     >
       <div className="space-y-8">
