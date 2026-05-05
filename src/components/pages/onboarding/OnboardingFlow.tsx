@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Step1Signup } from './steps/Step1Signup';
 import { Step2ProfileInfo } from './steps/Step2ProfileInfo';
@@ -20,10 +21,16 @@ export function OnboardingFlow() {
   const [direction, setDirection] = useState(1);
   const [signupError, setSignupError] = useState<string | null>(null);
 
+  const navigate = useNavigate();
+
   const nextStep = useCallback(() => {
+    if (currentStep === 3) {
+      navigate('/organization-decision');
+      return;
+    }
     setDirection(1);
     setCurrentStep(prev => prev + 1);
-  }, []);
+  }, [currentStep, navigate]);
 
   const prevStep = useCallback(() => {
     setDirection(-1);
@@ -86,7 +93,6 @@ export function OnboardingFlow() {
             />
           )}
           {currentStep === 3 && <EntranceTransition onComplete={nextStep} />}
-          {currentStep === 4 && null}
 
         </motion.div>
       </AnimatePresence>
