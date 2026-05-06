@@ -59,7 +59,7 @@ describe('OrganizationDecision', () => {
       </MemoryRouter>
     );
 
-    const joinCard = screen.getByText('Join an Organization').closest('div');
+    const joinCard = screen.getByText('Join an Organization').closest('button');
     fireEvent.click(joinCard!);
 
     const continueButton = screen.getByText('Continue to Dashboard').closest('button');
@@ -73,7 +73,7 @@ describe('OrganizationDecision', () => {
       </MemoryRouter>
     );
 
-    const createCard = screen.getByText('Create an Organization').closest('div');
+    const createCard = screen.getByText('Create an Organization').closest('button');
     fireEvent.click(createCard!);
 
     const continueButton = screen.getByText('Continue to Dashboard').closest('button');
@@ -87,7 +87,7 @@ describe('OrganizationDecision', () => {
       </MemoryRouter>
     );
 
-    const joinCard = screen.getByText('Join an Organization').closest('div');
+    const joinCard = screen.getByText('Join an Organization').closest('button');
     fireEvent.click(joinCard!);
 
     const continueButton = screen.getByText('Continue to Dashboard');

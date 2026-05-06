@@ -1,6 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
-import { OnboardingFlow } from '../components/pages/onboarding/OnboardingFlow';
-import { OrganizationDecision } from '../components/pages/organization/OrganizationDecision';
+import { OnboardingFlow } from '../pages/onboarding/OnboardingFlow';
+import { OrganizationDecision } from '../pages/organization/OrganizationDecision';
 
 export const Router = createBrowserRouter([
   {

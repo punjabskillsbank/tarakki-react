@@ -1,9 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Step2ProfileInfo } from './Step2ProfileInfo';
-import MemberServices from '../../../../services/MemberServices';
+import MemberServices from '../../../services/MemberServices';
 import '@testing-library/jest-dom';
 
-jest.mock('../../../../services/MemberServices');
+jest.mock('../../../services/MemberServices');
 const mockedMemberServices = MemberServices as jest.Mocked<typeof MemberServices>;
 
 describe('Step2ProfileInfo', () => {
