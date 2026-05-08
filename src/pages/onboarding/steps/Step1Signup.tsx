@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
-import signupIllustration from '../../../../assets/images/onboarding-signup.jpg';
+import signupIllustration from '../../../assets/images/onboarding-signup.jpg';
 
 interface Step1Props {
   onNext: () => void;
