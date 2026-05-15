@@ -22,14 +22,23 @@ export function Step2ProfileInfo({ onNext, onBack, email, onErrorBack }: Step2Pr
       setLoading(true);
       setApiError(null);
       try {
+        const formattedFirstName = firstName.trim().charAt(0).toUpperCase() + firstName.trim().slice(1);
+        const formattedLastName = lastName.trim().charAt(0).toUpperCase() + lastName.trim().slice(1);
+
         // Use MemberServices as requested
-        await MemberServices.createMember({
-          firstName,
-          lastName,
+        const response = await MemberServices.createMember({
+          firstName: formattedFirstName,
+          lastName: formattedLastName,
           email: email,
           profilePhotoS3Key: "",
           accountStatus: "ACTIVE"
         });
+
+        if (response && response.memberId) {
+          localStorage.setItem('memberId', response.memberId.toString());
+          localStorage.setItem('firstName', formattedFirstName);
+          localStorage.setItem('lastName', formattedLastName);
+        }
         onNext();
       } catch (error: any) {
         console.log('Error creating member:', error);

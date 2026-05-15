@@ -18,6 +18,8 @@ export function OrganizationDecision() {
     }
   };
 
+  const firstName = localStorage.getItem('firstName') || '';
+
   return (
     <div
       className="h-screen w-full relative overflow-hidden flex items-center justify-center"
@@ -36,7 +38,7 @@ export function OrganizationDecision() {
         className="relative z-10 w-full max-w-6xl mx-auto px-8"
       >
         <PageHeader 
-          title="Choose Your Path Forward"
+          title={`Choose Your Path Forward, ${firstName}`}
           subtitle="Select the option that best fits your needs to begin your journey with Tarakki"
         />
 

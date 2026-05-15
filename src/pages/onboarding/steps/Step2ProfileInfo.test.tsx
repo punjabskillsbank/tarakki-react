@@ -14,6 +14,8 @@ describe('Step2ProfileInfo', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
+    jest.spyOn(Storage.prototype, 'setItem');
   });
 
   it('renders correctly', () => {
@@ -30,11 +32,11 @@ describe('Step2ProfileInfo', () => {
   });
 
   it('calls MemberServices and onNext when form is complete', async () => {
-    mockedMemberServices.createMember.mockResolvedValueOnce({ id: 1 });
+    mockedMemberServices.createMember.mockResolvedValueOnce({ memberId: 1 });
     render(<Step2ProfileInfo onNext={onNext} onBack={onBack} email={email} onErrorBack={onErrorBack} />);
     
-    fireEvent.change(screen.getByPlaceholderText('e.g. John'), { target: { value: 'John' } });
-    fireEvent.change(screen.getByPlaceholderText('e.g. Doe'), { target: { value: 'Doe' } });
+    fireEvent.change(screen.getByPlaceholderText('e.g. John'), { target: { value: 'john' } });
+    fireEvent.change(screen.getByPlaceholderText('e.g. Doe'), { target: { value: 'doe' } });
     
     const button = screen.getByText('Set up my workspace');
     fireEvent.click(button);
@@ -47,6 +49,9 @@ describe('Step2ProfileInfo', () => {
         profilePhotoS3Key: "",
         accountStatus: "ACTIVE"
       });
+      expect(localStorage.setItem).toHaveBeenCalledWith('memberId', '1');
+      expect(localStorage.setItem).toHaveBeenCalledWith('firstName', 'John');
+      expect(localStorage.setItem).toHaveBeenCalledWith('lastName', 'Doe');
       expect(onNext).toHaveBeenCalledTimes(1);
     });
   });
