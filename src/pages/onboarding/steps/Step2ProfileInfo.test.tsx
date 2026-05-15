@@ -56,8 +56,39 @@ describe('Step2ProfileInfo', () => {
     });
   });
 
+  it('trims and formats names before calling MemberServices', async () => {
+    mockedMemberServices.createMember.mockResolvedValueOnce({ memberId: 1 });
+    render(<Step2ProfileInfo onNext={onNext} onBack={onBack} email={email} onErrorBack={onErrorBack} />);
+    
+    fireEvent.change(screen.getByPlaceholderText('e.g. John'), { target: { value: '  john  ' } });
+    fireEvent.change(screen.getByPlaceholderText('e.g. Doe'), { target: { value: '  doe  ' } });
+    
+    fireEvent.click(screen.getByText('Set up my workspace'));
+
+    await waitFor(() => {
+      expect(mockedMemberServices.createMember).toHaveBeenCalledWith(expect.objectContaining({
+        firstName: 'John',
+        lastName: 'Doe'
+      }));
+    });
+  });
+
   it('calls onErrorBack when duplicate email error occurs', async () => {
-    mockedMemberServices.createMember.mockRejectedValueOnce(new Error('Member with email test@example.com already exists.'));
+    mockedMemberServices.createMember.mockRejectedValueOnce(new Error('Member already exists'));
+    render(<Step2ProfileInfo onNext={onNext} onBack={onBack} email={email} onErrorBack={onErrorBack} />);
+    
+    fireEvent.change(screen.getByPlaceholderText('e.g. John'), { target: { value: 'John' } });
+    fireEvent.change(screen.getByPlaceholderText('e.g. Doe'), { target: { value: 'Doe' } });
+    
+    fireEvent.click(screen.getByText('Set up my workspace'));
+
+    await waitFor(() => {
+      expect(onErrorBack).toHaveBeenCalledWith('Member with this email already exists.');
+    });
+  });
+
+  it('handles non-Error exceptions correctly', async () => {
+    mockedMemberServices.createMember.mockRejectedValueOnce('Member already exists');
     render(<Step2ProfileInfo onNext={onNext} onBack={onBack} email={email} onErrorBack={onErrorBack} />);
     
     fireEvent.change(screen.getByPlaceholderText('e.g. John'), { target: { value: 'John' } });

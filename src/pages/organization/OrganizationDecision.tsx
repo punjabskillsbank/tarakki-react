@@ -18,7 +18,7 @@ export function OrganizationDecision() {
     }
   };
 
-  const firstName = localStorage.getItem('firstName') || '';
+  const storedFirstName = localStorage.getItem('firstName') || '';
 
   return (
     <div
@@ -38,7 +38,7 @@ export function OrganizationDecision() {
         className="relative z-10 w-full max-w-6xl mx-auto px-8"
       >
         <PageHeader 
-          title={`Choose Your Path Forward, ${firstName}`}
+          title={`Choose Your Path Forward, ${storedFirstName}`}
           subtitle="Select the option that best fits your needs to begin your journey with Tarakki"
         />
 

@@ -45,6 +45,16 @@ describe('OrganizationDecision', () => {
     expect(screen.getByText('Continue to Dashboard')).toBeInTheDocument();
   });
 
+  it('renders a generic title when firstName is missing from localStorage', () => {
+    render(
+      <MemoryRouter>
+        <OrganizationDecision />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Choose Your Path Forward,')).toBeInTheDocument();
+  });
+
   it('initially disables the continue button', () => {
     render(
       <MemoryRouter>
