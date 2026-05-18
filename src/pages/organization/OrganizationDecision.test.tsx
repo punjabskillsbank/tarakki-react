@@ -27,18 +27,32 @@ jest.mock('motion/react', () => ({
 describe('OrganizationDecision', () => {
   beforeEach(() => {
     mockNavigate.mockClear();
+    localStorage.clear();
+    jest.spyOn(Storage.prototype, 'getItem');
   });
 
-  it('renders the organization decision options', () => {
+  it('renders the organization decision options with personalized title', () => {
+    localStorage.setItem('firstName', 'John');
     render(
       <MemoryRouter>
         <OrganizationDecision />
       </MemoryRouter>
     );
 
+    expect(screen.getByText('Choose Your Path Forward, John')).toBeInTheDocument();
     expect(screen.getByText('Join an Organization')).toBeInTheDocument();
     expect(screen.getByText('Create an Organization')).toBeInTheDocument();
     expect(screen.getByText('Continue to Dashboard')).toBeInTheDocument();
+  });
+
+  it('renders a generic title when firstName is missing from localStorage', () => {
+    render(
+      <MemoryRouter>
+        <OrganizationDecision />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Choose Your Path Forward,')).toBeInTheDocument();
   });
 
   it('initially disables the continue button', () => {

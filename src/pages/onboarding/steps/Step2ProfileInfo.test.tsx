@@ -14,6 +14,8 @@ describe('Step2ProfileInfo', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
+    jest.spyOn(Storage.prototype, 'setItem');
   });
 
   it('renders correctly', () => {
@@ -30,11 +32,11 @@ describe('Step2ProfileInfo', () => {
   });
 
   it('calls MemberServices and onNext when form is complete', async () => {
-    mockedMemberServices.createMember.mockResolvedValueOnce({ id: 1 });
+    mockedMemberServices.createMember.mockResolvedValueOnce({ memberId: 1 });
     render(<Step2ProfileInfo onNext={onNext} onBack={onBack} email={email} onErrorBack={onErrorBack} />);
     
-    fireEvent.change(screen.getByPlaceholderText('e.g. John'), { target: { value: 'John' } });
-    fireEvent.change(screen.getByPlaceholderText('e.g. Doe'), { target: { value: 'Doe' } });
+    fireEvent.change(screen.getByPlaceholderText('e.g. John'), { target: { value: 'john' } });
+    fireEvent.change(screen.getByPlaceholderText('e.g. Doe'), { target: { value: 'doe' } });
     
     const button = screen.getByText('Set up my workspace');
     fireEvent.click(button);
@@ -47,12 +49,46 @@ describe('Step2ProfileInfo', () => {
         profilePhotoS3Key: "",
         accountStatus: "ACTIVE"
       });
+      expect(localStorage.setItem).toHaveBeenCalledWith('memberId', '1');
+      expect(localStorage.setItem).toHaveBeenCalledWith('firstName', 'John');
+      expect(localStorage.setItem).toHaveBeenCalledWith('lastName', 'Doe');
       expect(onNext).toHaveBeenCalledTimes(1);
     });
   });
 
+  it('trims and formats names before calling MemberServices', async () => {
+    mockedMemberServices.createMember.mockResolvedValueOnce({ memberId: 1 });
+    render(<Step2ProfileInfo onNext={onNext} onBack={onBack} email={email} onErrorBack={onErrorBack} />);
+    
+    fireEvent.change(screen.getByPlaceholderText('e.g. John'), { target: { value: '  john  ' } });
+    fireEvent.change(screen.getByPlaceholderText('e.g. Doe'), { target: { value: '  doe  ' } });
+    
+    fireEvent.click(screen.getByText('Set up my workspace'));
+
+    await waitFor(() => {
+      expect(mockedMemberServices.createMember).toHaveBeenCalledWith(expect.objectContaining({
+        firstName: 'John',
+        lastName: 'Doe'
+      }));
+    });
+  });
+
   it('calls onErrorBack when duplicate email error occurs', async () => {
-    mockedMemberServices.createMember.mockRejectedValueOnce(new Error('Member with email test@example.com already exists.'));
+    mockedMemberServices.createMember.mockRejectedValueOnce(new Error('Member already exists'));
+    render(<Step2ProfileInfo onNext={onNext} onBack={onBack} email={email} onErrorBack={onErrorBack} />);
+    
+    fireEvent.change(screen.getByPlaceholderText('e.g. John'), { target: { value: 'John' } });
+    fireEvent.change(screen.getByPlaceholderText('e.g. Doe'), { target: { value: 'Doe' } });
+    
+    fireEvent.click(screen.getByText('Set up my workspace'));
+
+    await waitFor(() => {
+      expect(onErrorBack).toHaveBeenCalledWith('Member with this email already exists.');
+    });
+  });
+
+  it('handles non-Error exceptions correctly', async () => {
+    mockedMemberServices.createMember.mockRejectedValueOnce('Member already exists');
     render(<Step2ProfileInfo onNext={onNext} onBack={onBack} email={email} onErrorBack={onErrorBack} />);
     
     fireEvent.change(screen.getByPlaceholderText('e.g. John'), { target: { value: 'John' } });

@@ -22,18 +22,29 @@ export function Step2ProfileInfo({ onNext, onBack, email, onErrorBack }: Step2Pr
       setLoading(true);
       setApiError(null);
       try {
+        const trimmedFirstName = firstName.trim();
+        const trimmedLastName = lastName.trim();
+        const formattedFirstName = trimmedFirstName.charAt(0).toUpperCase() + trimmedFirstName.slice(1);
+        const formattedLastName = trimmedLastName.charAt(0).toUpperCase() + trimmedLastName.slice(1);
+
         // Use MemberServices as requested
-        await MemberServices.createMember({
-          firstName,
-          lastName,
+        const memberResponse = await MemberServices.createMember({
+          firstName: formattedFirstName,
+          lastName: formattedLastName,
           email: email,
           profilePhotoS3Key: "",
           accountStatus: "ACTIVE"
         });
+
+        if (memberResponse && memberResponse.memberId) {
+          localStorage.setItem('memberId', memberResponse.memberId.toString());
+          localStorage.setItem('firstName', formattedFirstName);
+          localStorage.setItem('lastName', formattedLastName);
+        }
         onNext();
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.log('Error creating member:', error);
-        const errorMessage = error.message || '';
+        const errorMessage = error instanceof Error ? error.message : String(error);
         
         if (errorMessage.toLowerCase().includes('already exists')) {
           onErrorBack('Member with this email already exists.');
