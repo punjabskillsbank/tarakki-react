@@ -13,7 +13,7 @@ describe('FormTextarea', () => {
     const errorMessage = screen.getByText('Textarea is invalid');
     expect(errorMessage).toBeInTheDocument();
     expect(errorMessage.tagName.toLowerCase()).toBe('p');
-    expect(errorMessage).toHaveClass('mt-1 text-[12px] text-[#E2445C]');
+    expect(errorMessage).toHaveClass('text-[12px] text-[#E2445C]');
   });
 
   it('passes other props to the textarea element', () => {
@@ -27,5 +27,15 @@ describe('FormTextarea', () => {
     const textarea = screen.getByLabelText('Test Textarea');
     expect(textarea).toHaveClass('custom-test-class');
     expect(textarea).toHaveClass('w-full');
+  });
+
+  it('displays character count when showCount is true', () => {
+    render(<FormTextarea id="test-textarea" label="Test Textarea" showCount maxLength={100} defaultValue="hello" />);
+    expect(screen.getByText('5 / 100')).toBeInTheDocument();
+  });
+
+  it('displays only current character count when maxLength is not provided', () => {
+    render(<FormTextarea id="test-textarea" label="Test Textarea" showCount defaultValue="hello" />);
+    expect(screen.getByText('5')).toBeInTheDocument();
   });
 });

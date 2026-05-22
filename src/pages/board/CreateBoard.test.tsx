@@ -16,8 +16,16 @@ describe('CreateBoard', () => {
   it('renders the form correctly', () => {
     render(<CreateBoard />);
     expect(screen.getByText('Create Board', { selector: 'h1' })).toBeInTheDocument();
-    expect(screen.getByLabelText('Board Name')).toBeInTheDocument();
-    expect(screen.getByLabelText('Board Description')).toBeInTheDocument();
+    const boardNameInput = screen.getByLabelText('Board Name');
+    expect(boardNameInput).toBeInTheDocument();
+    expect(boardNameInput).toHaveAttribute('maxLength', '100');
+    expect(screen.getByText('0 / 100')).toBeInTheDocument();
+    
+    const boardDescInput = screen.getByLabelText('Board Description');
+    expect(boardDescInput).toBeInTheDocument();
+    expect(boardDescInput).toHaveAttribute('maxLength', '500');
+    expect(screen.getByText('0 / 500')).toBeInTheDocument();
+    
     expect(screen.getByRole('button', { name: 'Create Board' })).toBeInTheDocument();
   });
 

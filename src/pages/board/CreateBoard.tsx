@@ -129,6 +129,8 @@ export function CreateBoard() {
               }
             }}
             placeholder="Enter board name"
+            maxLength={100}
+            showCount
             error={errors.name}
           />
 
@@ -145,6 +147,9 @@ export function CreateBoard() {
             }}
             placeholder="Describe what this board is for"
             rows={4}
+            maxLength={500}
+            showCount
+            autoResize
             error={errors.description}
           />
 

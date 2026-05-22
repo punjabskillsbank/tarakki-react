@@ -1,12 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { cn } from '../utils/cn';
 
 interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   error?: string;
+  showCount?: boolean;
 }
 
-export function FormInput({ label, error, id, className, style, ...props }: FormInputProps) {
+export function FormInput({ label, error, id, className, style, showCount, maxLength, onChange, ...props }: FormInputProps) {
+  const [charCount, setCharCount] = useState(() => {
+    return String(props.value || props.defaultValue || '').length;
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCharCount(e.target.value.length);
+    if (onChange) {
+      onChange(e);
+    }
+  };
+
+  const currentLength = props.value !== undefined ? String(props.value).length : charCount;
+
   return (
     <div>
       <label htmlFor={id} className="block text-[14px] font-medium text-gray-900 mb-2">
@@ -14,6 +28,7 @@ export function FormInput({ label, error, id, className, style, ...props }: Form
       </label>
       <input
         id={id}
+        maxLength={maxLength}
         className={cn(
           'w-full h-11 px-3 rounded-lg border transition-all duration-200 outline-none',
           error
@@ -22,12 +37,24 @@ export function FormInput({ label, error, id, className, style, ...props }: Form
           className
         )}
         style={{ fontSize: '14px', ...style }}
+        onChange={handleChange}
         {...props}
       />
-      {error && (
-        <p className="mt-1 text-[12px] text-[#E2445C]">
-          {error}
-        </p>
+      {(error || showCount) && (
+        <div className="flex justify-between items-start mt-1">
+          <div className="flex-1">
+            {error && (
+              <p className="text-[12px] text-[#E2445C]">
+                {error}
+              </p>
+            )}
+          </div>
+          {showCount && (
+            <span className="text-[12px] text-gray-500 ml-2 whitespace-nowrap">
+              {maxLength ? `${currentLength} / ${maxLength}` : currentLength}
+            </span>
+          )}
+        </div>
       )}
     </div>
   );
