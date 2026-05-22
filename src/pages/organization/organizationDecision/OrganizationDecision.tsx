@@ -22,6 +22,7 @@ export function OrganizationDecision() {
     }
   };
 
+  const storedFirstName = localStorage.getItem("firstName") || "";
   if (showForm) {
     return <CreateOrganizationForm onCancel={() => setShowForm(false)} />;
   }
@@ -43,7 +44,7 @@ export function OrganizationDecision() {
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="relative z-10 w-full max-w-6xl mx-auto px-8">
         <PageHeader
-          title="Choose Your Path Forward"
+          title={`Choose Your Path Forward, ${storedFirstName}`}
           subtitle="Select the option that best fits your needs to begin your journey with Tarakki"
         />
 
