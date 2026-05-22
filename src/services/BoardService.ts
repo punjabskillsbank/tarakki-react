@@ -7,13 +7,14 @@ export interface CreateBoardPayload {
   createdBy: string;
 }
 
+export type CreateBoardResponse = CreateBoardPayload;
+
 export default class BoardService {
-  static async createBoard(payload: CreateBoardPayload) {
+  static async createBoard(payload: CreateBoardPayload): Promise<CreateBoardResponse> {
     try {
-      const response = await API.post('/boards', payload);
+      const response = await API.post<CreateBoardResponse>('/boards', payload);
       return response.data;
     } catch (error: any) {
-      console.log('Error creating board:', error.response?.data?.message || error.message);
       const message = error.response?.data?.message || error.response?.data || 'Failed to create board';
       throw new Error(typeof message === 'string' ? message : 'Failed to create board');
     }

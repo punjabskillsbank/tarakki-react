@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { CreateBoard } from './CreateBoard';
 import BoardService from '../../services/BoardService';
 import toast from 'react-hot-toast';
@@ -30,10 +31,11 @@ describe('CreateBoard', () => {
   });
 
   it('shows validation errors when fields are empty', async () => {
+    const user = userEvent.setup();
     render(<CreateBoard />);
     
     const submitBtn = screen.getByRole('button', { name: 'Create Board' });
-    fireEvent.click(submitBtn);
+    await user.click(submitBtn);
 
     expect(await screen.findByText('Board name is required')).toBeInTheDocument();
     expect(await screen.findByText('Board description is required')).toBeInTheDocument();
@@ -41,14 +43,15 @@ describe('CreateBoard', () => {
   });
 
   it('calls BoardService and shows success toast on valid submission', async () => {
-    (BoardService.createBoard as jest.Mock).mockResolvedValueOnce({ id: 1 });
+    const user = userEvent.setup();
+    (BoardService.createBoard as jest.Mock).mockResolvedValueOnce(boardPayloadFactory());
     
     render(<CreateBoard />);
     
-    fireEvent.change(screen.getByLabelText('Board Name'), { target: { value: 'New Board' } });
-    fireEvent.change(screen.getByLabelText('Board Description'), { target: { value: 'Description here' } });
+    await user.type(screen.getByLabelText('Board Name'), 'New Board');
+    await user.type(screen.getByLabelText('Board Description'), 'Description here');
     
-    fireEvent.click(screen.getByRole('button', { name: 'Create Board' }));
+    await user.click(screen.getByRole('button', { name: 'Create Board' }));
 
     await waitFor(() => {
       expect(BoardService.createBoard).toHaveBeenCalledWith(boardPayloadFactory());
@@ -57,14 +60,15 @@ describe('CreateBoard', () => {
   });
 
   it('shows error toast on API failure', async () => {
+    const user = userEvent.setup();
     (BoardService.createBoard as jest.Mock).mockRejectedValueOnce(new Error('API Error'));
     
     render(<CreateBoard />);
     
-    fireEvent.change(screen.getByLabelText('Board Name'), { target: { value: 'New Board' } });
-    fireEvent.change(screen.getByLabelText('Board Description'), { target: { value: 'Description here' } });
+    await user.type(screen.getByLabelText('Board Name'), 'New Board');
+    await user.type(screen.getByLabelText('Board Description'), 'Description here');
     
-    fireEvent.click(screen.getByRole('button', { name: 'Create Board' }));
+    await user.click(screen.getByRole('button', { name: 'Create Board' }));
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith("Board couldn't be created. Please try again.");

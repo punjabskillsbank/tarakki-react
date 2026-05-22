@@ -13,9 +13,10 @@ export function CreateBoard() {
   const [boardName, setBoardName] = useState('');
   const [boardDescription, setBoardDescription] = useState('');
   const [errors, setErrors] = useState<{ name?: string; description?: string }>({});
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
+  const handleSubmit = async (e: unknown) => {
+    (e as Event).preventDefault();
 
     // Validation
     const newErrors: { name?: string; description?: string } = {};
@@ -35,6 +36,7 @@ export function CreateBoard() {
 
     // Clear errors
     setErrors({});
+    setIsLoading(true);
 
     try {
       // TODO: Change orgId and createdBy when create organisation page is created and hooked with api
@@ -44,15 +46,17 @@ export function CreateBoard() {
         boardDesc: boardDescription,
         createdBy: 'f9dbfe85-7f75-41d8-8c77-0d0dde8010c0'
       });
-      
+
       toast.success('Board created successfully!');
-      
+
       // Clear form on success
       setBoardName('');
       setBoardDescription('');
     } catch (error) {
       console.error('Failed to create board:', error);
       toast.error("Board couldn't be created. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -155,7 +159,7 @@ export function CreateBoard() {
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-3 pt-6">
-            <PrimaryButton type="submit">
+            <PrimaryButton type="submit" isLoading={isLoading}>
               Create Board
             </PrimaryButton>
           </div>
