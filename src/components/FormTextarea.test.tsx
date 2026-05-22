@@ -10,12 +10,22 @@ describe('FormTextarea', () => {
 
   it('displays error message when error prop is provided', () => {
     render(<FormTextarea id="test-textarea" label="Test Textarea" error="Textarea is invalid" />);
-    expect(screen.getByText('Textarea is invalid')).toBeInTheDocument();
+    const errorMessage = screen.getByText('Textarea is invalid');
+    expect(errorMessage).toBeInTheDocument();
+    expect(errorMessage.tagName.toLowerCase()).toBe('p');
+    expect(errorMessage).toHaveClass('mt-1 text-[12px] text-[#E2445C]');
   });
 
   it('passes other props to the textarea element', () => {
     render(<FormTextarea id="test-textarea" label="Test Textarea" placeholder="Write something..." rows={5} />);
     const textarea = screen.getByPlaceholderText('Write something...');
     expect(textarea).toHaveAttribute('rows', '5');
+  });
+
+  it('merges custom className with default classes', () => {
+    render(<FormTextarea id="test-textarea" label="Test Textarea" className="custom-test-class" />);
+    const textarea = screen.getByLabelText('Test Textarea');
+    expect(textarea).toHaveClass('custom-test-class');
+    expect(textarea).toHaveClass('w-full');
   });
 });
