@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { AlertCircle } from "lucide-react";
+import { FieldWrapper } from "../../../components/FieldWrapper";
+import { PageHeader } from "../../../components/PageHeader";
+import { PageBackground } from "../../../components/PageBackground";
+import OrganisationServices from "../../../services/OrganizationServices";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const getStoredMemberId = () => {
@@ -22,31 +26,6 @@ type FormData = {
 
 interface CreateOrganizationFormProps {
   onCancel: () => void;
-}
-
-// ─── Reusable field wrapper ───────────────────────────────────────────────────
-function FieldWrapper({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-sm font-medium text-gray-700">
-        {label} <span className="text-[#E2445C]">*</span>
-      </label>
-      {children}
-      {error && (
-        <p className="text-xs text-[#E2445C] animate-[fadeIn_150ms_ease-in]">
-          {error}
-        </p>
-      )}
-    </div>
-  );
 }
 
 // ─── Input style helper ───────────────────────────────────────────────────────
@@ -98,43 +77,32 @@ export default function CreateOrganizationForm({
     }
 
     try {
-      const response = await fetch("/api/organizations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        const apiErrors = error.errors ?? error;
-
-        if (response.status === 400) {
-          if (apiErrors && typeof apiErrors === "object") {
-            Object.entries(apiErrors).forEach(([key, value]) => {
-              if (typeof value === "string") {
-                setError(key as keyof FormData, { message: value });
-              }
-            });
-          }
-          if (error.message) {
-            setGlobalError(error.message);
-          }
-        } else {
-          setGlobalError("An unexpected error occurred. Please try again.");
-        }
-
-        setIsSubmitting(false);
-        return;
-      }
-
-      //Success — redirect to dashboard (future implementation)
-      console.log("Organization created successfully:", data);
+      const result = await OrganisationServices.createOrganisation(data);
+      localStorage.setItem("orgId", result.orgId);
+      localStorage.setItem("orgName", result.orgName);
+      // Success — redirect to Create-Board page (future implementation)
+      console.log("Organization created successfully:", result);
       alert("Organization created successfully!");
       reset();
-    } catch {
-      setGlobalError(
-        "Network error. Please check your connection and try again."
-      );
+    } catch (error: any) {
+      const apiErrors = error.response?.data?.errors ?? error.response?.data;
+
+      if (error.response?.status === 400) {
+        if (apiErrors && typeof apiErrors === "object") {
+          Object.entries(apiErrors).forEach(([key, value]) => {
+            if (typeof value === "string") {
+              setError(key as keyof FormData, { message: value });
+            }
+          });
+        }
+        if (error.response?.data?.message) {
+          setGlobalError(error.response.data.message);
+        }
+      } else {
+        setGlobalError(
+          "Network error. Please check your connection and try again."
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -149,21 +117,15 @@ export default function CreateOrganizationForm({
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div
-      className="min-h-screen w-full flex items-center justify-center p-6"
-      style={{ backgroundColor: "#F6F7FB" }}>
+    <div className="min-h-screen w-full relative flex items-center justify-center p-6">
+      <PageBackground />
       <div
         className="w-full max-w-[640px] bg-white rounded-xl p-8"
         style={{ boxShadow: "0px 8px 24px rgba(0,0,0,0.06)" }}>
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-[28px] font-semibold text-gray-900 mb-1">
-            Create Organization
-          </h1>
-          <p className="text-sm text-[#6B7280]">
-            Set up your organization details to get started
-          </p>
-        </div>
+        <PageHeader
+          title="Create Organization"
+          subtitle="Set up your organization details to get started"
+        />
 
         {/* Global Error Banner */}
         {globalError && (

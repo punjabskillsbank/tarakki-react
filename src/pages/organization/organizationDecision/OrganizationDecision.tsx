@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { Users, Building2, ArrowRight } from "lucide-react";
-import { DecisionCard } from "../../components/DecisionCard";
-import { PageBackground } from "../../components/PageBackground";
-import { PageHeader } from "../../components/PageHeader";
-import CreateOrganizationForm from "./CreateOrganizationForm";
+import { DecisionCard } from "../../../components/DecisionCard";
+import { PageBackground } from "../../../components/PageBackground";
+import { PageHeader } from "../../../components/PageHeader";
+import CreateOrganizationForm from "../createOrganisation/CreateOrganizationForm";
 
 type DecisionType = "join" | "create" | null;
 
