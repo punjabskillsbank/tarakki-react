@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import { OnboardingFlow } from "../pages/onboarding/OnboardingFlow";
 import { OrganizationDecision } from "../pages/organization/organizationDecision/OrganizationDecision";
-import CreateOrganizationPage from "../pages/organization/createOrganisation/CreateOrganizationPage";
+import CreateOrganizationForm from "../pages/organization/createOrganisation/CreateOrganizationForm";
 
 export const Router = createBrowserRouter([
   {
@@ -14,6 +14,6 @@ export const Router = createBrowserRouter([
   },
   {
     path: "/create-organization",
-    Component: CreateOrganizationPage,
+    Component: CreateOrganizationForm,
   },
 ]);

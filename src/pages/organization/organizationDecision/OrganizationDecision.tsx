@@ -5,27 +5,20 @@ import { Users, Building2, ArrowRight } from "lucide-react";
 import { DecisionCard } from "../../../components/DecisionCard";
 import { PageBackground } from "../../../components/PageBackground";
 import { PageHeader } from "../../../components/PageHeader";
-import CreateOrganizationForm from "../createOrganisation/CreateOrganizationForm";
 
 type DecisionType = "join" | "create" | null;
 
 export function OrganizationDecision() {
   const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState<DecisionType>(null);
-  const [showForm, setShowForm] = useState(false);
 
   const handleContinue = () => {
     if (selectedOption === "create") {
-      setShowForm(true);
-    } else if (selectedOption) {
-      navigate("/dashboard");
+      navigate("/create-organization");
     }
   };
 
   const storedFirstName = localStorage.getItem("firstName") || "";
-  if (showForm) {
-    return <CreateOrganizationForm onCancel={() => setShowForm(false)} />;
-  }
 
   return (
     <div
@@ -88,7 +81,7 @@ export function OrganizationDecision() {
                 : "bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed"
             }`}>
             <span className="relative z-10 flex items-center gap-2">
-              Continue to Dashboard
+              Continue
               {selectedOption && (
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               )}

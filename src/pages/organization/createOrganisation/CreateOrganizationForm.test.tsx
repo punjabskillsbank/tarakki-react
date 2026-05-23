@@ -1,7 +1,58 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import CreateOrganizationForm from "./CreateOrganizationForm";
 import "@testing-library/jest-dom";
+import OrganisationServices from "../../../services/OrganizationServices";
+import { MemoryRouter } from "react-router-dom";
+import {
+  MOCK_MEMBER_ID,
+  mockOrgFormData,
+  mockOrgPayload,
+  mockOrgSuccessResponse,
+  mockOrgValidationError,
+} from "../../../test-utils/factories";
 
+// ── Mock OrganisationServices ──────────────────────────────────────────────
+jest.mock("../../../services/OrganizationServices", () => ({
+  __esModule: true,
+  default: {
+    createOrganisation: jest.fn(),
+  },
+}));
+
+// ── Typed reference to the mocked method ──────────────────────────────────
+const mockCreateOrganisation =
+  OrganisationServices.createOrganisation as jest.Mock;
+
+// ─── Helper: fill all form fields using factory data ──────────────────────
+const fillForm = () => {
+  fireEvent.change(screen.getByPlaceholderText("Enter organization name"), {
+    target: { value: mockOrgFormData.orgName },
+  });
+  fireEvent.change(screen.getByPlaceholderText("Describe your organization"), {
+    target: { value: mockOrgFormData.orgDesc },
+  });
+  fireEvent.change(screen.getByPlaceholderText("Street address"), {
+    target: { value: mockOrgFormData.orgAddress },
+  });
+  fireEvent.change(screen.getByPlaceholderText("City"), {
+    target: { value: mockOrgFormData.orgCity },
+  });
+  fireEvent.change(screen.getByPlaceholderText("State"), {
+    target: { value: mockOrgFormData.orgState },
+  });
+  fireEvent.change(screen.getByPlaceholderText("e.g. 132001"), {
+    target: { value: mockOrgFormData.orgPostalCode },
+  });
+  fireEvent.change(screen.getByPlaceholderText("Country"), {
+    target: { value: mockOrgFormData.orgCountry },
+  });
+};
+
+// ─── Helper: render with router context ───────────────────────────────────
+const renderWithRouter = (ui: React.ReactElement) =>
+  render(<MemoryRouter>{ui}</MemoryRouter>);
+
+// ─── Tests ────────────────────────────────────────────────────────────────
 describe("CreateOrganizationForm", () => {
   const onCancel = jest.fn();
   const mockAlert = jest.spyOn(window, "alert").mockImplementation(() => {});
@@ -9,16 +60,17 @@ describe("CreateOrganizationForm", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
-    localStorage.setItem("memberId", "550e8400-e29b-41d4-a716-446655440000");
-    (globalThis as any).fetch = jest.fn();
+    // memberId mocked from test-utils
+    localStorage.setItem("memberId", MOCK_MEMBER_ID);
   });
 
   afterEach(() => {
     mockAlert.mockClear();
   });
 
+  // ── 1. Renders all form fields and buttons ─────────────────────────────
   it("renders the create organization form fields and buttons", () => {
-    render(<CreateOrganizationForm onCancel={onCancel} />);
+    renderWithRouter(<CreateOrganizationForm onCancel={onCancel} />);
 
     expect(
       screen.getByRole("heading", { name: "Create Organization" })
@@ -40,16 +92,18 @@ describe("CreateOrganizationForm", () => {
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
   });
 
+  // ── 2. Cancel button calls onCancel ───────────────────────────────────
   it("calls onCancel when cancel button is clicked", () => {
-    render(<CreateOrganizationForm onCancel={onCancel} />);
+    renderWithRouter(<CreateOrganizationForm onCancel={onCancel} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
+  // ── 3. Validation errors on empty submit ──────────────────────────────
   it("shows validation errors when submitting an empty form", async () => {
-    render(<CreateOrganizationForm onCancel={onCancel} />);
+    renderWithRouter(<CreateOrganizationForm onCancel={onCancel} />);
 
     fireEvent.click(
       screen.getByRole("button", { name: "Create Organization" })
@@ -72,104 +126,36 @@ describe("CreateOrganizationForm", () => {
     });
   });
 
+  // ── 4. Successful submission ──────────────────────────────────────────
   it("submits the form successfully and shows an alert", async () => {
-    (globalThis as any).fetch.mockResolvedValueOnce({ ok: true });
+    // Use the mocked API (not fetch), with factory success response
+    mockCreateOrganisation.mockResolvedValueOnce(mockOrgSuccessResponse);
 
-    render(<CreateOrganizationForm onCancel={onCancel} />);
+    renderWithRouter(<CreateOrganizationForm onCancel={onCancel} />);
 
-    fireEvent.change(screen.getByPlaceholderText("Enter organization name"), {
-      target: { value: "Test Organization" },
-    });
-    fireEvent.change(
-      screen.getByPlaceholderText("Describe your organization"),
-      {
-        target: { value: "A test organization description" },
-      }
-    );
-    fireEvent.change(screen.getByPlaceholderText("Street address"), {
-      target: { value: "123 Main St" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("City"), {
-      target: { value: "Test City" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("State"), {
-      target: { value: "State" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("e.g. 132001"), {
-      target: { value: "123456" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("Country"), {
-      target: { value: "Test Country" },
-    });
+    fillForm();
 
     fireEvent.click(
       screen.getByRole("button", { name: "Create Organization" })
     );
 
     await waitFor(() => {
-      expect((globalThis as any).fetch).toHaveBeenCalledWith(
-        "/api/organizations",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            orgName: "Test Organization",
-            orgDesc: "A test organization description",
-            ownerId: "550e8400-e29b-41d4-a716-446655440000",
-            orgAddress: "123 Main St",
-            orgCity: "Test City",
-            orgState: "State",
-            orgPostalCode: "123456",
-            orgCountry: "Test Country",
-          }),
-        }
-      );
+      // Verify service called with factory payload (includes ownerId from MOCK_MEMBER_ID)
+      expect(mockCreateOrganisation).toHaveBeenCalledWith(mockOrgPayload);
       expect(window.alert).toHaveBeenCalledWith(
         "Organization created successfully!"
       );
     });
   });
 
+  // ── 5. API validation error (400) with error status ───────────────────
   it("shows a global error and field-level error when the API returns validation errors", async () => {
-    const errorResponse = {
-      errors: {
-        orgName: "Name already exists",
-      },
-      message: "Validation failed",
-    };
+    // Factory includes status 400 + field errors + global message
+    mockCreateOrganisation.mockRejectedValueOnce(mockOrgValidationError);
 
-    (globalThis as any).fetch.mockResolvedValueOnce({
-      ok: false,
-      status: 400,
-      json: jest.fn().mockResolvedValueOnce(errorResponse),
-    });
+    renderWithRouter(<CreateOrganizationForm onCancel={onCancel} />);
 
-    render(<CreateOrganizationForm onCancel={onCancel} />);
-
-    fireEvent.change(screen.getByPlaceholderText("Enter organization name"), {
-      target: { value: "Test Organization" },
-    });
-    fireEvent.change(
-      screen.getByPlaceholderText("Describe your organization"),
-      {
-        target: { value: "A test organization description" },
-      }
-    );
-    fireEvent.change(screen.getByPlaceholderText("Street address"), {
-      target: { value: "123 Main St" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("City"), {
-      target: { value: "Test City" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("State"), {
-      target: { value: "State" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("e.g. 132001"), {
-      target: { value: "123456" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("Country"), {
-      target: { value: "Test Country" },
-    });
+    fillForm();
 
     fireEvent.click(
       screen.getByRole("button", { name: "Create Organization" })

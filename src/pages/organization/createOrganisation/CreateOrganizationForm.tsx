@@ -5,6 +5,7 @@ import { FieldWrapper } from "../../../components/FieldWrapper";
 import { PageHeader } from "../../../components/PageHeader";
 import { PageBackground } from "../../../components/PageBackground";
 import OrganisationServices from "../../../services/OrganizationServices";
+import { useNavigate } from "react-router-dom";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const getStoredMemberId = () => {
@@ -25,7 +26,7 @@ type FormData = {
 };
 
 interface CreateOrganizationFormProps {
-  onCancel: () => void;
+  onCancel?: () => void;
 }
 
 // ─── Input style helper ───────────────────────────────────────────────────────
@@ -41,6 +42,7 @@ const inputClass = (hasError?: boolean) =>
 export default function CreateOrganizationForm({
   onCancel,
 }: CreateOrganizationFormProps) {
+  const navigate = useNavigate();
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -112,7 +114,11 @@ export default function CreateOrganizationForm({
   const handleCancel = () => {
     reset();
     setGlobalError(null);
-    onCancel(); // Goes back to OrganizationDecision
+    if (onCancel) {
+      onCancel();
+    } else {
+      navigate("/organization-decision");
+    }
   };
 
   // ── Render ──────────────────────────────────────────────────────────────────
@@ -120,7 +126,7 @@ export default function CreateOrganizationForm({
     <div className="min-h-screen w-full relative flex items-center justify-center p-6">
       <PageBackground />
       <div
-        className="w-full max-w-[640px] bg-white rounded-xl p-8"
+        className="w-full max-w-[640px] bg-white/50 backdrop-blur-md rounded-xl p-8"
         style={{ boxShadow: "0px 8px 24px rgba(0,0,0,0.06)" }}>
         <PageHeader
           title="Create Organization"
