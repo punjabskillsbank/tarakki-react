@@ -1,7 +1,7 @@
 import API from "./axios";
 import { isAxiosError } from "axios";
 
-type CreateOrganisationData = {
+type CreateOrganizationData = {
   orgName: string;
   orgDesc: string;
   ownerId: string;
@@ -12,8 +12,8 @@ type CreateOrganisationData = {
   orgCountry: string;
 };
 
-export default class OrganisationService {
-  static async createOrganisation(data: CreateOrganisationData) {
+export default class OrganizationService {
+  static async createOrganization(data: CreateOrganizationData) {
     try {
       const response = await API.post("/organizations", data);
       return response.data;
@@ -21,10 +21,10 @@ export default class OrganisationService {
       const message = isAxiosError(error)
         ? error.response?.data?.message ||
           error.response?.data ||
-          "Failed to create organisation"
-        : "Failed to create organisation";
+          "Failed to create organization"
+        : "Failed to create organization";
       throw new Error(
-        typeof message === "string" ? message : "Failed to create organisation"
+        typeof message === "string" ? message : "Failed to create organization"
       );
     }
   }

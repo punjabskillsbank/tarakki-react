@@ -1,4 +1,4 @@
-import OrganisationService from "./OrganizationServices";
+import OrganizationService from "./OrganizationServices";
 import API from "./axios";
 import { isAxiosError } from "axios";
 import {
@@ -21,16 +21,16 @@ const mockedIsAxiosError = isAxiosError as jest.MockedFunction<
   typeof isAxiosError
 >;
 
-describe("OrganisationService", () => {
+describe("OrganizationService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe("createOrganisation", () => {
-    it("successfully creates an organisation", async () => {
+  describe("createOrganization", () => {
+    it("successfully creates an organization", async () => {
       mockedAPI.post.mockResolvedValueOnce({ data: mockOrgSuccessResponse });
 
-      const result = await OrganisationService.createOrganisation(
+      const result = await OrganizationService.createOrganization(
         mockOrgPayload
       );
 
@@ -42,7 +42,7 @@ describe("OrganisationService", () => {
     });
 
     it("throws an error with message from axios response on failure", async () => {
-      const errorMessage = "Organisation already exists";
+      const errorMessage = "Organization already exists";
       mockedIsAxiosError.mockReturnValueOnce(true);
       mockedAPI.post.mockRejectedValueOnce({
         response: {
@@ -51,7 +51,7 @@ describe("OrganisationService", () => {
       });
 
       await expect(
-        OrganisationService.createOrganisation(mockOrgPayload)
+        OrganizationService.createOrganization(mockOrgPayload)
       ).rejects.toThrow(errorMessage);
     });
 
@@ -64,8 +64,8 @@ describe("OrganisationService", () => {
       });
 
       await expect(
-        OrganisationService.createOrganisation(mockOrgPayload)
-      ).rejects.toThrow("Failed to create organisation");
+        OrganizationService.createOrganization(mockOrgPayload)
+      ).rejects.toThrow("Failed to create organization");
     });
 
     it("throws a default error message for non-axios errors", async () => {
@@ -73,8 +73,8 @@ describe("OrganisationService", () => {
       mockedAPI.post.mockRejectedValueOnce(new Error("Network Error"));
 
       await expect(
-        OrganisationService.createOrganisation(mockOrgPayload)
-      ).rejects.toThrow("Failed to create organisation");
+        OrganizationService.createOrganization(mockOrgPayload)
+      ).rejects.toThrow("Failed to create organization");
     });
   });
 });

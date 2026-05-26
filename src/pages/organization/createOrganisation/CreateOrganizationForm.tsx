@@ -4,7 +4,7 @@ import { AlertCircle } from "lucide-react";
 import { FieldWrapper } from "../../../components/FieldWrapper";
 import { PageHeader } from "../../../components/PageHeader";
 import { PageBackground } from "../../../components/PageBackground";
-import OrganisationServices from "../../../services/OrganizationServices";
+import OrganizationServices from "../../../services/OrganizationServices";
 import { useNavigate } from "react-router-dom";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -79,11 +79,10 @@ export default function CreateOrganizationForm({
     }
 
     try {
-      const result = await OrganisationServices.createOrganisation(data);
+      const result = await OrganizationServices.createOrganization(data);
       localStorage.setItem("orgId", result.orgId);
       localStorage.setItem("orgName", result.orgName);
       // Success — redirect to Create-Board page (future implementation)
-      console.log("Organization created successfully:", result);
       alert("Organization created successfully!");
       reset();
     } catch (error: any) {

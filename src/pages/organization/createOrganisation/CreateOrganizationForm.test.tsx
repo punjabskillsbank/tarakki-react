@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import CreateOrganizationForm from "./CreateOrganizationForm";
 import "@testing-library/jest-dom";
-import OrganisationServices from "../../../services/OrganizationServices";
+import OrganizationServices from "../../../services/OrganizationServices";
 import { MemoryRouter } from "react-router-dom";
 import {
   MOCK_MEMBER_ID,
@@ -11,17 +11,17 @@ import {
   mockOrgValidationError,
 } from "../../../test-utils/factories";
 
-// ── Mock OrganisationServices ──────────────────────────────────────────────
+// ── Mock OrganizationServices ──────────────────────────────────────────────
 jest.mock("../../../services/OrganizationServices", () => ({
   __esModule: true,
   default: {
-    createOrganisation: jest.fn(),
+    createOrganization: jest.fn(),
   },
 }));
 
 // ── Typed reference to the mocked method ──────────────────────────────────
-const mockCreateOrganisation =
-  OrganisationServices.createOrganisation as jest.Mock;
+const mockCreateOrganization =
+  OrganizationServices.createOrganization as jest.Mock;
 
 // ─── Helper: fill all form fields using factory data ──────────────────────
 const fillForm = () => {
@@ -129,7 +129,7 @@ describe("CreateOrganizationForm", () => {
   // ── 4. Successful submission ──────────────────────────────────────────
   it("submits the form successfully and shows an alert", async () => {
     // Use the mocked API (not fetch), with factory success response
-    mockCreateOrganisation.mockResolvedValueOnce(mockOrgSuccessResponse);
+    mockCreateOrganization.mockResolvedValueOnce(mockOrgSuccessResponse);
 
     renderWithRouter(<CreateOrganizationForm onCancel={onCancel} />);
 
@@ -141,7 +141,7 @@ describe("CreateOrganizationForm", () => {
 
     await waitFor(() => {
       // Verify service called with factory payload (includes ownerId from MOCK_MEMBER_ID)
-      expect(mockCreateOrganisation).toHaveBeenCalledWith(mockOrgPayload);
+      expect(mockCreateOrganization).toHaveBeenCalledWith(mockOrgPayload);
       expect(window.alert).toHaveBeenCalledWith(
         "Organization created successfully!"
       );
@@ -151,7 +151,7 @@ describe("CreateOrganizationForm", () => {
   // ── 5. API validation error (400) with error status ───────────────────
   it("shows a global error and field-level error when the API returns validation errors", async () => {
     // Factory includes status 400 + field errors + global message
-    mockCreateOrganisation.mockRejectedValueOnce(mockOrgValidationError);
+    mockCreateOrganization.mockRejectedValueOnce(mockOrgValidationError);
 
     renderWithRouter(<CreateOrganizationForm onCancel={onCancel} />);
 
