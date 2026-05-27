@@ -30,11 +30,7 @@ export function DashboardPage({ organizations }: DashboardPageProps) {
           <span className="text-sm font-bold text-[#6b7280]">Total Members</span>
           <strong className="text-[32px] leading-none text-[#111827]">{totalMembers}</strong>
         </div>
-        {/* <div className="grid min-h-[148px] content-center gap-2.5 rounded-lg border border-[#e7ebf2] bg-white p-6 text-[#0f7bf2] shadow-[0_1px_2px_rgba(15,23,42,0.08),0_1px_4px_rgba(15,23,42,0.04)]">
-          <Users size={24} />
-          <span className="text-sm font-bold text-[#6b7280]">Active Members</span>
-          <strong className="text-[32px] leading-none text-[#111827]">{activeMembers}</strong>
-        </div> */}
+      
       </section>
     </section>
   );
