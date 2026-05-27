@@ -12,6 +12,10 @@ jest.mock('react-hot-toast');
 describe('CreateBoard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
+    const defaultPayload = boardPayloadFactory();
+    localStorage.setItem('orgId', String(defaultPayload.orgId));
+    localStorage.setItem('memberId', defaultPayload.createdBy);
   });
 
   it('renders the form correctly', () => {

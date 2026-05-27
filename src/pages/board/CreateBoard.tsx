@@ -39,12 +39,14 @@ export function CreateBoard() {
     setIsLoading(true);
 
     try {
-      // TODO: Change orgId and createdBy when create organisation page is created and hooked with api
+      const orgId = Number(localStorage.getItem('orgId') || 0);
+      const createdBy = localStorage.getItem('memberId') || '';
+
       await BoardService.createBoard({
-        orgId: 2,
+        orgId,
         boardName: boardName,
         boardDesc: boardDescription,
-        createdBy: 'f9dbfe85-7f75-41d8-8c77-0d0dde8010c0'
+        createdBy
       });
 
       toast.success('Board created successfully!');
