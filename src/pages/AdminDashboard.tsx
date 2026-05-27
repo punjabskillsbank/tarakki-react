@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AppShell } from './components/layout/AppShell';
-import type { NavigationItem } from './components/layout/Sidebar';
-import { MembersPage } from './features/members/MembersPage';
-import { DashboardPage } from './features/organizations/DashboardPage';
-import { OrganizationDetailPage } from './features/organizations/OrganizationDetailPage';
-import { OrganizationListPage } from './features/organizations/OrganizationListPage';
-import { useAdminData } from './hooks/useAdminData';
-import './styles/adminDashboard.css';
+import { AppShell } from '../adminDashboard/components/layout/AppShell';
+import type { NavigationItem } from '../adminDashboard/components/layout/Sidebar';
+import { MembersPage } from '../adminDashboard/features/members/MembersPage';
+import { DashboardPage } from '../adminDashboard/features/organizations/DashboardPage';
+import { OrganizationDetailPage } from '../adminDashboard/features/organizations/OrganizationDetailPage';
+import { OrganizationListPage } from '../adminDashboard/features/organizations/OrganizationListPage';
+import { useAdminData } from '../adminDashboard/hooks/useAdminData';
 
 type OrganizationView = 'list' | 'detail' | 'members';
 
@@ -42,11 +41,19 @@ export function AdminDashboard() {
 
   const renderWorkspace = () => {
     if (isLoading) {
-      return <div className="state-panel">Loading admin data...</div>;
+      return (
+        <div className="grid min-h-[220px] place-items-center rounded-lg border border-[#e7ebf2] bg-white text-base font-bold text-[#6b7280] shadow-[0_1px_2px_rgba(15,23,42,0.08),0_1px_4px_rgba(15,23,42,0.04)]">
+          Loading admin data...
+        </div>
+      );
     }
 
     if (error) {
-      return <div className="state-panel state-panel--error">{error}</div>;
+      return (
+        <div className="grid min-h-[220px] place-items-center rounded-lg border border-[#e7ebf2] bg-white text-base font-bold text-[#f15d75] shadow-[0_1px_2px_rgba(15,23,42,0.08),0_1px_4px_rgba(15,23,42,0.04)]">
+          {error}
+        </div>
+      );
     }
 
     if (activeItem === 'dashboard') {
@@ -54,7 +61,11 @@ export function AdminDashboard() {
     }
 
     if (!selectedOrganization) {
-      return <div className="state-panel state-panel--error">No organization selected.</div>;
+      return (
+        <div className="grid min-h-[220px] place-items-center rounded-lg border border-[#e7ebf2] bg-white text-base font-bold text-[#f15d75] shadow-[0_1px_2px_rgba(15,23,42,0.08),0_1px_4px_rgba(15,23,42,0.04)]">
+          No organization selected.
+        </div>
+      );
     }
 
     if (organizationView === 'detail') {
