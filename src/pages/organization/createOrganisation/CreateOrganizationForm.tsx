@@ -6,6 +6,7 @@ import { PageHeader } from "../../../components/PageHeader";
 import { PageBackground } from "../../../components/PageBackground";
 import OrganizationServices from "../../../services/OrganizationServices";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const getStoredMemberId = () => {
@@ -82,9 +83,9 @@ export default function CreateOrganizationForm({
       const result = await OrganizationServices.createOrganization(data);
       localStorage.setItem("orgId", result.orgId);
       localStorage.setItem("orgName", result.orgName);
-      // Success — redirect to Create-Board page (future implementation)
-      alert("Organization created successfully!");
+      toast.success("Organization created successfully!");
       reset();
+      navigate("/create-board");
     } catch (error: any) {
       const apiErrors = error.response?.data?.errors ?? error.response?.data;
 
@@ -96,13 +97,15 @@ export default function CreateOrganizationForm({
             }
           });
         }
+        const errorMsg = error.response?.data?.message || "Failed to create organization. Please check the form.";
         if (error.response?.data?.message) {
           setGlobalError(error.response.data.message);
         }
+        toast.error(errorMsg);
       } else {
-        setGlobalError(
-          "Network error. Please check your connection and try again."
-        );
+        const errorMsg = "Network error. Please check your connection and try again.";
+        setGlobalError(errorMsg);
+        toast.error(errorMsg);
       }
     } finally {
       setIsSubmitting(false);
