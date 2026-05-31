@@ -79,10 +79,7 @@ export default function CreateOrganizationForm({
     }
 
     try {
-      const result = await OrganizationServices.createOrganization(data);
-      localStorage.setItem("orgId", result.orgId);
-      localStorage.setItem("orgName", result.orgName);
-      // Success — redirect to Create-Board page (future implementation)
+     // Success — redirect to Create-Board page (future implementation)
       alert("Organization created successfully!");
       reset();
     } catch (error: any) {
