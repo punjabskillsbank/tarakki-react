@@ -79,7 +79,8 @@ export default function CreateOrganizationForm({
     }
 
     try {
-     // Success — redirect to Create-Board page (future implementation)
+      await OrganizationServices.createOrganization(data);
+      // Success — redirect to Create-Board page (future implementation)
       alert("Organization created successfully!");
       reset();
     } catch (error: any) {

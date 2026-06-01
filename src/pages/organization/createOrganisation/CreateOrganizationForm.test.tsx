@@ -128,7 +128,9 @@ describe("CreateOrganizationForm", () => {
 
   // ── 4. Successful submission ──────────────────────────────────────────
   it("submits the form successfully and shows an alert", async () => {
-   
+    // Use the mocked API (not fetch), with factory success response
+    mockCreateOrganization.mockResolvedValueOnce(mockOrgSuccessResponse);
+
     renderWithRouter(<CreateOrganizationForm onCancel={onCancel} />);
 
     fillForm();
@@ -138,12 +140,30 @@ describe("CreateOrganizationForm", () => {
     );
 
     await waitFor(() => {
-     
+      // Verify service called with factory payload (includes ownerId from MOCK_MEMBER_ID)
+      expect(mockCreateOrganization).toHaveBeenCalledWith(mockOrgPayload);
       expect(window.alert).toHaveBeenCalledWith(
         "Organization created successfully!"
       );
     });
   });
 
- 
+  // ── 5. API validation error (400) with error status ───────────────────
+  it("shows a global error and field-level error when the API returns validation errors", async () => {
+    // Factory includes status 400 + field errors + global message
+    mockCreateOrganization.mockRejectedValueOnce(mockOrgValidationError);
+
+    renderWithRouter(<CreateOrganizationForm onCancel={onCancel} />);
+
+    fillForm();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Create Organization" })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Validation failed")).toBeInTheDocument();
+      expect(screen.getByText("Name already exists")).toBeInTheDocument();
+    });
+  });
 });
