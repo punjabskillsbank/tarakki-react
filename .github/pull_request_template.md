@@ -15,7 +15,7 @@ Example: TK-123
 
 
 ## Impacted Modules
-<!-- Mention affected services/modules or write N/A if not applicable -->
+<!-- Mention affected services/modules  -->
 - [ ] Organizations
 - [ ] Board-Task
 - [ ] Members
