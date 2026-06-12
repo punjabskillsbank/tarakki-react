@@ -16,8 +16,7 @@ export function CreateBoard() {
   const [errors, setErrors] = useState<{ name?: string; description?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const { orgId, orgName } = useParams();
-  const decodedOrgName = decodeURIComponent(orgName ?? "");
+  const { orgId } = useParams();
 
   const handleSubmit = async (e: unknown) => {
     (e as Event).preventDefault();
@@ -45,13 +44,6 @@ export function CreateBoard() {
     try {
 const createdBy = localStorage.getItem("memberId") || "";
 
-console.log({
-  orgId,
-  orgName,
-  boardName,
-  boardDesc: boardDescription,
-  createdBy,
-});
      await BoardService.createBoard({
   orgId: Number(orgId),
   boardName,
@@ -65,13 +57,6 @@ console.log({
       setBoardName('');
       setBoardDescription('');
 
-      console.log({
-  orgId: Number(orgId),
-  orgName: decodedOrgName,
-  boardName,
-  boardDesc: boardDescription,
-  createdBy,
-});
     } catch (error) {
       console.error('Failed to create board:', error);
       toast.error("Board couldn't be created. Please try again.");

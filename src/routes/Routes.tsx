@@ -18,7 +18,7 @@ export const Router = createBrowserRouter([
     Component: CreateOrganizationForm,
   },
   {
-   path:"/create-board/:orgId/:orgName" ,
+   path:"/create-board/:orgId" ,
    Component: CreateBoard  
   },
 ]);

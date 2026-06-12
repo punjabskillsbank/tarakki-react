@@ -13,7 +13,6 @@ jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useParams: () => ({
     orgId: "2",
-    orgName: "Test%20Organization",
   }),
 }));
 

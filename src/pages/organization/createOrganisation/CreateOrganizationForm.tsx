@@ -85,9 +85,7 @@ const result = await OrganizationServices.createOrganization(data);
 toast.success("Organization created successfully!");
 reset();
 
-navigate(
-  `/create-board/${result.orgId}/${encodeURIComponent(result.orgName)}`
-);
+navigate(`/create-board/${result.orgId}`);
       
     } catch (error: any) {
       const apiErrors = error.response?.data?.errors ?? error.response?.data;
