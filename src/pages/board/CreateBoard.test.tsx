@@ -9,12 +9,20 @@ import { boardPayloadFactory } from '../../test-utils/factories';
 jest.mock('../../services/BoardService');
 jest.mock('react-hot-toast');
 
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useParams: () => ({
+    orgId: "2",
+    orgName: "Test%20Organization",
+  }),
+}));
+
 describe('CreateBoard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
     const defaultPayload = boardPayloadFactory();
-    localStorage.setItem('orgId', String(defaultPayload.orgId));
+
     localStorage.setItem('memberId', defaultPayload.createdBy);
   });
 

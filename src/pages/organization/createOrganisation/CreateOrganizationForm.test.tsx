@@ -149,7 +149,11 @@ describe("CreateOrganizationForm", () => {
       expect(toast.success).toHaveBeenCalledWith(
         "Organization created successfully!"
       );
-      expect(mockNavigate).toHaveBeenCalledWith("/create-board");
+     expect(mockNavigate).toHaveBeenCalledWith(
+  `/create-board/${mockOrgSuccessResponse.orgId}/${encodeURIComponent(
+    mockOrgSuccessResponse.orgName
+  )}`
+);
     });
   });
 

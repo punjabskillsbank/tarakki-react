@@ -8,12 +8,16 @@ import { FormInput } from '../../components/FormInput';
 import { FormTextarea } from '../../components/FormTextarea';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import toast from 'react-hot-toast';
+import { useParams } from "react-router-dom";
 
 export function CreateBoard() {
   const [boardName, setBoardName] = useState('');
   const [boardDescription, setBoardDescription] = useState('');
   const [errors, setErrors] = useState<{ name?: string; description?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
+
+  const { orgId, orgName } = useParams();
+  const decodedOrgName = decodeURIComponent(orgName ?? "");
 
   const handleSubmit = async (e: unknown) => {
     (e as Event).preventDefault();
@@ -39,21 +43,35 @@ export function CreateBoard() {
     setIsLoading(true);
 
     try {
-      const orgId = Number(localStorage.getItem('orgId') || 0);
-      const createdBy = localStorage.getItem('memberId') || '';
+const createdBy = localStorage.getItem("memberId") || "";
 
-      await BoardService.createBoard({
-        orgId,
-        boardName: boardName,
-        boardDesc: boardDescription,
-        createdBy
-      });
+console.log({
+  orgId,
+  orgName,
+  boardName,
+  boardDesc: boardDescription,
+  createdBy,
+});
+     await BoardService.createBoard({
+  orgId: Number(orgId),
+  boardName,
+  boardDesc: boardDescription,
+  createdBy,
+});
 
       toast.success('Board created successfully!');
 
       // Clear form on success
       setBoardName('');
       setBoardDescription('');
+
+      console.log({
+  orgId: Number(orgId),
+  orgName: decodedOrgName,
+  boardName,
+  boardDesc: boardDescription,
+  createdBy,
+});
     } catch (error) {
       console.error('Failed to create board:', error);
       toast.error("Board couldn't be created. Please try again.");

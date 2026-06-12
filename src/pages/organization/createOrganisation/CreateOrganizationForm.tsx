@@ -80,12 +80,15 @@ export default function CreateOrganizationForm({
     }
 
     try {
-      const result = await OrganizationServices.createOrganization(data);
-      localStorage.setItem("orgId", result.orgId);
-      localStorage.setItem("orgName", result.orgName);
-      toast.success("Organization created successfully!");
-      reset();
-      navigate("/create-board");
+const result = await OrganizationServices.createOrganization(data);
+
+toast.success("Organization created successfully!");
+reset();
+
+navigate(
+  `/create-board/${result.orgId}/${encodeURIComponent(result.orgName)}`
+);
+      
     } catch (error: any) {
       const apiErrors = error.response?.data?.errors ?? error.response?.data;
 
