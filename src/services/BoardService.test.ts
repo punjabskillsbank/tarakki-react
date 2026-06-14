@@ -1,6 +1,7 @@
 import BoardService from './BoardService';
 import API from './axios';
 import { boardPayloadFactory } from '../test-utils/factories';
+import config from '../config/indexConfig';
 
 jest.mock('./axios');
 const mockedAPI = API as jest.Mocked<typeof API>;
@@ -19,7 +20,7 @@ describe('BoardService', () => {
 
       const result = await BoardService.createBoard(boardPayload);
 
-      expect(mockedAPI.post).toHaveBeenCalledWith('/boards', boardPayload);
+      expect(mockedAPI.post).toHaveBeenCalledWith(config.endpoints.boards, boardPayload);
       expect(result).toEqual(responseData);
     });
 

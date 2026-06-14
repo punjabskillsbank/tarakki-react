@@ -5,6 +5,7 @@ import OrganizationServices from "../../../services/OrganizationServices";
 import { MemoryRouter } from "react-router-dom";
 import toast from "react-hot-toast";
 import userEvent from "@testing-library/user-event";
+import config from "../../../config/indexConfig";
 
 const mockNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
@@ -100,7 +101,8 @@ describe("CreateOrganizationForm", () => {
 
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
-    expect(mockNavigate).toHaveBeenCalledWith("/organization-decision");
+    // Earlier hardcoded expected path: "/organization-decision"
+    expect(mockNavigate).toHaveBeenCalledWith(config.routes.organizationDecision);
   });
 
   // ── 3. Validation errors on empty submit ──────────────────────────────
@@ -149,9 +151,9 @@ describe("CreateOrganizationForm", () => {
       expect(toast.success).toHaveBeenCalledWith(
         "Organization created successfully!"
       );
- expect(mockNavigate).toHaveBeenCalledWith(
-  `/create-board/${mockOrgSuccessResponse.orgId}`
-);
+      expect(mockNavigate).toHaveBeenCalledWith(
+        config.routes.createBoardWithOrgId(mockOrgSuccessResponse.orgId)
+      );
     });
   });
 

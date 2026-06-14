@@ -1,4 +1,5 @@
 import API from './axios';
+import config from '../config/indexConfig';
 
 export interface CreateBoardPayload {
   orgId: number;
@@ -12,7 +13,7 @@ export type CreateBoardResponse = CreateBoardPayload;
 export default class BoardService {
   static async createBoard(payload: CreateBoardPayload): Promise<CreateBoardResponse> {
     try {
-      const response = await API.post<CreateBoardResponse>('/boards', payload);
+      const response = await API.post<CreateBoardResponse>(config.endpoints.boards, payload);
       return response.data;
     } catch (error: any) {
       const message = error.response?.data?.message || error.response?.data || 'Failed to create board';

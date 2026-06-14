@@ -1,12 +1,14 @@
+import { FormInput } from "../../../components/FormInput";
+import { FormTextarea } from "../../../components/FormTextarea";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { AlertCircle } from "lucide-react";
-import { FieldWrapper } from "../../../components/FieldWrapper";
 import { PageHeader } from "../../../components/PageHeader";
 import { PageBackground } from "../../../components/PageBackground";
 import OrganizationServices from "../../../services/OrganizationServices";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import config from "../../../config/indexConfig";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const getStoredMemberId = () => {
@@ -30,14 +32,6 @@ interface CreateOrganizationFormProps {
   onCancel?: () => void;
 }
 
-// ─── Input style helper ───────────────────────────────────────────────────────
-const inputClass = (hasError?: boolean) =>
-  [
-    "h-11 w-full rounded-lg border px-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-150",
-    "focus:border-[#0073EA] focus:shadow-[0_0_0_2px_rgba(0,115,234,0.1)]",
-    hasError ? "border-[#E2445C]" : "border-[#D1D5DB]",
-    "bg-white",
-  ].join(" ");
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function CreateOrganizationForm({
@@ -80,13 +74,13 @@ export default function CreateOrganizationForm({
     }
 
     try {
-const result = await OrganizationServices.createOrganization(data);
+      const result = await OrganizationServices.createOrganization(data);
 
-toast.success("Organization created successfully!");
-reset();
+      toast.success("Organization created successfully!");
+      reset();
 
-navigate(`/create-board/${result.orgId}`);
-      
+      navigate(config.routes.createBoardWithOrgId(result.orgId));
+
     } catch (error: any) {
       const apiErrors = error.response?.data?.errors ?? error.response?.data;
 
@@ -120,7 +114,8 @@ navigate(`/create-board/${result.orgId}`);
     if (onCancel) {
       onCancel();
     } else {
-      navigate("/organization-decision");
+      // Earlier hardcoded path: navigate("/organization-decision");
+      navigate(config.routes.organizationDecision);
     }
   };
 
@@ -151,37 +146,32 @@ navigate(`/create-board/${result.orgId}`);
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4">
           {/* 1. Organization Name */}
-          <FieldWrapper
+          <FormInput
             label="Organization Name"
-            error={errors.orgName?.message}>
-            <input
-              {...register("orgName", {
-                required: "Organization name is required",
-              })}
-              placeholder="Enter organization name"
-              className={inputClass(!!errors.orgName)}
-            />
-          </FieldWrapper>
+            id="orgName"
+            placeholder="Enter organization name"
+            error={errors.orgName?.message}
+            maxLength={100}
+            showCount
+            {...register("orgName", {
+              required: "Organization name is required",
+            })}
+          />
 
           {/* 2. Organization Description */}
-          <FieldWrapper
+          <FormTextarea
             label="Organization Description"
-            error={errors.orgDesc?.message}>
-            <textarea
-              {...register("orgDesc", {
-                required: "Organization description is required",
-              })}
-              placeholder="Describe your organization"
-              rows={4}
-              className={[
-                "w-full rounded-lg border px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-150 resize-none",
-                "focus:border-[#0073EA] focus:shadow-[0_0_0_2px_rgba(0,115,234,0.1)]",
-                errors.orgDesc ? "border-[#E2445C]" : "border-[#D1D5DB]",
-                "bg-white",
-              ].join(" ")}
-              style={{ minHeight: "100px" }}
-            />
-          </FieldWrapper>
+            id="orgDesc"
+            placeholder="Describe your organization"
+            rows={4}
+            error={errors.orgDesc?.message}
+            maxLength={500}
+            showCount
+            autoResize
+            {...register("orgDesc", {
+              required: "Organization description is required",
+            })}
+          />
 
           <input
             type="hidden"
@@ -189,68 +179,71 @@ navigate(`/create-board/${result.orgId}`);
           />
 
           {/* 4. Address */}
-          <FieldWrapper
+          <FormInput
             label="Organization Address"
-            error={errors.orgAddress?.message}>
-            <input
-              {...register("orgAddress", {
-                required: "Street address is required",
-              })}
-              placeholder="Street address"
-              className={inputClass(!!errors.orgAddress)}
-            />
-          </FieldWrapper>
-
+            id="orgAddress"
+            placeholder="Street address"
+            error={errors.orgAddress?.message}
+            maxLength={200}
+            showCount
+            {...register("orgAddress", {
+              required: "Street address is required",
+            })}
+          />
           {/* 5. City */}
-          <FieldWrapper
+          <FormInput
             label="Organization City"
-            error={errors.orgCity?.message}>
-            <input
-              {...register("orgCity", { required: "City is required" })}
-              placeholder="City"
-              className={inputClass(!!errors.orgCity)}
-            />
-          </FieldWrapper>
+            id="orgCity"
+            placeholder="City"
+            error={errors.orgCity?.message}
+            maxLength={100}
+            showCount
+            {...register("orgCity", {
+              required: "City is required",
+            })}
+          />
 
           {/* 6. State */}
-          <FieldWrapper
+          <FormInput
             label="Organization State"
-            error={errors.orgState?.message}>
-            <input
-              {...register("orgState", { required: "State is required" })}
-              placeholder="State"
-              className={inputClass(!!errors.orgState)}
-            />
-          </FieldWrapper>
-
+            id="orgState"
+            placeholder="State"
+            error={errors.orgState?.message}
+            maxLength={100}
+            showCount
+            {...register("orgState", {
+              required: "State is required",
+            })}
+          />
           {/* 7. Postal Code */}
-          <FieldWrapper
+          <FormInput
             label="Organization Postal Code"
-            error={errors.orgPostalCode?.message}>
-            <input
-              {...register("orgPostalCode", {
-                required: "Postal code is required",
-                pattern: {
-                  value: /^[1-9][0-9]{5}$/,
-                  message:
-                    "Postal code must be 6 digits and cannot start with 0",
-                },
-              })}
-              placeholder="e.g. 132001"
-              className={inputClass(!!errors.orgPostalCode)}
-            />
-          </FieldWrapper>
+            id="orgPostalCode"
+            placeholder="e.g. 132001"
+            error={errors.orgPostalCode?.message}
+            maxLength={6}
+            showCount
+            {...register("orgPostalCode", {
+              required: "Postal code is required",
+              pattern: {
+                value: /^[1-9][0-9]{5}$/,
+                message: "Postal code must be 6 digits and cannot start with 0",
+              },
+            })}
+          />
 
           {/* 8. Country */}
-          <FieldWrapper
+          <FormInput
             label="Organization Country"
-            error={errors.orgCountry?.message}>
-            <input
-              {...register("orgCountry", { required: "Country is required" })}
-              placeholder="Country"
-              className={inputClass(!!errors.orgCountry)}
-            />
-          </FieldWrapper>
+            id="orgCountry"
+            placeholder="Country"
+            error={errors.orgCountry?.message}
+            maxLength={100}
+            showCount
+            {...register("orgCountry", {
+              required: "Country is required",
+            })}
+          />
 
           {/* Action Buttons */}
           <div className="flex items-center gap-3 pt-2">

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React,{ useState} from 'react';
 import { motion } from 'motion/react';
 import { LayoutGrid } from 'lucide-react';
 import BoardService from '../../services/BoardService';
@@ -18,9 +18,8 @@ export function CreateBoard() {
 
   const { orgId } = useParams();
 
-  const handleSubmit = async (e: unknown) => {
-    (e as Event).preventDefault();
-
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
     // Validation
     const newErrors: { name?: string; description?: string } = {};
 
@@ -43,6 +42,12 @@ export function CreateBoard() {
 
     try {
 const createdBy = localStorage.getItem("memberId") || "";
+
+if (!orgId) {
+  toast.error("Organization ID not found.");
+  setIsLoading(false);
+  return;
+}
 
      await BoardService.createBoard({
   orgId: Number(orgId),
