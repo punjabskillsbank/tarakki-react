@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { OnboardingFlow } from "../pages/onboarding/OnboardingFlow";
 import { OrganizationDecision } from "../pages/organization/organizationDecision/OrganizationDecision";
 import CreateOrganizationForm from "../pages/organization/createOrganisation/CreateOrganizationForm";
-import { UserProfile } from "../pages/UserProfile";
+import { UserProfile } from "../pages/user/UserProfile";
 
 export const Router = createBrowserRouter([
   {

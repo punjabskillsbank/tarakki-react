@@ -1,10 +1,11 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { UserProfile } from "./UserProfile";
-import MemberServices from "../services/MemberServices";
-import { memberFactory, MOCK_MEMBER_ID } from "../test-utils/factories";
+import MemberServices from "../../services/MemberServices";
+import { memberFactory, MOCK_MEMBER_ID } from "../../test-utils/factories";
 import "@testing-library/jest-dom";
 
-jest.mock("../services/MemberServices");
+jest.mock("../../services/MemberServices");
 const mockedMemberServices = MemberServices as jest.Mocked<
   typeof MemberServices
 >;
@@ -14,10 +15,11 @@ beforeEach(() => {
   localStorage.clear();
 });
 
-const setupSuccessfulFetch = () => {
+const setupSuccessfulFetch = (member = memberFactory()) => {
   localStorage.setItem("memberId", MOCK_MEMBER_ID);
 
-  mockedMemberServices.getMemberById.mockResolvedValue(memberFactory());
+  mockedMemberServices.getMemberById.mockResolvedValue(member);
+  return member;
 };
 
 describe("UserProfile", () => {
@@ -30,11 +32,13 @@ describe("UserProfile", () => {
   });
 
   it("displays member details after successful fetch", async () => {
-    setupSuccessfulFetch();
+    const member = setupSuccessfulFetch();
     render(<UserProfile />);
-    expect(await screen.findByDisplayValue("John")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("Doe")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("john@example.com")).toBeInTheDocument();
+    expect(
+      await screen.findByDisplayValue(member.firstName)
+    ).toBeInTheDocument();
+    expect(screen.getByDisplayValue(member.lastName)).toBeInTheDocument();
+    expect(screen.getByDisplayValue(member.email)).toBeInTheDocument();
   });
 
   it("shows error when member fetch fails", async () => {
@@ -49,12 +53,13 @@ describe("UserProfile", () => {
   });
 
   it("enters edit mode when Edit Profile is clicked", async () => {
+    const user = userEvent.setup();
     setupSuccessfulFetch();
     render(<UserProfile />);
     const editButton = await screen.findByRole("button", {
       name: /Edit Profile/i,
     });
-    fireEvent.click(editButton);
+    await user.click(editButton);
     expect(
       screen.getByRole("button", {
         name: /Cancel/i,
@@ -68,26 +73,24 @@ describe("UserProfile", () => {
   });
 
   it("restores original values when Cancel is clicked", async () => {
-    setupSuccessfulFetch();
+    const user = userEvent.setup();
+    const member = setupSuccessfulFetch();
     render(<UserProfile />);
-    fireEvent.click(
+    await user.click(
       await screen.findByRole("button", {
         name: /Edit Profile/i,
       })
     );
-    const firstNameInput = screen.getByDisplayValue("John");
-    fireEvent.change(firstNameInput, {
-      target: {
-        value: "Alice",
-      },
-    });
+    const firstNameInput = screen.getByDisplayValue(member.firstName);
+    await user.clear(firstNameInput);
+    await user.type(firstNameInput, "Alice");
     expect(screen.getByDisplayValue("Alice")).toBeInTheDocument();
-    fireEvent.click(
+    await user.click(
       screen.getByRole("button", {
         name: /Cancel/i,
       })
     );
-    expect(screen.getByDisplayValue("John")).toBeInTheDocument();
+    expect(screen.getByDisplayValue(member.firstName)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /Edit Profile/i })
     ).toBeInTheDocument();
@@ -105,21 +108,19 @@ describe("UserProfile", () => {
   });
 
   it("updates displayed values when Save changes is clicked", async () => {
-    setupSuccessfulFetch();
+    const user = userEvent.setup();
+    const member = setupSuccessfulFetch();
     render(<UserProfile />);
-    fireEvent.click(
+    await user.click(
       await screen.findByRole("button", {
         name: /Edit Profile/i,
       })
     );
-    const firstNameInput = screen.getByDisplayValue("John");
-    fireEvent.change(firstNameInput, {
-      target: {
-        value: "Alice",
-      },
-    });
+    const firstNameInput = screen.getByDisplayValue(member.firstName);
+    await user.clear(firstNameInput);
+    await user.type(firstNameInput, "Alice");
     expect(screen.getByDisplayValue("Alice")).toBeInTheDocument();
-    fireEvent.click(
+    await user.click(
       screen.getByRole("button", {
         name: /Save changes/i,
       })
@@ -142,15 +143,16 @@ describe("UserProfile", () => {
   });
 
   it("shows success alert after saving", async () => {
+    const user = userEvent.setup();
     const mockAlert = jest.spyOn(window, "alert").mockImplementation(() => {});
     setupSuccessfulFetch();
     render(<UserProfile />);
-    fireEvent.click(
+    await user.click(
       await screen.findByRole("button", {
         name: /Edit Profile/i,
       })
     );
-    fireEvent.click(
+    await user.click(
       screen.getByRole("button", {
         name: /Save changes/i,
       })

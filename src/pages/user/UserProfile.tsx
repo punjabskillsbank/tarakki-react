@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { FieldWrapper } from "../components/FieldWrapper";
-import { PageBackground } from "../components/PageBackground";
-import { PageHeader } from "../components/PageHeader";
-import MemberServices from "../services/MemberServices";
+import { PageBackground } from "../../components/PageBackground";
+import { PageHeader } from "../../components/PageHeader";
+import MemberServices from "../../services/MemberServices";
+import { LoadingScreen } from "../../components/LoadingScreen";
+import { ErrorScreen } from "../../components/ErrorScreen";
+import { FormInput } from "../../components/FormInput";
 
 type Member = {
   memberId: string;
@@ -46,18 +48,10 @@ export function UserProfile() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8 h-screen font-bold text-3xl">
-        Loading...
-      </div>
-    );
+    return <LoadingScreen />;
   }
   if (error) {
-    return (
-      <div className="flex items-center justify-center p-8 h-screen font-bold text-3xl">
-        Error: {error}
-      </div>
-    );
+    return <ErrorScreen error={error} />;
   }
 
   return (
@@ -66,77 +60,58 @@ export function UserProfile() {
       <div>
         <PageHeader
           title="User Profile"
-          subtitle="Manage your personal information and profile details."></PageHeader>
+          subtitle=""></PageHeader>
         <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl">
           <div className="flex flex-col items-center gap-4 pb-4">
-            <div className="text-blue-500 font-bold px-2 py-1 bg-blue-100 rounded-lg">
-              Tarraki Member
-            </div>
             <div className="w-28 h-28 bg-blue-500 rounded-full flex items-center justify-center text-white text-3xl font-bold">
               {member?.firstName?.[0]}
               {member?.lastName?.[0]}
             </div>
-            <button className="p-2 rounded-xl border-black border">
-              Upload photo
-            </button>
+            {isEditing && (
+              <button className="p-2 rounded-xl border-black border">
+                Upload photo
+              </button>
+            )}
           </div>
           <hr></hr>
           <div className="flex flex-col gap-4 p-4">
             <p className="font-bold">Personal Information</p>
             <div className="flex gap-4">
               <div className="flex-1">
-                <FieldWrapper label="First Name">
-                  <input
-                    value={formData?.firstName ?? ""}
-                    readOnly={!isEditing}
-                    onChange={(e) => {
-                      setFormData((prev) =>
-                        prev ? { ...prev, firstName: e.target.value } : null
-                      );
-                    }}
-                    className={`w-full rounded-lg border px-3 py-2 ${
-                      isEditing
-                        ? "bg-white border-blue-300"
-                        : "bg-gray-100 border-gray-300"
-                    }`}
-                  />
-                </FieldWrapper>
+                <FormInput
+                  label="First Name"
+                  value={formData?.firstName ?? ""}
+                  readOnly={!isEditing}
+                  onChange={(e) => {
+                    setFormData((prev) =>
+                      prev ? { ...prev, firstName: e.target.value } : null
+                    );
+                  }}
+                />
               </div>
               <div className="flex-1">
-                <FieldWrapper label="Last Name">
-                  <input
-                    value={formData?.lastName ?? ""}
-                    readOnly={!isEditing}
-                    onChange={(e) => {
-                      setFormData((prev) =>
-                        prev ? { ...prev, lastName: e.target.value } : null
-                      );
-                    }}
-                    className={`w-full rounded-lg border px-3 py-2 ${
-                      isEditing
-                        ? "bg-white border-blue-300"
-                        : "bg-gray-100 border-gray-300"
-                    }`}
-                  />
-                </FieldWrapper>
+                <FormInput
+                  label="Last Name"
+                  value={formData?.lastName ?? ""}
+                  readOnly={!isEditing}
+                  onChange={(e) => {
+                    setFormData((prev) =>
+                      prev ? { ...prev, lastName: e.target.value } : null
+                    );
+                  }}
+                />
               </div>
             </div>
-            <FieldWrapper label="Email Address">
-              <input
-                value={formData?.email ?? ""}
-                readOnly={!isEditing}
-                onChange={(e) => {
-                  setFormData((prev) =>
-                    prev ? { ...prev, email: e.target.value } : null
-                  );
-                }}
-                className={`w-full rounded-lg border px-3 py-2 ${
-                  isEditing
-                    ? "bg-white border-blue-300"
-                    : "bg-gray-100 border-gray-300"
-                }`}
-              />
-            </FieldWrapper>
+            <FormInput
+              label="Email Address"
+              value={formData?.email ?? ""}
+              readOnly={!isEditing}
+              onChange={(e) => {
+                setFormData((prev) =>
+                  prev ? { ...prev, email: e.target.value } : null
+                );
+              }}
+            />
           </div>
           <hr></hr>
           {!isEditing ? (
