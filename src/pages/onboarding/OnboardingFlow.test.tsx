@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { OnboardingFlow } from './OnboardingFlow';
 import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
+import config from '../../config/indexConfig';
 
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -83,6 +84,6 @@ describe('OnboardingFlow', () => {
     const completeButton = await screen.findByText('Complete');
     fireEvent.click(completeButton);
 
-    expect(mockNavigate).toHaveBeenCalledWith('/organization-decision');
+    expect(mockNavigate).toHaveBeenCalledWith(config.routes.organizationDecision);
   });
 });

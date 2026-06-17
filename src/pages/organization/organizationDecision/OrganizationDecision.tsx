@@ -5,6 +5,7 @@ import { Users, Building2, ArrowRight } from "lucide-react";
 import { DecisionCard } from "../../../components/DecisionCard";
 import { PageBackground } from "../../../components/PageBackground";
 import { PageHeader } from "../../../components/PageHeader";
+import config from "../../../config/indexConfig";
 
 type DecisionType = "join" | "create" | null;
 
@@ -14,7 +15,7 @@ export function OrganizationDecision() {
 
   const handleContinue = () => {
     if (selectedOption === "create") {
-      navigate("/create-organization");
+      navigate(config.routes.createOrganization);
     }
   };
 

@@ -1,5 +1,6 @@
 import API from "./axios";
 import { isAxiosError } from "axios";
+import config from "../config/indexConfig";
 
 type CreateOrganizationData = {
   orgName: string;
@@ -15,7 +16,7 @@ type CreateOrganizationData = {
 export default class OrganizationService {
   static async createOrganization(data: CreateOrganizationData) {
     try {
-      const response = await API.post("/organizations", data);
+      const response = await API.post(config.endpoints.organizations, data);
       return response.data;
     } catch (error: unknown) {
       const message = isAxiosError(error)

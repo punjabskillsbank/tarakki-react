@@ -5,6 +5,7 @@ import {
   mockOrgPayload,
   mockOrgSuccessResponse,
 } from "../test-utils/factories";
+import config from "../config/indexConfig";
 
 jest.mock("./axios");
 jest.mock("axios", () => ({
@@ -35,7 +36,7 @@ describe("OrganizationService", () => {
       );
 
       expect(mockedAPI.post).toHaveBeenCalledWith(
-        "/organizations",
+        config.endpoints.organizations,
         mockOrgPayload
       );
       expect(result).toEqual(mockOrgSuccessResponse);

@@ -1,6 +1,7 @@
 import MemberServices from "./MemberServices";
 import API from "./axios";
 import { memberFactory, MOCK_MEMBER_ID } from "../test-utils/factories";
+import config from "../config/indexConfig";
 
 jest.mock("./axios");
 const mockedAPI = API as jest.Mocked<typeof API>;
@@ -19,7 +20,10 @@ describe("MemberServices", () => {
 
       const result = await MemberServices.createMember(memberData);
 
-      expect(mockedAPI.post).toHaveBeenCalledWith("/members", memberData);
+      expect(mockedAPI.post).toHaveBeenCalledWith(
+        config.endpoints.members,
+        memberData
+      );
       expect(result).toEqual(responseData);
     });
 
