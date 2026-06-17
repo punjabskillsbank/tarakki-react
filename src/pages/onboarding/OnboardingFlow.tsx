@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Step1Signup } from './steps/Step1Signup';
 import { Step2ProfileInfo } from './steps/Step2ProfileInfo';
 import { EntranceTransition } from './EntranceTransition';
+import config from '../../config/indexConfig';
 
 // This will only be used further when more steps are added to onboarding
 /*
@@ -25,7 +26,7 @@ export function OnboardingFlow() {
 
   const nextStep = useCallback(() => {
     if (currentStep === 3) {
-      navigate('/organization-decision');
+      navigate(config.routes.organizationDecision);
       return;
     }
     setDirection(1);

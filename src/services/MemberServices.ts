@@ -1,4 +1,5 @@
 import API from './axios';
+import config from '../config/indexConfig';
 
 export default class MemberServices {
   static async createMember(memberData: {
@@ -9,7 +10,7 @@ export default class MemberServices {
     accountStatus: string;
   }) {
     try {
-      const response = await API.post('/members', memberData);
+      const response = await API.post(config.endpoints.members, memberData);
       return response.data;
     } catch (error: any) {
       console.log('Error creating member at members:', error.response?.data?.message || error.message);

@@ -9,6 +9,16 @@ export const memberFactory = (overrides = {}) => {
   };
 };
 
+export const boardPayloadFactory = (overrides = {}) => {
+  return {
+    orgId: 2,
+    boardName: 'New Board',
+    boardDesc: 'Description here',
+    createdBy: 'f9dbfe85-7f75-41d8-8c77-0d0dde8010c0',
+    ...overrides,
+  };
+};
+
 /*
 export const onboardingDataFactory = (overrides = {}) => {
   return {

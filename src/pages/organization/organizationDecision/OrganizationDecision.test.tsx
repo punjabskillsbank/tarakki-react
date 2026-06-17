@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { OrganizationDecision } from "./OrganizationDecision";
 import { MemoryRouter } from "react-router-dom";
 import "@testing-library/jest-dom";
+import config from "../../../config/indexConfig";
 
 const mockNavigate = jest.fn();
 jest.mock("react-router", () => ({
@@ -134,8 +135,8 @@ describe("OrganizationDecision", () => {
 
     const continueButton = screen.getByRole("button", { name: /continue/i });
     fireEvent.click(continueButton);
-
-    expect(mockNavigate).toHaveBeenCalledWith("/create-organization");
+    
+    expect(mockNavigate).toHaveBeenCalledWith(config.routes.createOrganization);
   });
 
   it('does not navigate when "Join an Organization" is selected and Continue is clicked', () => {
