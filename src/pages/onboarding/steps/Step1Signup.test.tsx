@@ -1,8 +1,14 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { Step1Signup } from './Step1Signup';
-import '@testing-library/jest-dom';
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { Step1Signup } from "./Step1Signup";
+import "@testing-library/jest-dom";
+import MemberServices from "../../../services/MemberServices";
 
-describe('Step1Signup', () => {
+jest.mock("../../../services/MemberServices");
+const mockedMemberServices = MemberServices as jest.Mocked<
+  typeof MemberServices
+>;
+
+describe("Step1Signup", () => {
   const onNext = jest.fn();
   const setEmail = jest.fn();
 
@@ -10,33 +16,113 @@ describe('Step1Signup', () => {
     jest.clearAllMocks();
   });
 
-  it('renders correctly', () => {
-    render(<Step1Signup onNext={onNext} email={''} setEmail={setEmail} />);
-    expect(screen.getByText('Welcome to Tarakki')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('name@company.com')).toBeInTheDocument();
+  it("renders correctly", () => {
+    render(
+      <Step1Signup
+        onNext={onNext}
+        email={""}
+        setEmail={setEmail}
+      />
+    );
+    expect(screen.getByText("Welcome to Tarakki")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("name@company.com")).toBeInTheDocument();
   });
 
-  it('validates email and calls onNext and updateData on success', () => {
-    render(<Step1Signup onNext={onNext} email={''} setEmail={setEmail} />);
-    const input = screen.getByPlaceholderText('name@company.com');
-    const button = screen.getByRole('button', { name: /^continue$/i });
+  it("validates email and calls onNext when email does not exist", async () => {
+    mockedMemberServices.getMemberByEmail.mockRejectedValueOnce(
+      new Error("Not Found")
+    );
 
-    fireEvent.change(input, { target: { value: 'test@example.com' } });
+    render(
+      <Step1Signup
+        onNext={onNext}
+        email={""}
+        setEmail={setEmail}
+      />
+    );
+    const input = screen.getByPlaceholderText("name@company.com");
+    const button = screen.getByRole("button", { name: /^continue$/i });
+
+    fireEvent.change(input, { target: { value: "test@example.com" } });
     fireEvent.click(button);
 
-    expect(setEmail).toHaveBeenCalledWith('test@example.com');
-    expect(onNext).toHaveBeenCalledTimes(1);
+    expect(setEmail).toHaveBeenCalledWith("test@example.com");
+    await waitFor(() => expect(onNext).toHaveBeenCalledTimes(1));
+    expect(mockedMemberServices.getMemberByEmail).toHaveBeenCalledWith(
+      "test@example.com"
+    );
   });
 
-  it('shows error for invalid email', () => {
-    render(<Step1Signup onNext={onNext} email={''} setEmail={setEmail} />);
-    const input = screen.getByPlaceholderText('name@company.com');
-    const button = screen.getByRole('button', { name: /^continue$/i });
+  it("shows error for invalid email", () => {
+    render(
+      <Step1Signup
+        onNext={onNext}
+        email={""}
+        setEmail={setEmail}
+      />
+    );
+    const input = screen.getByPlaceholderText("name@company.com");
+    const button = screen.getByRole("button", { name: /^continue$/i });
 
-    fireEvent.change(input, { target: { value: 'invalid-email' } });
+    fireEvent.change(input, { target: { value: "invalid-email" } });
     fireEvent.click(button);
 
-    expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
+    expect(
+      screen.getByText("Please enter a valid email address")
+    ).toBeInTheDocument();
     expect(onNext).not.toHaveBeenCalled();
+  });
+
+  it("shows error if member with email already exists", async () => {
+    mockedMemberServices.getMemberByEmail.mockResolvedValueOnce({
+      id: "123",
+      email: "existing@example.com",
+    } as any);
+
+    render(
+      <Step1Signup
+        onNext={onNext}
+        email={""}
+        setEmail={setEmail}
+      />
+    );
+    const input = screen.getByPlaceholderText("name@company.com");
+    const button = screen.getByRole("button", { name: /^continue$/i });
+
+    fireEvent.change(input, { target: { value: "existing@example.com" } });
+    fireEvent.click(button);
+
+    expect(
+      await screen.findByText("Member with this email already exist")
+    ).toBeInTheDocument();
+    expect(onNext).not.toHaveBeenCalled();
+    expect(mockedMemberServices.getMemberByEmail).toHaveBeenCalledWith(
+      "existing@example.com"
+    );
+  });
+
+  it("calls on Next when email not exist", async () => {
+    mockedMemberServices.getMemberByEmail.mockRejectedValueOnce(
+      new Error("Not Found")
+    );
+
+    render(
+      <Step1Signup
+        onNext={onNext}
+        email={""}
+        setEmail={setEmail}
+      />
+    );
+    const input = screen.getByPlaceholderText("name@company.com");
+    const button = screen.getByRole("button", { name: /^continue$/i });
+
+    fireEvent.change(input, { target: { value: "newuser@example.com" } });
+    fireEvent.click(button);
+
+    expect(setEmail).toHaveBeenCalledWith("newuser@example.com");
+    await waitFor(() => expect(onNext).toHaveBeenCalledTimes(1));
+    expect(mockedMemberServices.getMemberByEmail).toHaveBeenCalledWith(
+      "newuser@example.com"
+    );
   });
 });

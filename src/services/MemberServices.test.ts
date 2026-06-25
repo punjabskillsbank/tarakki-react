@@ -82,4 +82,31 @@ describe("MemberServices", () => {
       );
     });
   });
+
+  describe("getMemberByEmail", () => {
+    it("successfully fetches a member by email", async () => {
+      const memberData = memberFactory();
+      const email = "john.doe@example.com";
+      mockedAPI.get.mockResolvedValueOnce({
+        data: memberData,
+      });
+      const result = await MemberServices.getMemberByEmail(email);
+      expect(mockedAPI.get).toHaveBeenCalledWith(`/members/email/${email}`);
+      expect(result).toEqual(memberData);
+    });
+
+    it("throws an error with message from response on failure", async () => {
+      const errorMessage = "Member not found";
+      mockedAPI.get.mockRejectedValueOnce({
+        response: {
+          data: {
+            message: errorMessage,
+          },
+        },
+      });
+      await expect(
+        MemberServices.getMemberByEmail("john.doe@example.com")
+      ).rejects.toThrow(errorMessage);
+    });
+  });
 });
