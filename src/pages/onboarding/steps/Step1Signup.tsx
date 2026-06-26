@@ -37,8 +37,16 @@ export function Step1Signup({
       try {
         await MemberService.getMemberByEmail(localEmail);
         setError("Member with this email already exist");
-      } catch (error) {
-        onNext();
+      } catch (error: any) {
+        const status = error?.response?.status;
+        if (status === 404) {
+          // Member not found, proceed to next step
+          onNext();
+        } else {
+          setError(
+            "Something went wrong while checking your email. Please try again."
+          );
+        }
       }
     } else {
       setError("Please enter a valid email address");

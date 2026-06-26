@@ -49,17 +49,16 @@ export default class MemberServices {
       const response = await API.get(`/members/email/${email}`);
       return response.data;
     } catch (error: any) {
-      console.log(
-        "Error fetching member details:",
-        error.response?.data?.message || error.message
-      );
       const message =
         error.response?.data?.message ||
         error.response?.data ||
         "Failed to fetch member details";
-      throw new Error(
+
+      const customError = new Error(
         typeof message === "string" ? message : "Failed to fetch member details"
-      );
+      ) as any;
+      customError.response = error.response;
+      throw customError;
     }
   }
 }

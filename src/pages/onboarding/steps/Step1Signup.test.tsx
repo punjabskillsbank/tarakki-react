@@ -29,9 +29,9 @@ describe("Step1Signup", () => {
   });
 
   it("validates email and calls onNext when email does not exist", async () => {
-    mockedMemberServices.getMemberByEmail.mockRejectedValueOnce(
-      new Error("Not Found")
-    );
+    mockedMemberServices.getMemberByEmail.mockRejectedValueOnce({
+      response: { status: 404 },
+    } as any);
 
     render(
       <Step1Signup
@@ -102,9 +102,9 @@ describe("Step1Signup", () => {
   });
 
   it("calls on Next when email not exist", async () => {
-    mockedMemberServices.getMemberByEmail.mockRejectedValueOnce(
-      new Error("Not Found")
-    );
+    mockedMemberServices.getMemberByEmail.mockRejectedValueOnce({
+      response: { status: 404 },
+    } as any);
 
     render(
       <Step1Signup
@@ -124,5 +124,31 @@ describe("Step1Signup", () => {
     expect(mockedMemberServices.getMemberByEmail).toHaveBeenCalledWith(
       "newuser@example.com"
     );
+  });
+
+  it("shows a generic error when the email check service fails", async () => {
+    mockedMemberServices.getMemberByEmail.mockRejectedValueOnce(
+      new Error("Network Error")
+    );
+
+    render(
+      <Step1Signup
+        onNext={onNext}
+        email={""}
+        setEmail={setEmail}
+      />
+    );
+    const input = screen.getByPlaceholderText("name@company.com");
+    const button = screen.getByRole("button", { name: /^continue$/i });
+
+    fireEvent.change(input, { target: { value: "service@example.com" } });
+    fireEvent.click(button);
+
+    expect(
+      await screen.findByText(
+        "Something went wrong while checking your email. Please try again."
+      )
+    ).toBeInTheDocument();
+    expect(onNext).not.toHaveBeenCalled();
   });
 });

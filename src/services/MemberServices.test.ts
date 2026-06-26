@@ -86,7 +86,7 @@ describe("MemberServices", () => {
   describe("getMemberByEmail", () => {
     it("successfully fetches a member by email", async () => {
       const memberData = memberFactory();
-      const email = "john.doe@example.com";
+      const email = memberData.email;
       mockedAPI.get.mockResolvedValueOnce({
         data: memberData,
       });
