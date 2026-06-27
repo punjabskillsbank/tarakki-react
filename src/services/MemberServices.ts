@@ -1,5 +1,6 @@
 import API from "./axios";
 import config from "../config/indexConfig";
+import { isAxiosError } from "axios";
 
 export default class MemberServices {
   static async createMember(memberData: {
@@ -48,16 +49,17 @@ export default class MemberServices {
     try {
       const response = await API.get(`/members/email/${email}`);
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const axiosError = isAxiosError(error) ? error : undefined;
       const message =
-        error.response?.data?.message ||
-        error.response?.data ||
+        axiosError?.response?.data?.message ||
+        axiosError?.response?.data ||
         "Failed to fetch member details";
 
       const customError = new Error(
         typeof message === "string" ? message : "Failed to fetch member details"
       ) as any;
-      customError.response = error.response;
+      customError.response = axiosError?.response;
       throw customError;
     }
   }

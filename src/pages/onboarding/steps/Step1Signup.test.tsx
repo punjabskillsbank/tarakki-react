@@ -1,7 +1,9 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Step1Signup } from "./Step1Signup";
 import "@testing-library/jest-dom";
 import MemberServices from "../../../services/MemberServices";
+import { memberFactory } from "../../../test-utils/factories";
 
 jest.mock("../../../services/MemberServices");
 const mockedMemberServices = MemberServices as jest.Mocked<
@@ -43,8 +45,9 @@ describe("Step1Signup", () => {
     const input = screen.getByPlaceholderText("name@company.com");
     const button = screen.getByRole("button", { name: /^continue$/i });
 
-    fireEvent.change(input, { target: { value: "test@example.com" } });
-    fireEvent.click(button);
+    const user = userEvent.setup();
+    await user.type(input, "test@example.com");
+    await user.click(button);
 
     expect(setEmail).toHaveBeenCalledWith("test@example.com");
     await waitFor(() => expect(onNext).toHaveBeenCalledTimes(1));
@@ -53,7 +56,7 @@ describe("Step1Signup", () => {
     );
   });
 
-  it("shows error for invalid email", () => {
+  it("shows error for invalid email", async () => {
     render(
       <Step1Signup
         onNext={onNext}
@@ -64,8 +67,9 @@ describe("Step1Signup", () => {
     const input = screen.getByPlaceholderText("name@company.com");
     const button = screen.getByRole("button", { name: /^continue$/i });
 
-    fireEvent.change(input, { target: { value: "invalid-email" } });
-    fireEvent.click(button);
+    const user = userEvent.setup();
+    await user.type(input, "invalid-email");
+    await user.click(button);
 
     expect(
       screen.getByText("Please enter a valid email address")
@@ -74,10 +78,8 @@ describe("Step1Signup", () => {
   });
 
   it("shows error if member with email already exists", async () => {
-    mockedMemberServices.getMemberByEmail.mockResolvedValueOnce({
-      id: "123",
-      email: "existing@example.com",
-    } as any);
+    const member = memberFactory();
+    mockedMemberServices.getMemberByEmail.mockResolvedValueOnce(member);
 
     render(
       <Step1Signup
@@ -89,8 +91,9 @@ describe("Step1Signup", () => {
     const input = screen.getByPlaceholderText("name@company.com");
     const button = screen.getByRole("button", { name: /^continue$/i });
 
-    fireEvent.change(input, { target: { value: "existing@example.com" } });
-    fireEvent.click(button);
+    const user = userEvent.setup();
+    await user.type(input, "existing@example.com");
+    await user.click(button);
 
     expect(
       await screen.findByText("Member with this email already exist")
@@ -116,8 +119,9 @@ describe("Step1Signup", () => {
     const input = screen.getByPlaceholderText("name@company.com");
     const button = screen.getByRole("button", { name: /^continue$/i });
 
-    fireEvent.change(input, { target: { value: "newuser@example.com" } });
-    fireEvent.click(button);
+    const user = userEvent.setup();
+    await user.type(input, "newuser@example.com");
+    await user.click(button);
 
     expect(setEmail).toHaveBeenCalledWith("newuser@example.com");
     await waitFor(() => expect(onNext).toHaveBeenCalledTimes(1));
@@ -141,8 +145,10 @@ describe("Step1Signup", () => {
     const input = screen.getByPlaceholderText("name@company.com");
     const button = screen.getByRole("button", { name: /^continue$/i });
 
-    fireEvent.change(input, { target: { value: "service@example.com" } });
-    fireEvent.click(button);
+    const member = memberFactory();
+    const user = userEvent.setup();
+    await user.type(input, member.email);
+    await user.click(button);
 
     expect(
       await screen.findByText(

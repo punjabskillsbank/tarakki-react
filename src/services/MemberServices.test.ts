@@ -97,6 +97,7 @@ describe("MemberServices", () => {
 
     it("throws an error with message from response on failure", async () => {
       const errorMessage = "Member not found";
+      const member = memberFactory();
       mockedAPI.get.mockRejectedValueOnce({
         response: {
           data: {
@@ -105,7 +106,7 @@ describe("MemberServices", () => {
         },
       });
       await expect(
-        MemberServices.getMemberByEmail("john.doe@example.com")
+        MemberServices.getMemberByEmail(member.email)
       ).rejects.toThrow(errorMessage);
     });
   });
