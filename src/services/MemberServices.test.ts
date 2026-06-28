@@ -96,7 +96,7 @@ describe("MemberServices", () => {
     });
 
     it("throws an error with message from response on failure", async () => {
-      const errorMessage = "Member not found";
+      const errorMessage = "Failed to fetch member details";
       const member = memberFactory();
       mockedAPI.get.mockRejectedValueOnce({
         response: {

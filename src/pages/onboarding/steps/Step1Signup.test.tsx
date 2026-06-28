@@ -42,17 +42,18 @@ describe("Step1Signup", () => {
         setEmail={setEmail}
       />
     );
+    const member = memberFactory();
     const input = screen.getByPlaceholderText("name@company.com");
     const button = screen.getByRole("button", { name: /^continue$/i });
 
     const user = userEvent.setup();
-    await user.type(input, "test@example.com");
+    await user.type(input, member.email);
     await user.click(button);
 
-    expect(setEmail).toHaveBeenCalledWith("test@example.com");
+    expect(setEmail).toHaveBeenCalledWith(member.email);
     await waitFor(() => expect(onNext).toHaveBeenCalledTimes(1));
     expect(mockedMemberServices.getMemberByEmail).toHaveBeenCalledWith(
-      "test@example.com"
+      member.email
     );
   });
 
@@ -92,7 +93,7 @@ describe("Step1Signup", () => {
     const button = screen.getByRole("button", { name: /^continue$/i });
 
     const user = userEvent.setup();
-    await user.type(input, "existing@example.com");
+    await user.type(input, member.email);
     await user.click(button);
 
     expect(
@@ -100,7 +101,7 @@ describe("Step1Signup", () => {
     ).toBeInTheDocument();
     expect(onNext).not.toHaveBeenCalled();
     expect(mockedMemberServices.getMemberByEmail).toHaveBeenCalledWith(
-      "existing@example.com"
+      member.email
     );
   });
 
@@ -116,17 +117,18 @@ describe("Step1Signup", () => {
         setEmail={setEmail}
       />
     );
+    const member = memberFactory();
     const input = screen.getByPlaceholderText("name@company.com");
     const button = screen.getByRole("button", { name: /^continue$/i });
 
     const user = userEvent.setup();
-    await user.type(input, "newuser@example.com");
+    await user.type(input, member.email);
     await user.click(button);
 
-    expect(setEmail).toHaveBeenCalledWith("newuser@example.com");
+    expect(setEmail).toHaveBeenCalledWith(member.email);
     await waitFor(() => expect(onNext).toHaveBeenCalledTimes(1));
     expect(mockedMemberServices.getMemberByEmail).toHaveBeenCalledWith(
-      "newuser@example.com"
+      member.email
     );
   });
 
