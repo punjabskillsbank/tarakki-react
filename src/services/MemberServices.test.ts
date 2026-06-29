@@ -82,4 +82,32 @@ describe("MemberServices", () => {
       );
     });
   });
+
+  describe("getMemberByEmail", () => {
+    it("successfully fetches a member by email", async () => {
+      const memberData = memberFactory();
+      const email = memberData.email;
+      mockedAPI.get.mockResolvedValueOnce({
+        data: memberData,
+      });
+      const result = await MemberServices.getMemberByEmail(email);
+      expect(mockedAPI.get).toHaveBeenCalledWith(`/members/email/${email}`);
+      expect(result).toEqual(memberData);
+    });
+
+    it("throws an error with message from response on failure", async () => {
+      const errorMessage = "Failed to fetch member details";
+      const member = memberFactory();
+      mockedAPI.get.mockRejectedValueOnce({
+        response: {
+          data: {
+            message: errorMessage,
+          },
+        },
+      });
+      await expect(
+        MemberServices.getMemberByEmail(member.email)
+      ).rejects.toThrow(errorMessage);
+    });
+  });
 });

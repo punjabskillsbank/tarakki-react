@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
-import { OnboardingLayout } from '../OnboardingLayout';
-import signupIllustration from '../../../assets/images/onboarding-signup.jpg';
+import { useState, useEffect } from "react";
+import { OnboardingLayout } from "../OnboardingLayout";
+import signupIllustration from "../../../assets/images/onboarding-signup.jpg";
+import MemberService from "../../../services/MemberServices";
 
 interface Step1Props {
   onNext: () => void;
@@ -10,46 +11,71 @@ interface Step1Props {
   onClearError?: () => void;
 }
 
-export function Step1Signup({ onNext, email, setEmail, externalError, onClearError }: Step1Props) {
+export function Step1Signup({
+  onNext,
+  email,
+  setEmail,
+  externalError,
+  onClearError,
+}: Step1Props) {
   const [localEmail, setLocalEmail] = useState(email);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    setError(externalError || '');
+    setError(externalError || "");
   }, [externalError]);
 
   const isValidEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (isValidEmail(localEmail)) {
-      setError('');
+      setError("");
       onClearError?.();
       setEmail(localEmail);
-      onNext();
+      try {
+        await MemberService.getMemberByEmail(localEmail);
+        setError("Member with this email already exist");
+      } catch (error: any) {
+        const status = error?.response?.status;
+        if (status === 404) {
+          // Member not found, proceed to next step
+          onNext();
+        } else {
+          setError(
+            "Something went wrong while checking your email. Please try again."
+          );
+        }
+      }
     } else {
-      setError('Please enter a valid email address');
+      setError("Please enter a valid email address");
     }
   };
 
   return (
-    <OnboardingLayout 
+    <OnboardingLayout
       illustration={signupIllustration}
-      gradientType="purple"
-    >
+      gradientType="purple">
       <div className="space-y-8">
         {/* Heading with Logo */}
         <div className="space-y-6">
           <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center border border-gray-100 shadow-sm bg-white">
-            <img src="/tarakki_logo.png" alt="Tarakki Logo" className="w-full h-full object-cover" />
+            <img
+              src="/tarakki_logo.png"
+              alt="Tarakki Logo"
+              className="w-full h-full object-cover"
+            />
           </div>
           <div className="space-y-3">
-            <h1 className="text-[32px] font-semibold text-gray-900">Welcome to Tarakki</h1>
-            <p className="text-[16px] text-[#6B7280]">Get started – it's free. No credit card needed.</p>
+            <h1 className="text-[32px] font-semibold text-gray-900">
+              Welcome to Tarakki
+            </h1>
+            <p className="text-[16px] text-[#6B7280]">
+              Get started – it's free. No credit card needed.
+            </p>
           </div>
         </div>
-
 
         {/* Email Input */}
         <div className="space-y-2">
@@ -60,13 +86,15 @@ export function Step1Signup({ onNext, email, setEmail, externalError, onClearErr
             onChange={(e) => {
               setLocalEmail(e.target.value);
               if (error) {
-                setError('');
+                setError("");
                 onClearError?.();
               }
             }}
-            onKeyPress={(e) => e.key === 'Enter' && handleContinue()}
+            onKeyPress={(e) => e.key === "Enter" && handleContinue()}
             className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors duration-200 ${
-              error ? 'border-red-500' : 'border-[#D1D5DB] focus:border-[#0073EA]'
+              error
+                ? "border-red-500"
+                : "border-[#D1D5DB] focus:border-[#0073EA]"
             }`}
           />
           {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
@@ -78,16 +106,18 @@ export function Step1Signup({ onNext, email, setEmail, externalError, onClearErr
           disabled={!localEmail}
           className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 ${
             localEmail
-              ? 'bg-[#0073EA] text-white hover:bg-[#0062C9] hover:scale-[1.02] active:scale-[0.98]' 
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
-        >
+              ? "bg-[#0073EA] text-white hover:bg-[#0062C9] hover:scale-[1.02] active:scale-[0.98]"
+              : "bg-gray-200 text-gray-400 cursor-not-allowed"
+          }`}>
           Continue
         </button>
 
         {/* Footer */}
         <p className="text-center text-[14px] text-[#6B7280]">
-          Already have an account? <span className="text-[#0073EA] cursor-pointer hover:underline">Log in</span>
+          Already have an account?{" "}
+          <span className="text-[#0073EA] cursor-pointer hover:underline">
+            Log in
+          </span>
         </p>
       </div>
     </OnboardingLayout>
