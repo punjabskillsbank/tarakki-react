@@ -12,9 +12,9 @@ export const memberFactory = (overrides = {}) => {
 export const boardPayloadFactory = (overrides = {}) => {
   return {
     orgId: 2,
-    boardName: 'New Board',
-    boardDesc: 'Description here',
-    createdBy: 'f9dbfe85-7f75-41d8-8c77-0d0dde8010c0',
+    boardName: "New Board",
+    boardDesc: "Description here",
+    createdBy: "f9dbfe85-7f75-41d8-8c77-0d0dde8010c0",
     ...overrides,
   };
 };
@@ -35,6 +35,7 @@ export const onboardingDataFactory = (overrides = {}) => {
 
 // ─── Organization ─────────────────────────────────────────────────────────────
 export const MOCK_MEMBER_ID = "550e8400-e29b-41d4-a716-446655440000";
+export const STEP1_INPUT_PLACEHOLDER = "name@company.com";
 
 export const mockOrgFormData = {
   orgName: "Test Organization",

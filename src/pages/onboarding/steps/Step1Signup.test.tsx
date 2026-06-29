@@ -3,7 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { Step1Signup } from "./Step1Signup";
 import "@testing-library/jest-dom";
 import MemberServices from "../../../services/MemberServices";
-import { memberFactory } from "../../../test-utils/factories";
+import {
+  memberFactory,
+  STEP1_INPUT_PLACEHOLDER,
+} from "../../../test-utils/factories";
 
 jest.mock("../../../services/MemberServices");
 const mockedMemberServices = MemberServices as jest.Mocked<
@@ -27,7 +30,9 @@ describe("Step1Signup", () => {
       />
     );
     expect(screen.getByText("Welcome to Tarakki")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("name@company.com")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText(STEP1_INPUT_PLACEHOLDER)
+    ).toBeInTheDocument();
   });
 
   it("validates email and calls onNext when email does not exist", async () => {
@@ -43,7 +48,7 @@ describe("Step1Signup", () => {
       />
     );
     const member = memberFactory();
-    const input = screen.getByPlaceholderText("name@company.com");
+    const input = screen.getByPlaceholderText(STEP1_INPUT_PLACEHOLDER);
     const button = screen.getByRole("button", { name: /^continue$/i });
 
     const user = userEvent.setup();
@@ -65,7 +70,7 @@ describe("Step1Signup", () => {
         setEmail={setEmail}
       />
     );
-    const input = screen.getByPlaceholderText("name@company.com");
+    const input = screen.getByPlaceholderText(STEP1_INPUT_PLACEHOLDER);
     const button = screen.getByRole("button", { name: /^continue$/i });
 
     const user = userEvent.setup();
@@ -89,7 +94,7 @@ describe("Step1Signup", () => {
         setEmail={setEmail}
       />
     );
-    const input = screen.getByPlaceholderText("name@company.com");
+    const input = screen.getByPlaceholderText(STEP1_INPUT_PLACEHOLDER);
     const button = screen.getByRole("button", { name: /^continue$/i });
 
     const user = userEvent.setup();
@@ -118,7 +123,7 @@ describe("Step1Signup", () => {
       />
     );
     const member = memberFactory();
-    const input = screen.getByPlaceholderText("name@company.com");
+    const input = screen.getByPlaceholderText(STEP1_INPUT_PLACEHOLDER);
     const button = screen.getByRole("button", { name: /^continue$/i });
 
     const user = userEvent.setup();
@@ -144,7 +149,7 @@ describe("Step1Signup", () => {
         setEmail={setEmail}
       />
     );
-    const input = screen.getByPlaceholderText("name@company.com");
+    const input = screen.getByPlaceholderText(STEP1_INPUT_PLACEHOLDER);
     const button = screen.getByRole("button", { name: /^continue$/i });
 
     const member = memberFactory();
