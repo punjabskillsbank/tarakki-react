@@ -67,10 +67,7 @@ export function OrganizationDetailPage({ organization, onBack, onViewMembers }: 
           <div className="grid min-h-[98px] content-center rounded-lg bg-[#fbfcfe] p-[18px]">
             <span className="text-sm font-bold text-[#6b7280]">Location</span>
             <p className="mt-1.5 text-[13px] leading-[1.35] text-[#4b5563]">{organization.location.city}</p>
-<<<<<<< Updated upstream
-=======
              <p className="mt-1.5 text-[13px] leading-[1.35] text-[#4b5563]">{organization.location.state}</p>
->>>>>>> Stashed changes
             <p className="mt-1.5 text-[13px] leading-[1.35] text-[#4b5563]">
               {organization.location.country}
               {organization.location.postalCode ? ` - ${organization.location.postalCode}` : ''}

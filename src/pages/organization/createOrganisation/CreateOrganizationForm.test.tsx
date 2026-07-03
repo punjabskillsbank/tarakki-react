@@ -1,8 +1,19 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import CreateOrganizationForm from "./CreateOrganizationForm";
 import "@testing-library/jest-dom";
 import OrganizationServices from "../../../services/OrganizationServices";
 import { MemoryRouter } from "react-router-dom";
+import toast from "react-hot-toast";
+import userEvent from "@testing-library/user-event";
+import config from "../../../config/indexConfig";
+
+const mockNavigate = jest.fn();
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockNavigate,
+}));
+
+jest.mock("react-hot-toast");
 import {
   MOCK_MEMBER_ID,
   mockOrgFormData,
@@ -24,28 +35,14 @@ const mockCreateOrganization =
   OrganizationServices.createOrganization as jest.Mock;
 
 // ─── Helper: fill all form fields using factory data ──────────────────────
-const fillForm = () => {
-  fireEvent.change(screen.getByPlaceholderText("Enter organization name"), {
-    target: { value: mockOrgFormData.orgName },
-  });
-  fireEvent.change(screen.getByPlaceholderText("Describe your organization"), {
-    target: { value: mockOrgFormData.orgDesc },
-  });
-  fireEvent.change(screen.getByPlaceholderText("Street address"), {
-    target: { value: mockOrgFormData.orgAddress },
-  });
-  fireEvent.change(screen.getByPlaceholderText("City"), {
-    target: { value: mockOrgFormData.orgCity },
-  });
-  fireEvent.change(screen.getByPlaceholderText("State"), {
-    target: { value: mockOrgFormData.orgState },
-  });
-  fireEvent.change(screen.getByPlaceholderText("e.g. 132001"), {
-    target: { value: mockOrgFormData.orgPostalCode },
-  });
-  fireEvent.change(screen.getByPlaceholderText("Country"), {
-    target: { value: mockOrgFormData.orgCountry },
-  });
+const fillForm = async (user: ReturnType<typeof userEvent.setup>) => {
+  await user.type(screen.getByPlaceholderText("Enter organization name"), mockOrgFormData.orgName);
+  await user.type(screen.getByPlaceholderText("Describe your organization"), mockOrgFormData.orgDesc);
+  await user.type(screen.getByPlaceholderText("Street address"), mockOrgFormData.orgAddress);
+  await user.type(screen.getByPlaceholderText("City"), mockOrgFormData.orgCity);
+  await user.type(screen.getByPlaceholderText("State"), mockOrgFormData.orgState);
+  await user.type(screen.getByPlaceholderText("e.g. 132001"), mockOrgFormData.orgPostalCode);
+  await user.type(screen.getByPlaceholderText("Country"), mockOrgFormData.orgCountry);
 };
 
 // ─── Helper: render with router context ───────────────────────────────────
@@ -55,17 +52,13 @@ const renderWithRouter = (ui: React.ReactElement) =>
 // ─── Tests ────────────────────────────────────────────────────────────────
 describe("CreateOrganizationForm", () => {
   const onCancel = jest.fn();
-  const mockAlert = jest.spyOn(window, "alert").mockImplementation(() => {});
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockNavigate.mockClear();
     localStorage.clear();
     // memberId mocked from test-utils
     localStorage.setItem("memberId", MOCK_MEMBER_ID);
-  });
-
-  afterEach(() => {
-    mockAlert.mockClear();
   });
 
   // ── 1. Renders all form fields and buttons ─────────────────────────────
@@ -93,19 +86,31 @@ describe("CreateOrganizationForm", () => {
   });
 
   // ── 2. Cancel button calls onCancel ───────────────────────────────────
-  it("calls onCancel when cancel button is clicked", () => {
+  it("calls onCancel when cancel button is clicked", async () => {
+    const user = userEvent.setup();
     renderWithRouter(<CreateOrganizationForm onCancel={onCancel} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
+  it("navigates to /organization-decision when cancel button is clicked and onCancel is not provided", async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<CreateOrganizationForm />);
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    // Earlier hardcoded expected path: "/organization-decision"
+    expect(mockNavigate).toHaveBeenCalledWith(config.routes.organizationDecision);
+  });
+
   // ── 3. Validation errors on empty submit ──────────────────────────────
   it("shows validation errors when submitting an empty form", async () => {
+    const user = userEvent.setup();
     renderWithRouter(<CreateOrganizationForm onCancel={onCancel} />);
 
-    fireEvent.click(
+    await user.click(
       screen.getByRole("button", { name: "Create Organization" })
     );
 
@@ -127,43 +132,72 @@ describe("CreateOrganizationForm", () => {
   });
 
   // ── 4. Successful submission ──────────────────────────────────────────
-  it("submits the form successfully and shows an alert", async () => {
+  it("submits the form successfully and shows a success toast", async () => {
+    const user = userEvent.setup();
     // Use the mocked API (not fetch), with factory success response
     mockCreateOrganization.mockResolvedValueOnce(mockOrgSuccessResponse);
 
     renderWithRouter(<CreateOrganizationForm onCancel={onCancel} />);
 
-    fillForm();
+    await fillForm(user);
 
-    fireEvent.click(
+    await user.click(
       screen.getByRole("button", { name: "Create Organization" })
     );
 
     await waitFor(() => {
       // Verify service called with factory payload (includes ownerId from MOCK_MEMBER_ID)
       expect(mockCreateOrganization).toHaveBeenCalledWith(mockOrgPayload);
-      expect(window.alert).toHaveBeenCalledWith(
+      expect(toast.success).toHaveBeenCalledWith(
         "Organization created successfully!"
+      );
+      expect(mockNavigate).toHaveBeenCalledWith(
+        config.routes.createBoardWithOrgId(mockOrgSuccessResponse.orgId)
       );
     });
   });
 
   // ── 5. API validation error (400) with error status ───────────────────
   it("shows a global error and field-level error when the API returns validation errors", async () => {
+    const user = userEvent.setup();
     // Factory includes status 400 + field errors + global message
     mockCreateOrganization.mockRejectedValueOnce(mockOrgValidationError);
 
     renderWithRouter(<CreateOrganizationForm onCancel={onCancel} />);
 
-    fillForm();
+    await fillForm(user);
 
-    fireEvent.click(
+    await user.click(
       screen.getByRole("button", { name: "Create Organization" })
     );
 
     await waitFor(() => {
       expect(screen.getByText("Validation failed")).toBeInTheDocument();
       expect(screen.getByText("Name already exists")).toBeInTheDocument();
+      expect(toast.error).toHaveBeenCalledWith("Validation failed");
+    });
+  });
+
+  // ── 6. Network error ───────────────────────────────────────────────────
+  it("shows a global error and toast error on network failure", async () => {
+    const user = userEvent.setup();
+    mockCreateOrganization.mockRejectedValueOnce(new Error("Network Error"));
+
+    renderWithRouter(<CreateOrganizationForm onCancel={onCancel} />);
+
+    await fillForm(user);
+
+    await user.click(
+      screen.getByRole("button", { name: "Create Organization" })
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Network error. Please check your connection and try again.")
+      ).toBeInTheDocument();
+      expect(toast.error).toHaveBeenCalledWith(
+        "Network error. Please check your connection and try again."
+      );
     });
   });
 });

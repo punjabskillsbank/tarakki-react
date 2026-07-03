@@ -3,31 +3,27 @@ import { AdminDashboard } from "../pages/AdminDashboard";
 import { OnboardingFlow } from "../pages/onboarding/OnboardingFlow";
 import { OrganizationDecision } from "../pages/organization/organizationDecision/OrganizationDecision";
 import CreateOrganizationForm from "../pages/organization/createOrganisation/CreateOrganizationForm";
+import { UserProfile } from "../pages/user/UserProfile";
+import { CreateBoard } from "../pages/board/CreateBoard";
+import config from "../config/indexConfig";
 
 export const Router = createBrowserRouter([
   {
-    path: "/",
+    path: config.routes.onboarding,
     Component: OnboardingFlow,
   },
   {
-    path: "/organization-decision",
+    path: config.routes.organizationDecision,
     Component: OrganizationDecision,
-  },
-  {
-    path: "/dashboard",
-    Component: AdminDashboard,
   },
   {
     path: "/admin-dashboard",
     Component: AdminDashboard,
   },
   {
-    path: "/create-organization",
+    path: config.routes.createOrganization,
     Component: CreateOrganizationForm,
   },
-<<<<<<< Updated upstream
-]);
-=======
   {
     path: "/user-profile",
     Component: UserProfile,
@@ -36,9 +32,4 @@ export const Router = createBrowserRouter([
     path: config.routes.createBoard,
     Component: CreateBoard,
   },
-  {
-    path: "/admin-dashboard",
-    Component: AdminDashboard,
-  },
 ]);
->>>>>>> Stashed changes
