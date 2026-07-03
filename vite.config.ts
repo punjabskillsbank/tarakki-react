@@ -12,10 +12,31 @@ export default defineConfig({
   server: {
     forwardConsole: false,
     proxy: {
+<<<<<<< Updated upstream
       '/api': {
         target: 'http://localhost:8080',
+=======
+      "/api/members": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+      },
+      "/api/organizations": {
+        target: "http://localhost:8081",
+        changeOrigin: true,
+      },
+      "/api/admin": {
+        target: "http://localhost:8081",
+        changeOrigin: true,
+      },
+      "/api/boards": {
+        target: "http://localhost:8080",
+>>>>>>> Stashed changes
         changeOrigin: true,
       },
     },
   },
+<<<<<<< Updated upstream
 })
+=======
+});
+>>>>>>> Stashed changes

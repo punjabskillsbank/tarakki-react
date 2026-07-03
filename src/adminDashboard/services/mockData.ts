@@ -13,6 +13,10 @@ export const organizations: Organization[] = [
     address: '123 Business Park',
     location: {
       city: 'New York, NY',
+<<<<<<< Updated upstream
+=======
+      state: "NY",
+>>>>>>> Stashed changes
       country: 'USA',
       postalCode: '10001'
     },
@@ -31,6 +35,10 @@ export const organizations: Organization[] = [
     address: '45 Silicon Avenue',
     location: {
       city: 'San Francisco, CA',
+<<<<<<< Updated upstream
+=======
+      state: "NY",
+>>>>>>> Stashed changes
       country: 'USA'
     },
     memberCount: 12,
@@ -48,6 +56,10 @@ export const organizations: Organization[] = [
     address: '88 Innovation Street',
     location: {
       city: 'Seattle, WA',
+<<<<<<< Updated upstream
+=======
+      state: "NY",
+>>>>>>> Stashed changes
       country: 'USA'
     },
     memberCount: 8,

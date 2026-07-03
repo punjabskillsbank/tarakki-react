@@ -44,7 +44,13 @@ export function OrganizationCard({ organization, onOpen }: OrganizationCardProps
         <div>
           <span className="text-sm font-bold text-[#6b7280]">Location</span>
           <p className="mt-1.5 text-[13px] leading-[1.35] text-[#4b5563]">{organization.location.city}</p>
+<<<<<<< Updated upstream
           <p className="mt-1.5 text-[13px] leading-[1.35] text-[#4b5563]">{organization.location.country}</p>
+=======
+          <p className="mt-1.5 text-[13px] leading-[1.35] text-[#4b5563]">{organization.location.state}</p>
+          <p className="mt-1.5 text-[13px] leading-[1.35] text-[#4b5563]">{organization.location.country}</p>
+          <p className="mt-1.5 text-[13px] leading-[1.35] text-[#4b5563]">{organization.location.postalCode}</p>
+>>>>>>> Stashed changes
         </div>
       </div>
     </article>

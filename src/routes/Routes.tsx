@@ -25,4 +25,20 @@ export const Router = createBrowserRouter([
     path: "/create-organization",
     Component: CreateOrganizationForm,
   },
+<<<<<<< Updated upstream
 ]);
+=======
+  {
+    path: "/user-profile",
+    Component: UserProfile,
+  },
+  {
+    path: config.routes.createBoard,
+    Component: CreateBoard,
+  },
+  {
+    path: "/admin-dashboard",
+    Component: AdminDashboard,
+  },
+]);
+>>>>>>> Stashed changes

@@ -16,6 +16,10 @@ export interface Organization {
   address: string;
   location: {
     city: string;
+<<<<<<< Updated upstream
+=======
+    state:string;
+>>>>>>> Stashed changes
     country: string;
     postalCode?: string;
   };
