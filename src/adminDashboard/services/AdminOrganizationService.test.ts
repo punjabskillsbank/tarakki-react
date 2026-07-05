@@ -1,5 +1,5 @@
 import API from "../../services/axios";
-import { adminOrganizationService } from "./adminOrganizationService";
+import { adminOrganizationService } from "./AdminOrganizationService";
 import { mockApiOrganizations,mockOrganizationWithoutOwner,mockOrganizationWithoutMemberCount, mockOpenAIOrganization } from "../../test-utils/factories";
 
 

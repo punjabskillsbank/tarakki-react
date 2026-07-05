@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { adminOrganizationService } from '../services/adminOrganizationService';
+import { adminOrganizationService } from '../services/AdminOrganizationService';
 import type { AdminDataSource, Member, Organization } from '../types/admin';
 
 interface AdminDataState {
