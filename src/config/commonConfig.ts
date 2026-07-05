@@ -13,7 +13,9 @@ const commonConfig = {
     boards: "/boards",
     members: "/members",
     organizations: "/organizations",
+    all_organizations: "/admin/organizations/",
   },
 };
 
 export default commonConfig;
+

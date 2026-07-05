@@ -1,5 +1,6 @@
 import API from "../../services/axios";
 import type { AdminDataSource, Organization } from "../types/admin";
+import commonConfig from "../../config/commonConfig";
 
 const members: any[] = [];
 
@@ -51,15 +52,16 @@ const mapOrganization = (
   };
 };
 
-export const adminRepository: AdminDataSource = {
+export const adminOrganizationService: AdminDataSource = {
   async listOrganizations() {
     const response = await API.get<AdminOrganizationResponse[]>(
-      "/admin/organizations/"
-    );
+  commonConfig.endpoints.all_organizations
+);
 
     return response.data.map(mapOrganization);
   },
-
+  
+  
   async getOrganization(organizationId) {
     const organizations = await this.listOrganizations();
 
@@ -68,6 +70,7 @@ export const adminRepository: AdminDataSource = {
     );
   },
 
+  // TLDR: Later org-member API will be hooked here
   async listMembers(organizationId) {
     return members.filter(
       (member) => member.organizationId === organizationId

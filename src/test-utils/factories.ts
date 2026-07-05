@@ -67,3 +67,85 @@ export const mockOrgValidationError = {
     },
   },
 };
+
+
+// ─── Admin Organization ───────────────────────────────────────────────────────
+
+export const mockApiOrganizations = [
+  {
+    orgId: 1,
+    orgName: "Acme Corporation",
+    orgDesc: "Leading enterprise software solutions provider",
+    owner: {
+      firstName: "John",
+      lastName: "Smith",
+      email: "john@acme.com",
+    },
+    orgAddress: "123 Business Park",
+    orgCity: "New York",
+    orgState: "NY",
+    orgPostalCode: "10001",
+    orgCountry: "USA",
+    totalMemberCount: 24,
+  },
+  {
+    orgId: 2,
+    orgName: "Tech Innovations Ltd",
+    orgDesc: "AI and cloud transformation company",
+    owner: {
+      firstName: "Sarah",
+      lastName: "Johnson",
+      email: "sarah@techinnovations.io",
+    },
+    orgAddress: "45 Silicon Avenue",
+    orgCity: "San Francisco",
+    orgState: "CA",
+    orgPostalCode: "94105",
+    orgCountry: "USA",
+    totalMemberCount: 12,
+  },
+];
+
+
+export const mockOrganizationWithoutOwner = {
+  orgId: 3,
+  orgName: "Test Org",
+  orgDesc: "Testing",
+  owner: null,
+  orgAddress: "Test Address",
+  orgCity: "Test City",
+  orgState: "Punjab",
+  orgPostalCode: "140001",
+  orgCountry: "India",
+  totalMemberCount: 5,
+};
+
+export const mockOrganizationWithoutMemberCount = {
+  orgId: 4,
+  orgName: "Demo Org",
+  orgDesc: "Demo",
+  owner: null,
+  orgAddress: "Demo Address",
+  orgCity: "Demo City",
+  orgState: "Punjab",
+  orgPostalCode: "140001",
+  orgCountry: "India",
+  totalMemberCount: undefined,
+};
+
+export const mockOpenAIOrganization = {
+  orgId: 5,
+  orgName: "OpenAI",
+  orgDesc: "AI Research",
+  owner: {
+    firstName: "Sam",
+    lastName: "Altman",
+    email: "sam@openai.com",
+  },
+  orgAddress: "Address",
+  orgCity: "San Francisco",
+  orgState: "CA",
+  orgPostalCode: "94107",
+  orgCountry: "USA",
+  totalMemberCount: 10,
+};

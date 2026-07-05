@@ -17,7 +17,7 @@ export function OrganizationListPage({ organizations, onOpenOrganization }: Orga
           <p className="mt-2 text-[15px] leading-[1.4] text-[#6b7280]">Manage all organizations</p>
         </div>
       </header>
-rrrrr
+
       <section className="grid grid-cols-[minmax(280px,744px)] max-[760px]:grid-cols-1" aria-label="Organization summary">
         <div className="grid h-28 content-center rounded-lg border border-[#e7ebf2] bg-white px-7 shadow-[0_1px_2px_rgba(15,23,42,0.08),0_1px_4px_rgba(15,23,42,0.04)]">
           <span className="text-sm font-bold text-[#6b7280]">Total Organizations</span>

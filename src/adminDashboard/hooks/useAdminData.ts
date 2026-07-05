@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { adminRepository } from '../services/AdminOrganizationService';
+import { adminOrganizationService } from '../services/adminOrganizationService';
 import type { AdminDataSource, Member, Organization } from '../types/admin';
 
 interface AdminDataState {
@@ -10,7 +10,7 @@ interface AdminDataState {
   refresh: () => Promise<void>;
 }
 
-export function useAdminData(dataSource: AdminDataSource = adminRepository): AdminDataState {
+export function useAdminData(dataSource: AdminDataSource = adminOrganizationService): AdminDataState {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [membersByOrganization, setMembersByOrganization] = useState<Record<string, Member[]>>({});
   const [isLoading, setIsLoading] = useState(true);
