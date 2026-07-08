@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Step1Signup } from './steps/Step1Signup';
 import { Step2ProfileInfo } from './steps/Step2ProfileInfo';
@@ -17,26 +17,38 @@ export interface OnboardingData {
 */
 
 export function OnboardingFlow() {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const stepParam = searchParams.get('step');
+  const currentStep = stepParam ? parseInt(stepParam, 10) : 1;
+
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [direction, setDirection] = useState(1);
   const [signupError, setSignupError] = useState<string | null>(null);
 
   const navigate = useNavigate();
+  const prevStepRef = useRef(currentStep);
+
+  useEffect(() => {
+    if (currentStep !== prevStepRef.current) {
+      setDirection(currentStep > prevStepRef.current ? 1 : -1);
+      prevStepRef.current = currentStep;
+    }
+  }, [currentStep]);
 
   const nextStep = useCallback(() => {
     if (currentStep === 3) {
       navigate(config.routes.organizationDecision);
       return;
     }
-    setDirection(1);
-    setCurrentStep(prev => prev + 1);
-  }, [currentStep, navigate]);
+    setSearchParams({ step: String(currentStep + 1) });
+  }, [currentStep, navigate, setSearchParams]);
 
   const prevStep = useCallback(() => {
-    setDirection(-1);
-    setCurrentStep(prev => prev - 1);
-  }, []);
+    if (currentStep > 1) {
+      setSearchParams({ step: String(currentStep - 1) });
+    }
+  }, [currentStep, setSearchParams]);
 
   const handleStep2ErrorBack = useCallback((errorMessage: string) => {
     setSignupError(errorMessage);
@@ -81,6 +93,8 @@ export function OnboardingFlow() {
               onNext={nextStep} 
               email={email}
               setEmail={setEmail} 
+              password={password}
+              setPassword={setPassword}
               externalError={signupError}
               onClearError={() => setSignupError(null)}
             />
@@ -90,6 +104,7 @@ export function OnboardingFlow() {
               onNext={nextStep} 
               onBack={prevStep} 
               email={email} 
+              password={password}
               onErrorBack={handleStep2ErrorBack}
             />
           )}

@@ -2,11 +2,16 @@ import { useState, useEffect } from "react";
 import { OnboardingLayout } from "../OnboardingLayout";
 import signupIllustration from "../../../assets/images/onboarding-signup.jpg";
 import MemberService from "../../../services/MemberServices";
+import { FormInput } from "../../../components/FormInput";
+import { PasswordInput } from "../../../components/PasswordInput";
+import { PrimaryButton } from "../../../components/PrimaryButton";
 
 interface Step1Props {
   onNext: () => void;
   email: string;
   setEmail: (email: string) => void;
+  password: string;
+  setPassword: (password: string) => void;
   externalError?: string | null;
   onClearError?: () => void;
 }
@@ -15,11 +20,16 @@ export function Step1Signup({
   onNext,
   email,
   setEmail,
+  password: initialPassword = "",
+  setPassword: setParentPassword,
   externalError,
   onClearError,
 }: Step1Props) {
   const [localEmail, setLocalEmail] = useState(email);
+  const [password, setPassword] = useState(initialPassword);
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setError(externalError || "");
@@ -30,26 +40,51 @@ export function Step1Signup({
   };
 
   const handleContinue = async () => {
-    if (isValidEmail(localEmail)) {
-      setError("");
-      onClearError?.();
-      setEmail(localEmail);
-      try {
-        await MemberService.getMemberByEmail(localEmail);
-        setError("Member with this email already exist");
-      } catch (error: any) {
-        const status = error?.response?.status;
-        if (status === 404) {
-          // Member not found, proceed to next step
-          onNext();
-        } else {
-          setError(
-            "Something went wrong while checking your email. Please try again."
-          );
-        }
-      }
-    } else {
+    if (!isValidEmail(localEmail)) {
       setError("Please enter a valid email address");
+      return;
+    }
+    if (!password) {
+      setError("Please enter a password");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long");
+      return;
+    }
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecial = /[^A-Za-z0-9]/.test(password);
+    if (!hasUppercase || !hasNumber || !hasSpecial) {
+      setError("Password must contain at least one uppercase letter, one number, and one special character");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    setError("");
+    onClearError?.();
+    setEmail(localEmail);
+    setParentPassword?.(password);
+    
+    setIsLoading(true);
+    try {
+      await MemberService.getMemberByEmail(localEmail);
+      setError("Member with this email already exist");
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status === 404) {
+        // Member not found, proceed to next step
+        onNext();
+      } else {
+        setError(
+          "Something went wrong while checking your email. Please try again."
+        );
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -77,10 +112,13 @@ export function Step1Signup({
           </div>
         </div>
 
-        {/* Email Input */}
-        <div className="space-y-2">
-          <input
+        {/* Form Fields */}
+        <div className="space-y-4">
+          {/* Email Input */}
+          <FormInput
+            id="email-address"
             type="email"
+            label="Email Address"
             placeholder="name@company.com"
             value={localEmail}
             onChange={(e) => {
@@ -91,26 +129,52 @@ export function Step1Signup({
               }
             }}
             onKeyPress={(e) => e.key === "Enter" && handleContinue()}
-            className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors duration-200 ${
-              error
-                ? "border-red-500"
-                : "border-[#D1D5DB] focus:border-[#0073EA]"
-            }`}
           />
+
+          {/* Password Input */}
+          <PasswordInput
+            id="password"
+            label="Password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (error) {
+                setError("");
+                onClearError?.();
+              }
+            }}
+            onKeyPress={(e) => e.key === "Enter" && handleContinue()}
+          />
+
+          {/* Confirm Password Input */}
+          <PasswordInput
+            id="confirm-password"
+            label="Confirm Password"
+            placeholder="••••••••"
+            value={confirmPassword}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              if (error) {
+                setError("");
+                onClearError?.();
+              }
+            }}
+            onKeyPress={(e) => e.key === "Enter" && handleContinue()}
+          />
+
           {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
         </div>
 
         {/* Continue Button */}
-        <button
+        <PrimaryButton
           onClick={handleContinue}
-          disabled={!localEmail}
-          className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 ${
-            localEmail
-              ? "bg-[#0073EA] text-white hover:bg-[#0062C9] hover:scale-[1.02] active:scale-[0.98]"
-              : "bg-gray-200 text-gray-400 cursor-not-allowed"
-          }`}>
+          disabled={!localEmail || isLoading}
+          isLoading={isLoading}
+          className="w-full"
+        >
           Continue
-        </button>
+        </PrimaryButton>
 
         {/* Footer */}
         <p className="text-center text-[14px] text-[#6B7280]">
@@ -123,3 +187,4 @@ export function Step1Signup({
     </OnboardingLayout>
   );
 }
+
