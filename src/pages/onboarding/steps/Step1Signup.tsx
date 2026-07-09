@@ -81,8 +81,8 @@ export function Step1Signup({
     try {
       await MemberService.getMemberByEmail(localEmail);
       setEmailError("Member with this email already exist");
-    } catch (error: any) {
-      const status = error?.response?.status;
+    } catch (error: unknown) {
+      const status = (error as any)?.response?.status;
       if (status === 404) {
         // Member not found, proceed to next step
         onNext();
