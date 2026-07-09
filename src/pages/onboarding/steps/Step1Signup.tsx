@@ -28,11 +28,14 @@ export function Step1Signup({
   const [localEmail, setLocalEmail] = useState(email);
   const [password, setPassword] = useState(initialPassword);
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [generalError, setGeneralError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setError(externalError || "");
+    setEmailError(externalError || "");
   }, [externalError]);
 
   const isValidEmail = (email: string) => {
@@ -40,46 +43,51 @@ export function Step1Signup({
   };
 
   const handleContinue = async () => {
+    // Reset all errors before checking
+    setEmailError("");
+    setPasswordError("");
+    setConfirmPasswordError("");
+    setGeneralError("");
+    onClearError?.();
+
     if (!isValidEmail(localEmail)) {
-      setError("Please enter a valid email address");
+      setEmailError("Please enter a valid email address");
       return;
     }
     if (!password) {
-      setError("Please enter a password");
+      setPasswordError("Please enter a password");
       return;
     }
     if (password.length < 8) {
-      setError("Password must be at least 8 characters long");
+      setPasswordError("Password must be at least 8 characters long");
       return;
     }
     const hasUppercase = /[A-Z]/.test(password);
     const hasNumber = /[0-9]/.test(password);
     const hasSpecial = /[^A-Za-z0-9]/.test(password);
     if (!hasUppercase || !hasNumber || !hasSpecial) {
-      setError("Password must contain at least one uppercase letter, one number, and one special character");
+      setPasswordError("Password must contain at least one uppercase letter, one number, and one special character");
       return;
     }
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setConfirmPasswordError("Passwords do not match");
       return;
     }
 
-    setError("");
-    onClearError?.();
     setEmail(localEmail);
     setParentPassword?.(password);
     
     setIsLoading(true);
     try {
       await MemberService.getMemberByEmail(localEmail);
-      setError("Member with this email already exist");
+      setEmailError("Member with this email already exist");
     } catch (error: any) {
       const status = error?.response?.status;
       if (status === 404) {
         // Member not found, proceed to next step
         onNext();
       } else {
-        setError(
+        setGeneralError(
           "Something went wrong while checking your email. Please try again."
         );
       }
@@ -121,10 +129,11 @@ export function Step1Signup({
             label="Email Address"
             placeholder="name@company.com"
             value={localEmail}
+            error={emailError}
             onChange={(e) => {
               setLocalEmail(e.target.value);
-              if (error) {
-                setError("");
+              if (emailError) {
+                setEmailError("");
                 onClearError?.();
               }
             }}
@@ -137,11 +146,11 @@ export function Step1Signup({
             label="Password"
             placeholder="••••••••"
             value={password}
+            error={passwordError}
             onChange={(e) => {
               setPassword(e.target.value);
-              if (error) {
-                setError("");
-                onClearError?.();
+              if (passwordError) {
+                setPasswordError("");
               }
             }}
             onKeyPress={(e) => e.key === "Enter" && handleContinue()}
@@ -153,17 +162,17 @@ export function Step1Signup({
             label="Confirm Password"
             placeholder="••••••••"
             value={confirmPassword}
+            error={confirmPasswordError}
             onChange={(e) => {
               setConfirmPassword(e.target.value);
-              if (error) {
-                setError("");
-                onClearError?.();
+              if (confirmPasswordError) {
+                setConfirmPasswordError("");
               }
             }}
             onKeyPress={(e) => e.key === "Enter" && handleContinue()}
           />
 
-          {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+          {generalError && <p className="text-red-500 text-xs mt-1">{generalError}</p>}
         </div>
 
         {/* Continue Button */}

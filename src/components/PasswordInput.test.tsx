@@ -30,6 +30,19 @@ describe("PasswordInput", () => {
     expect(input).toHaveAttribute("type", PASSWORD_TYPE);
   });
 
+  it("keeps input focused when clicking the toggle button", async () => {
+    render(<PasswordInput id="test-password" label={PASSWORD_LABEL} value="" onChange={() => {}} />);
+    const input = screen.getByLabelText(PASSWORD_LABEL);
+    const toggleButton = screen.getByRole("button", { name: /show password/i });
+
+    const user = userEvent.setup();
+    input.focus();
+    expect(input).toHaveFocus();
+
+    await user.click(toggleButton);
+    expect(input).toHaveFocus();
+  });
+
   it("displays error message when error prop is provided", () => {
     render(<PasswordInput id="test-password" label={PASSWORD_LABEL} error={MOCK_VALIDATION_ERROR} value="" onChange={() => {}} />);
     expect(screen.getByText(MOCK_VALIDATION_ERROR)).toBeInTheDocument();
