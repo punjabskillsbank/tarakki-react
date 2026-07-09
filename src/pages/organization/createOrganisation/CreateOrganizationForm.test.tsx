@@ -36,13 +36,31 @@ const mockCreateOrganization =
 
 // ─── Helper: fill all form fields using factory data ──────────────────────
 const fillForm = async (user: ReturnType<typeof userEvent.setup>) => {
-  await user.type(screen.getByPlaceholderText("Enter organization name"), mockOrgFormData.orgName);
-  await user.type(screen.getByPlaceholderText("Describe your organization"), mockOrgFormData.orgDesc);
-  await user.type(screen.getByPlaceholderText("Street address"), mockOrgFormData.orgAddress);
+  await user.type(
+    screen.getByPlaceholderText("Enter organization name"),
+    mockOrgFormData.orgName
+  );
+  await user.type(
+    screen.getByPlaceholderText("Describe your organization"),
+    mockOrgFormData.orgDesc
+  );
+  await user.type(
+    screen.getByPlaceholderText("Street address"),
+    mockOrgFormData.orgAddress
+  );
   await user.type(screen.getByPlaceholderText("City"), mockOrgFormData.orgCity);
-  await user.type(screen.getByPlaceholderText("State"), mockOrgFormData.orgState);
-  await user.type(screen.getByPlaceholderText("e.g. 132001"), mockOrgFormData.orgPostalCode);
-  await user.type(screen.getByPlaceholderText("Country"), mockOrgFormData.orgCountry);
+  await user.type(
+    screen.getByPlaceholderText("State"),
+    mockOrgFormData.orgState
+  );
+  await user.type(
+    screen.getByPlaceholderText("e.g. 132001"),
+    mockOrgFormData.orgPostalCode
+  );
+  await user.type(
+    screen.getByPlaceholderText("Country"),
+    mockOrgFormData.orgCountry
+  );
 };
 
 // ─── Helper: render with router context ───────────────────────────────────
@@ -102,7 +120,9 @@ describe("CreateOrganizationForm", () => {
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     // Earlier hardcoded expected path: "/organization-decision"
-    expect(mockNavigate).toHaveBeenCalledWith(config.routes.organizationDecision);
+    expect(mockNavigate).toHaveBeenCalledWith(
+      config.routes.organizationDecision
+    );
   });
 
   // ── 3. Validation errors on empty submit ──────────────────────────────
@@ -152,7 +172,7 @@ describe("CreateOrganizationForm", () => {
         "Organization created successfully!"
       );
       expect(mockNavigate).toHaveBeenCalledWith(
-        config.routes.createBoardWithOrgId(mockOrgSuccessResponse.orgId)
+        config.routes.organizationMembersWithOrgId(mockOrgSuccessResponse.orgId)
       );
     });
   });
@@ -193,7 +213,9 @@ describe("CreateOrganizationForm", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Network error. Please check your connection and try again.")
+        screen.getByText(
+          "Network error. Please check your connection and try again."
+        )
       ).toBeInTheDocument();
       expect(toast.error).toHaveBeenCalledWith(
         "Network error. Please check your connection and try again."

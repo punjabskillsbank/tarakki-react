@@ -32,7 +32,6 @@ interface CreateOrganizationFormProps {
   onCancel?: () => void;
 }
 
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function CreateOrganizationForm({
   onCancel,
@@ -79,8 +78,7 @@ export default function CreateOrganizationForm({
       toast.success("Organization created successfully!");
       reset();
 
-      navigate(config.routes.createBoardWithOrgId(result.orgId));
-
+      navigate(config.routes.organizationMembersWithOrgId(result.orgId));
     } catch (error: any) {
       const apiErrors = error.response?.data?.errors ?? error.response?.data;
 
@@ -92,13 +90,16 @@ export default function CreateOrganizationForm({
             }
           });
         }
-        const errorMsg = error.response?.data?.message || "Failed to create organization. Please check the form.";
+        const errorMsg =
+          error.response?.data?.message ||
+          "Failed to create organization. Please check the form.";
         if (error.response?.data?.message) {
           setGlobalError(error.response.data.message);
         }
         toast.error(errorMsg);
       } else {
-        const errorMsg = "Network error. Please check your connection and try again.";
+        const errorMsg =
+          "Network error. Please check your connection and try again.";
         setGlobalError(errorMsg);
         toast.error(errorMsg);
       }
