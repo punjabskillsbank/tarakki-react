@@ -4,6 +4,7 @@ import { PageBackground } from "../../../components/PageBackground";
 import { PageHeader } from "../../../components/PageHeader";
 import { Trash2 } from "lucide-react";
 import config from "../../../config/indexConfig";
+import toast from "react-hot-toast";
 
 type OrgMember = {
   email: string;
@@ -15,6 +16,7 @@ export function OrgMembers() {
   const { orgId } = useParams<{ orgId: string }>();
   const [members, setMembers] = useState<OrgMember[]>([]);
   const [submitted, setSubmitted] = useState(false);
+  const [isInviting, setIsInviting] = useState(false);
 
   const handleSkip = () => {
     if (orgId) {
@@ -63,11 +65,12 @@ export function OrgMembers() {
     );
   };
 
-  const handleInviteMembers = () => {
+  const handleInviteMembers = async () => {
     setSubmitted(true);
 
     const hasErrors = members.some((member, index) => {
       return (
+        member.email.trim() === "" ||
         !isValidEmail(member.email) ||
         isDuplicateEmail(member.email, index) ||
         member.role === ""
@@ -78,16 +81,25 @@ export function OrgMembers() {
       return;
     }
 
-    setSubmitted(false);
-    setMembers([]);
-    // Later:
-    // await OrgMemberService.inviteMembers(...)
-    if (orgId) {
-      navigate(config.routes.createBoardWithOrgId(orgId));
-    } else {
-      navigate(config.routes.organizationDecision);
+    setIsInviting(true);
+
+    try {
+      // Later:
+      // await OrgMemberService.inviteMembers(...)
+
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call delay, will remove this when actual API call is implemented
+      toast.success("Invites sent successfully!");
+
+      if (orgId) {
+        navigate(config.routes.createBoardWithOrgId(orgId));
+      } else {
+        navigate(config.routes.organizationDecision);
+      }
+    } catch (error) {
+      toast.error("Failed to send invites");
+    } finally {
+      setIsInviting(false);
     }
-    alert("Invites sent successfully!");
   };
 
   return (
@@ -115,21 +127,24 @@ export function OrgMembers() {
                 </div>
               </div>
               {members.map((member, index) => {
+                const missingEmail = submitted && member.email.trim() === "";
+
                 const duplicate =
                   submitted && isDuplicateEmail(member.email, index);
 
-                const invalidEmail = submitted && !isValidEmail(member.email);
+                const invalidEmail =
+                  submitted && !isValidEmail(member.email) && !missingEmail;
 
                 const missingRole = submitted && member.role === "";
                 return (
                   <div
                     key={index}
-                    className="flex gap-4 items-center my-4">
-                    <div className="flex-2">
+                    className="flex flex-col md:flex-row gap-4 items-start md:items-center my-4">
+                    <div className="w-full md:flex-[2]">
                       <input
-                        className={`flex-2 rounded-xl p-3 border transition-colors 
+                        className={`w-full rounded-xl p-3 border transition-colors 
                           ${
-                            duplicate || invalidEmail
+                            duplicate || invalidEmail || missingEmail
                               ? "border-red-500"
                               : "border-gray-300"
                           }`}
@@ -137,6 +152,12 @@ export function OrgMembers() {
                         value={member.email}
                         onChange={(e) => updateEmail(index, e.target.value)}
                       />
+                      {missingEmail && (
+                        <p className="text-sm text-red-500 mt-1">
+                          Email address is required.
+                        </p>
+                      )}
+
                       {duplicate && (
                         <p className="text-sm text-red-500 mt-1">
                           Duplicate Email Address
@@ -149,9 +170,9 @@ export function OrgMembers() {
                         </p>
                       )}
                     </div>
-                    <div className="flex-1">
+                    <div className="w-full md:flex-1">
                       <select
-                        className={`flex-1 rounded-xl p-3 border transition-colors
+                        className={`w-full rounded-xl p-3 border transition-colors
                         ${missingRole ? "border-red-500" : "border-gray-300"}`}
                         value={member.role}
                         onChange={(e) =>
@@ -171,7 +192,7 @@ export function OrgMembers() {
                     <button
                       type="button"
                       onClick={() => deleteMember(index)}
-                      className="h-10 w-10 flex items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 transition">
+                      className="self-end md:self-auto h-10 w-10 flex items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 transition">
                       <Trash2 className="h-5 w-5" />
                     </button>
                   </div>
@@ -199,9 +220,9 @@ export function OrgMembers() {
             </button>
             <button
               className="px-4 py-2 rounded-xl  bg-blue-500 text-white border-blue-500 border disabled:bg-gray-300 disabled:border-gray-300 disabled:cursor-not-allowed"
-              disabled={members.length === 0}
+              disabled={members.length === 0 || isInviting}
               onClick={handleInviteMembers}>
-              Invite Members
+              {isInviting ? "Sending Invites..." : "Invite Members"}
             </button>
           </div>
         </div>
