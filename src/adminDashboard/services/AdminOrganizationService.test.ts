@@ -5,6 +5,7 @@ import {
  mockApiOrganizations,
  mappedAcmeOrganization,
  mappedTechOrganization,
+  MOCK_MEMBER_ID,
   mockOrganizationWithoutOwner,
   mockOrganizationWithoutMemberCount,
   mockOpenAIOrganization,
@@ -25,7 +26,7 @@ describe("adminOrganizationService", () => {
       .spyOn(Storage.prototype, "getItem")
       .mockImplementation((key: string) =>
         key === "memberId"
-          ? "550e8400-e29b-41d4-a716-446655440000"
+          ? MOCK_MEMBER_ID
           : null
       );
   });
@@ -111,7 +112,7 @@ describe("adminOrganizationService", () => {
         `${commonConfig.endpoints.organizations}/2`,
         {
           params: {
-            memberId: "550e8400-e29b-41d4-a716-446655440000",
+            memberId: MOCK_MEMBER_ID,
           },
         }
       );
