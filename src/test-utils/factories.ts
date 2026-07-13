@@ -149,3 +149,44 @@ export const mockOpenAIOrganization = {
   orgCountry: "USA",
   totalMemberCount: 10,
 };
+
+export const mappedAcmeOrganization = {
+  id: "1",
+  name: "Acme Corporation",
+  description: "Leading enterprise software solutions provider",
+  owner: {
+    name: "John Smith",
+    email: "john@acme.com",
+    initials: "JS",
+  },
+  address: "123 Business Park",
+  location: {
+    city: "New York",
+    state: "NY",
+    country: "USA",
+    postalCode: "10001",
+  },
+  memberCount: 24,
+  addedAt: "",
+};
+
+export const mappedTechOrganization = {
+  id: "2",
+  name: "Tech Innovations Ltd",
+  description: "AI and cloud transformation company",
+  owner: {
+    name: "Sarah Johnson",
+    email: "sarah@techinnovations.io",
+    initials: "SJ",
+  },
+  address: "45 Silicon Avenue",
+  location: {
+    city: "San Francisco",
+    state: "CA",
+    country: "USA",
+    postalCode: "94105",
+  },
+  memberCount: 12,
+  addedAt: "",
+};
+

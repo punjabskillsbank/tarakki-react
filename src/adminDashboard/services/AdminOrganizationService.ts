@@ -63,11 +63,12 @@ export const adminOrganizationService: AdminDataSource = {
   
   
   async getOrganization(organizationId) {
-    const organizations = await this.listOrganizations();
-
-    return organizations.find(
-      (organization) => organization.id === organizationId
+    const response = await API.get<AdminOrganizationResponse>(
+      `${commonConfig.endpoints.organizations}/${organizationId}`,
+      { params: { memberId: localStorage.getItem("memberId") ?? "" } }
     );
+
+    return mapOrganization(response.data);
   },
 
   // TLDR: Later org-member API will be hooked here
@@ -77,3 +78,5 @@ export const adminOrganizationService: AdminDataSource = {
     );
   },
 };
+
+
