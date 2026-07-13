@@ -7,6 +7,7 @@ export default class MemberServices {
     firstName: string;
     lastName: string;
     email?: string;
+    passwordHash?: string;
     profilePhotoS3Key: string;
     accountStatus: string;
   }) {
