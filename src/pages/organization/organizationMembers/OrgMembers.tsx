@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 
 type OrgMember = {
   email: string;
-  role: "ADMIN" | "MANAGER" | "MEMBER" | "";
+  role: "ORG_ADMIN" | "ORG_MEMBER" | "";
 };
 
 export function OrgMembers() {
@@ -179,9 +179,8 @@ export function OrgMembers() {
                           updateRole(index, e.target.value as OrgMember["role"])
                         }>
                         <option value="">Select Role</option>
-                        <option value="ADMIN">Admin</option>
-                        <option value="MANAGER">Manager</option>
-                        <option value="MEMBER">Member</option>
+                        <option value="ORG_ADMIN">Admin</option>
+                        <option value="ORG_MEMBER">Member</option>
                       </select>
                       {missingRole && (
                         <p className="text-sm text-red-500 mt-1">
