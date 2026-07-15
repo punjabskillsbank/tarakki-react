@@ -78,13 +78,13 @@ export const mockOrgSuccessResponse = {
   orgName: mockOrgFormData.orgName,
 };
 
-// export const mockOrgValidationError = {
-//   status: 400,
-//   response: {
-//     status: 400,
-//     data: {
-//       errors: { orgName: "Name already exists" },
-//       message: "Validation failed",
-//     },
-//   },
-// };
+export const mockOrgValidationError = {
+  status: 400,
+  response: {
+    status: 400,
+    data: {
+      errors: { orgName: "Name already exists" },
+      message: "Validation failed",
+    },
+  },
+};
