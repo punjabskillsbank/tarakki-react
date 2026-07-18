@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
-import { Users, Building2, ArrowRight } from "lucide-react";
+import { ArrowRight, Layers3, Building2, Users } from "lucide-react";
 import { DecisionCard } from "../../../components/DecisionCard";
 import { PageBackground } from "../../../components/PageBackground";
 import { PageHeader } from "../../../components/PageHeader";
@@ -88,6 +88,21 @@ export function OrganizationDecision() {
               )}
             </span>
           </motion.button>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.6 }}
+          className="mt-8 flex justify-center">
+          <button
+            type="button"
+            onClick={() => navigate("/task-board")}
+            className="inline-flex items-center gap-2 rounded-full border border-[#D7E4FF] bg-white/80 px-4 py-2 text-[13px] font-medium text-[#0073EA] shadow-sm transition-colors hover:bg-[#E6F0FF]"
+          >
+            <Layers3 className="h-4 w-4" />
+            Open Task Board
+          </button>
         </motion.div>
       </motion.div>
     </div>
