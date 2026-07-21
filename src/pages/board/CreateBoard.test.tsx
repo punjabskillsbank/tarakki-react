@@ -9,8 +9,11 @@ import { boardPayloadFactory } from '../../test-utils/factories';
 jest.mock('../../services/BoardService');
 jest.mock('react-hot-toast');
 
+const mockNavigate = jest.fn();
+
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockNavigate,
   useParams: () => ({
     orgId: "2",
   }),
