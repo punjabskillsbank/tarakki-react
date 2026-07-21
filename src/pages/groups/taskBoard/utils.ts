@@ -2,7 +2,9 @@ export const uid = () => Math.random().toString(36).slice(2, 10);
 
 export function getInitials(name: string) {
   const words = name.trim().split(/\s+/);
-  return words.length >= 2 ? (words[0][0] + words[1][0]).toUpperCase() : name.slice(0, 2).toUpperCase();
+  return words.length >= 2
+    ? (words[0][0] + words[1][0]).toUpperCase()
+    : name.slice(0, 2).toUpperCase();
 }
 
 export function formatDate(value: string | null) {
@@ -12,5 +14,8 @@ export function formatDate(value: string | null) {
   if (diff < 0) return { text: `${Math.abs(diff)}d overdue`, overdue: true };
   if (diff === 0) return { text: "Today", overdue: false };
   if (diff === 1) return { text: "Tomorrow", overdue: false };
-  return { text: date.toLocaleDateString("en-PK", { month: "short", day: "numeric" }), overdue: false };
+  return {
+    text: date.toLocaleDateString("en-PK", { month: "short", day: "numeric" }),
+    overdue: false,
+  };
 }

@@ -1,21 +1,172 @@
-import { ChevronDown, ChevronRight, Edit3, MoreHorizontal, Plus, Trash2 } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  Edit3,
+  MoreHorizontal,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { TaskCard } from "./TaskCard";
 import type { Section, Task } from "./types";
 
 type Props = {
-  section: Section; tasks: Task[]; draggingTaskId: string | null; dragTarget: string | null;
-  onRename: (sectionId: string, name: string) => void; onToggleCollapse: (sectionId: string) => void;
-  onDelete: (sectionId: string) => void; onDragOver: (sectionId: string) => void; onDrop: (sectionId: string) => void;
-  onDragStart: (taskId: string) => void; onDragEnd: () => void; onSelectTask: (task: Task) => void; onCreateTask: (sectionId: string) => void;
+  section: Section;
+  tasks: Task[];
+  draggingTaskId: string | null;
+  dragTarget: string | null;
+  onRename: (sectionId: string, name: string) => void;
+  onToggleCollapse: (sectionId: string) => void;
+  onDelete: (sectionId: string) => void;
+  onDragOver: (sectionId: string) => void;
+  onDrop: (sectionId: string) => void;
+  onDragStart: (taskId: string) => void;
+  onDragEnd: () => void;
+  onSelectTask: (task: Task) => void;
+  onCreateTask: (sectionId: string) => void;
 };
 
-export function SectionColumn({ section, tasks, draggingTaskId, dragTarget, onRename, onToggleCollapse, onDelete, onDragOver, onDrop, onDragStart, onDragEnd, onSelectTask, onCreateTask }: Props) {
+export function SectionColumn({
+  section,
+  tasks,
+  draggingTaskId,
+  dragTarget,
+  onRename,
+  onToggleCollapse,
+  onDelete,
+  onDragOver,
+  onDrop,
+  onDragStart,
+  onDragEnd,
+  onSelectTask,
+  onCreateTask,
+}: Props) {
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(section.name);
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  useEffect(() => { const handler = (event: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(event.target as Node)) setShowMenu(false); }; if (showMenu) document.addEventListener("mousedown", handler); return () => document.removeEventListener("mousedown", handler); }, [showMenu]);
-  const saveName = () => { setRenaming(false); onRename(section.id, renameValue || section.name); };
-  return <div className={`flex w-[272px] flex-shrink-0 flex-col transition-all duration-150 ${dragTarget === section.id ? "rounded-xl ring-2 ring-[#0073EA] ring-offset-2" : ""}`} onDragOver={(event) => { event.preventDefault(); onDragOver(section.id); }} onDrop={() => onDrop(section.id)}><div className="flex items-center gap-2 rounded-t-xl border border-b-0 border-[#E6E9EF] bg-white px-3 py-2.5">{renaming ? <input autoFocus value={renameValue} onChange={(event) => setRenameValue(event.target.value)} onBlur={saveName} onKeyDown={(event) => { if (event.key === "Enter") saveName(); if (event.key === "Escape") { setRenaming(false); setRenameValue(section.name); } }} className="flex-1 border-b border-[#0073EA] bg-transparent text-[11.5px] font-bold uppercase tracking-wider text-[#6B7280] outline-none" /> : <button onDoubleClick={() => setRenaming(true)} className="flex-1 text-left text-[11.5px] font-bold uppercase tracking-wider text-[#6B7280] transition-colors hover:text-[#1F2937]">{section.name}</button>}<span className="min-w-[20px] rounded-full bg-[#F3F4F6] px-1.5 py-0.5 text-center text-[10.5px] font-semibold text-[#9CA3AF]">{tasks.length}</span><div className="flex items-center gap-0.5"><button onClick={() => onToggleCollapse(section.id)} className="rounded p-1 text-[#C4C4C4] transition-colors hover:bg-[#F3F4F6] hover:text-[#6B7280]">{section.collapsed ? <ChevronRight size={13} /> : <ChevronDown size={13} />}</button><div ref={menuRef} className="relative"><button onClick={() => setShowMenu((value) => !value)} className="rounded p-1 text-[#C4C4C4] transition-colors hover:bg-[#F3F4F6] hover:text-[#6B7280]"><MoreHorizontal size={13} /></button>{showMenu && <div className="absolute right-0 top-7 z-30 w-40 rounded-lg border border-[#E6E9EF] bg-white py-1 text-[12px] shadow-lg"><button onClick={() => { setShowMenu(false); setRenaming(true); }} className="flex w-full items-center gap-2 px-3 py-1.5 text-[#1F2937] transition-colors hover:bg-[#F3F4F6]"><Edit3 size={12} /> Rename</button><div className="my-1 border-t border-[#E6E9EF]" /><button onClick={() => { setShowMenu(false); onDelete(section.id); }} className="flex w-full items-center gap-2 px-3 py-1.5 text-[#E2445C] transition-colors hover:bg-[#FEE2E2]"><Trash2 size={12} /> Delete group</button></div>}</div></div></div>{!section.collapsed && <div className={`flex min-h-[80px] flex-col gap-2 rounded-b-xl border border-t-0 border-[#E6E9EF] p-2 transition-colors ${dragTarget === section.id ? "bg-[#E6F0FF]/40" : "bg-[#F6F7FB]"}`}>{tasks.map((task) => <TaskCard key={task.id} task={task} onDragStart={() => onDragStart(task.id)} onDragEnd={onDragEnd} onClick={() => onSelectTask(task)} isDragging={draggingTaskId === task.id} />)}{dragTarget === section.id && draggingTaskId && <div className="flex h-12 items-center justify-center rounded-lg border-2 border-dashed border-[#0073EA]/40 bg-[#0073EA]/5"><span className="text-[11px] font-medium text-[#0073EA]/50">Drop here</span></div>}<button onClick={() => onCreateTask(section.id)} className="group flex items-center gap-1.5 rounded-lg border border-transparent px-3 py-2 text-[12px] font-medium text-[#6B7280] transition-all hover:border-[#E6E9EF] hover:bg-white hover:text-[#0073EA]"><Plus size={13} className="group-hover:text-[#0073EA]" />Create issue</button></div>}</div>;
+  useEffect(() => {
+    const handler = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node))
+        setShowMenu(false);
+    };
+    if (showMenu) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showMenu]);
+  const saveName = () => {
+    setRenaming(false);
+    onRename(section.id, renameValue || section.name);
+  };
+  return (
+    <div
+      className={`flex w-[272px] flex-shrink-0 flex-col transition-all duration-150 ${dragTarget === section.id ? "rounded-xl ring-2 ring-[#0073EA] ring-offset-2" : ""}`}
+      onDragOver={(event) => {
+        event.preventDefault();
+        onDragOver(section.id);
+      }}
+      onDrop={() => onDrop(section.id)}
+    >
+      <div className="flex items-center gap-2 rounded-t-xl border border-b-0 border-[#E6E9EF] bg-white px-3 py-2.5">
+        {renaming ? (
+          <input
+            autoFocus
+            value={renameValue}
+            onChange={(event) => setRenameValue(event.target.value)}
+            onBlur={saveName}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") saveName();
+              if (event.key === "Escape") {
+                setRenaming(false);
+                setRenameValue(section.name);
+              }
+            }}
+            className="flex-1 border-b border-[#0073EA] bg-transparent text-[11.5px] font-bold uppercase tracking-wider text-[#6B7280] outline-none"
+          />
+        ) : (
+          <button
+            onDoubleClick={() => setRenaming(true)}
+            className="flex-1 text-left text-[11.5px] font-bold uppercase tracking-wider text-[#6B7280] transition-colors hover:text-[#1F2937]"
+          >
+            {section.name}
+          </button>
+        )}
+        <span className="min-w-[20px] rounded-full bg-[#F3F4F6] px-1.5 py-0.5 text-center text-[10.5px] font-semibold text-[#9CA3AF]">
+          {tasks.length}
+        </span>
+        <div className="flex items-center gap-0.5">
+          <button
+            onClick={() => onToggleCollapse(section.id)}
+            className="rounded p-1 text-[#C4C4C4] transition-colors hover:bg-[#F3F4F6] hover:text-[#6B7280]"
+          >
+            {section.collapsed ? (
+              <ChevronRight size={13} />
+            ) : (
+              <ChevronDown size={13} />
+            )}
+          </button>
+          <div ref={menuRef} className="relative">
+            <button
+              onClick={() => setShowMenu((value) => !value)}
+              className="rounded p-1 text-[#C4C4C4] transition-colors hover:bg-[#F3F4F6] hover:text-[#6B7280]"
+            >
+              <MoreHorizontal size={13} />
+            </button>
+            {showMenu && (
+              <div className="absolute right-0 top-7 z-30 w-40 rounded-lg border border-[#E6E9EF] bg-white py-1 text-[12px] shadow-lg">
+                <button
+                  onClick={() => {
+                    setShowMenu(false);
+                    setRenaming(true);
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-[#1F2937] transition-colors hover:bg-[#F3F4F6]"
+                >
+                  <Edit3 size={12} /> Rename
+                </button>
+                <div className="my-1 border-t border-[#E6E9EF]" />
+                <button
+                  onClick={() => {
+                    setShowMenu(false);
+                    onDelete(section.id);
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-[#E2445C] transition-colors hover:bg-[#FEE2E2]"
+                >
+                  <Trash2 size={12} /> Delete group
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      {!section.collapsed && (
+        <div
+          className={`flex min-h-[80px] flex-col gap-2 rounded-b-xl border border-t-0 border-[#E6E9EF] p-2 transition-colors ${dragTarget === section.id ? "bg-[#E6F0FF]/40" : "bg-[#F6F7FB]"}`}
+        >
+          {tasks.map((task) => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              onDragStart={() => onDragStart(task.id)}
+              onDragEnd={onDragEnd}
+              onClick={() => onSelectTask(task)}
+              isDragging={draggingTaskId === task.id}
+            />
+          ))}
+          {dragTarget === section.id && draggingTaskId && (
+            <div className="flex h-12 items-center justify-center rounded-lg border-2 border-dashed border-[#0073EA]/40 bg-[#0073EA]/5">
+              <span className="text-[11px] font-medium text-[#0073EA]/50">
+                Drop here
+              </span>
+            </div>
+          )}
+          <button
+            onClick={() => onCreateTask(section.id)}
+            className="group flex items-center gap-1.5 rounded-lg border border-transparent px-3 py-2 text-[12px] font-medium text-[#6B7280] transition-all hover:border-[#E6E9EF] hover:bg-white hover:text-[#0073EA]"
+          >
+            <Plus size={13} className="group-hover:text-[#0073EA]" />
+            Create issue
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
