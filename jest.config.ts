@@ -3,6 +3,9 @@ export default {
   testEnvironment: 'jest-environment-jsdom',
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
+      diagnostics: {
+        ignoreCodes: [1343],
+      },
       tsconfig: {
         module: 'commonjs',
         target: 'es2020',
