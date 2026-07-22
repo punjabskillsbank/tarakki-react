@@ -1,12 +1,4 @@
 const getEnv = (key: string, defaultValue: string): string => {
-  try {
-    const env = (0, eval)('typeof import.meta !== "undefined" ? import.meta.env : null');
-    if (env && env[key]) {
-      return env[key];
-    }
-  } catch {
-    // Ignore error in non-ESM environments like Jest
-  }
   const proc = (globalThis as any).process;
   if (proc && proc.env && proc.env[key]) {
     return proc.env[key] as string;
