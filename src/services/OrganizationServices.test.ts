@@ -38,7 +38,7 @@ describe("OrganizationService", () => {
       );
 
       expect(mockedAPI.post).toHaveBeenCalledWith(
-        config.endpoints.organizations,
+        `${config.baseURLs.organizationService}${config.endpoints.organizations}`,
         mockOrgPayload
       );
       expect(result).toEqual(mockOrgSuccessResponse);
