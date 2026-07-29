@@ -5,8 +5,10 @@ import { PageHeader } from "../../../components/PageHeader";
 import { Trash2 } from "lucide-react";
 import config from "../../../config/indexConfig";
 import toast from "react-hot-toast";
+import OrganizationService from "../../../services/OrganizationServices";
 
 type OrgMember = {
+  orgId: string;
   email: string;
   role: "ORG_ADMIN" | "ORG_MEMBER" | "";
 };
@@ -32,6 +34,7 @@ export function OrgMembers() {
       {
         email: "",
         role: "",
+        orgId: orgId || "",
       },
     ]);
   };
@@ -77,6 +80,10 @@ export function OrgMembers() {
       );
     });
 
+    if (!orgId) {
+      throw new Error("Organization ID not found.");
+    }
+
     if (hasErrors) {
       return;
     }
@@ -84,10 +91,15 @@ export function OrgMembers() {
     setIsInviting(true);
 
     try {
-      // Later:
-      // await OrgMemberService.inviteMembers(...)
-
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call delay, will remove this when actual API call is implemented
+      await Promise.all(
+        members.map((member) =>
+          OrganizationService.inviteMember(orgId, {
+            email: member.email,
+            orgMemberRole: member.role,
+            orgId: orgId,
+          })
+        )
+      );
       toast.success("Invites sent successfully!");
 
       if (orgId) {

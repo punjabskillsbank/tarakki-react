@@ -17,6 +17,7 @@ export const TEXT_TYPE = "text";
 export const MOCK_FIRST_NAME = "John";
 export const MOCK_LAST_NAME = "Doe";
 export const MOCK_ACCOUNT_STATUS = "ACTIVE";
+export const MOCK_ORG_ID = "org-123";
 
 export const memberFactory = (overrides = {}) => {
   return {
@@ -40,6 +41,16 @@ export const boardPayloadFactory = (overrides = {}) => {
   };
 };
 
+export const mockInviteMember = {
+  email: "john@test.com",
+  role: "ORG_MEMBER",
+} as const;
+
+export const mockInvitePayload = {
+  email: "john@test.com",
+  orgMemberRole: "ORG_MEMBER",
+  orgId: MOCK_ORG_ID,
+} as const;
 /*
 export const onboardingDataFactory = (overrides = {}) => {
   return {

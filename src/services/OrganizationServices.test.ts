@@ -2,6 +2,8 @@ import OrganizationService from "./OrganizationServices";
 import API from "./axios";
 import { isAxiosError } from "axios";
 import {
+  MOCK_ORG_ID,
+  mockInvitePayload,
   mockOrgPayload,
   mockOrgSuccessResponse,
 } from "../test-utils/factories";
@@ -76,6 +78,65 @@ describe("OrganizationService", () => {
       await expect(
         OrganizationService.createOrganization(mockOrgPayload)
       ).rejects.toThrow("Failed to create organization");
+    });
+  });
+
+  describe("inviteMember", () => {
+    it("successfully invites a member", async () => {
+      mockedAPI.post.mockResolvedValueOnce({ data: { success: true } });
+
+      const result = await OrganizationService.inviteMember(
+        MOCK_ORG_ID,
+        mockInvitePayload
+      );
+
+      expect(mockedAPI.post).toHaveBeenCalledWith(
+        config.endpoints.organizationMember(MOCK_ORG_ID),
+        mockInvitePayload
+      );
+
+      expect(result).toEqual({ success: true });
+    });
+
+    it("throws an error with message from axios response on failure", async () => {
+      const errorMessage = "Member already invited";
+
+      mockedIsAxiosError.mockReturnValueOnce(true);
+      mockedAPI.post.mockRejectedValueOnce({
+        response: {
+          data: {
+            message: errorMessage,
+          },
+        },
+      });
+
+      await expect(
+        OrganizationService.inviteMember(MOCK_ORG_ID, mockInvitePayload)
+      ).rejects.toThrow(errorMessage);
+    });
+
+    it("throws a default error message when axios response has no message", async () => {
+      mockedIsAxiosError.mockReturnValueOnce(true);
+
+      mockedAPI.post.mockRejectedValueOnce({
+        response: {
+          data: null,
+        },
+      });
+
+      await expect(
+        OrganizationService.inviteMember(MOCK_ORG_ID, mockInvitePayload)
+      ).rejects.toThrow("Failed to invite members");
+    });
+
+    it("throws a default error message for non-axios errors", async () => {
+      mockedIsAxiosError.mockReturnValueOnce(false);
+
+      mockedAPI.post.mockRejectedValueOnce(new Error("Network Error"));
+
+      await expect(
+        OrganizationService.inviteMember(MOCK_ORG_ID, mockInvitePayload)
+      ).rejects.toThrow("Failed to invite members");
     });
   });
 });

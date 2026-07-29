@@ -16,6 +16,8 @@ const commonConfig = {
     boards: "/boards",
     members: "/members",
     organizations: "/organizations",
+    organizationMember: (orgId: string | number) =>
+      `/organizations/${orgId}/members`,
   },
 };
 
