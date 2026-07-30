@@ -234,6 +234,54 @@ describe("OrgMembers", () => {
     });
   });
 
+  //Partial success
+  it("keeps only failed members when some invites fail", async () => {
+    const user = userEvent.setup();
+
+    mockInviteMemberService
+      .mockResolvedValueOnce({})
+      .mockRejectedValueOnce(new Error());
+
+    renderWithRouter(<OrgMembers />);
+
+    await user.click(screen.getByText("Add another Member"));
+    await user.click(screen.getByText("Add another Member"));
+
+    const inputs = screen.getAllByPlaceholderText("Email Address");
+
+    await user.type(inputs[0], "success@test.com");
+    await user.type(inputs[1], "failed@test.com");
+
+    const selects = screen.getAllByRole("combobox");
+
+    await user.selectOptions(selects[0], "ORG_MEMBER");
+    await user.selectOptions(selects[1], "ORG_MEMBER");
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "Invite Members",
+      })
+    );
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith(
+        "1 invite(s) sent successfully."
+      );
+
+      expect(toast.error).toHaveBeenCalledWith(
+        "1 invite(s) failed. Please try again."
+      );
+    });
+
+    expect(
+      screen.queryByDisplayValue("success@test.com")
+    ).not.toBeInTheDocument();
+
+    expect(screen.getByDisplayValue("failed@test.com")).toBeInTheDocument();
+
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
   //API failure
   it("shows error toast when invite fails", async () => {
     const user = userEvent.setup();
@@ -261,7 +309,9 @@ describe("OrgMembers", () => {
     );
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("Failed to send invites");
+      expect(toast.error).toHaveBeenCalledWith("Failed to send invites.");
+      expect(toast.success).not.toHaveBeenCalled();
+      expect(mockNavigate).not.toHaveBeenCalled();
     });
   });
 });

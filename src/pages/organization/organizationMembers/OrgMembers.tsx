@@ -81,7 +81,8 @@ export function OrgMembers() {
     });
 
     if (!orgId) {
-      throw new Error("Organization ID not found.");
+      toast.error("Organization ID not found.");
+      return;
     }
 
     if (hasErrors) {
@@ -91,24 +92,42 @@ export function OrgMembers() {
     setIsInviting(true);
 
     try {
-      await Promise.all(
+      const results = await Promise.allSettled(
         members.map((member) =>
           OrganizationService.inviteMember(orgId, {
             email: member.email,
             orgMemberRole: member.role,
-            orgId: orgId,
+            orgId,
           })
         )
       );
-      toast.success("Invites sent successfully!");
 
-      if (orgId) {
+      const successfulMembers = members.filter(
+        (_, index) => results[index].status === "fulfilled"
+      );
+
+      const failedMembers = members.filter(
+        (_, index) => results[index].status === "rejected"
+      );
+
+      if (failedMembers.length === 0) {
+        toast.success("Invites sent successfully!");
         navigate(config.routes.createBoardWithOrgId(orgId));
-      } else {
-        navigate(config.routes.organizationDecision);
+        return;
       }
-    } catch (error) {
-      toast.error("Failed to send invites");
+
+      setMembers(failedMembers);
+
+      if (successfulMembers.length === 0) {
+        toast.error("Failed to send invites.");
+      } else {
+        toast.success(
+          `${successfulMembers.length} invite(s) sent successfully.`
+        );
+        toast.error(
+          `${failedMembers.length} invite(s) failed. Please try again.`
+        );
+      }
     } finally {
       setIsInviting(false);
     }
