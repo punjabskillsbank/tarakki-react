@@ -6,6 +6,9 @@ import { Trash2 } from "lucide-react";
 import config from "../../../config/indexConfig";
 import toast from "react-hot-toast";
 import OrganizationService from "../../../services/OrganizationServices";
+import { PrimaryButton } from "../../../components/PrimaryButton";
+import { FormSelect } from "../../../components/FormSelect";
+import { FormInput } from "../../../components/FormInput";
 
 type OrgMember = {
   orgId: string;
@@ -172,52 +175,37 @@ export function OrgMembers() {
                     key={index}
                     className="flex flex-col md:flex-row gap-4 items-start md:items-center my-4">
                     <div className="w-full md:flex-[2]">
-                      <input
-                        className={`w-full rounded-xl p-3 border transition-colors 
-                          ${
-                            duplicate || invalidEmail || missingEmail
-                              ? "border-red-500"
-                              : "border-gray-300"
-                          }`}
+                      <FormInput
+                        label=""
                         placeholder="Email Address"
                         value={member.email}
                         onChange={(e) => updateEmail(index, e.target.value)}
+                        error={
+                          missingEmail
+                            ? "Email address is required."
+                            : duplicate
+                            ? "Duplicate Email Address"
+                            : invalidEmail
+                            ? "Invalid email address."
+                            : undefined
+                        }
                       />
-                      {missingEmail && (
-                        <p className="text-sm text-red-500 mt-1">
-                          Email address is required.
-                        </p>
-                      )}
-
-                      {duplicate && (
-                        <p className="text-sm text-red-500 mt-1">
-                          Duplicate Email Address
-                        </p>
-                      )}
-
-                      {invalidEmail && (
-                        <p className="text-sm text-red-500 mt-1">
-                          Invalid email address.
-                        </p>
-                      )}
                     </div>
                     <div className="w-full md:flex-1">
-                      <select
-                        className={`w-full rounded-xl p-3 border transition-colors
-                        ${missingRole ? "border-red-500" : "border-gray-300"}`}
+                      <FormSelect
                         value={member.role}
                         onChange={(e) =>
                           updateRole(index, e.target.value as OrgMember["role"])
-                        }>
-                        <option value="">Select Role</option>
-                        <option value="ORG_ADMIN">Admin</option>
-                        <option value="ORG_MEMBER">Member</option>
-                      </select>
-                      {missingRole && (
-                        <p className="text-sm text-red-500 mt-1">
-                          Please select a role.
-                        </p>
-                      )}
+                        }
+                        error={
+                          missingRole ? "Please select a role." : undefined
+                        }
+                        options={[
+                          { value: "", label: "Select Role" },
+                          { value: "ORG_ADMIN", label: "Admin" },
+                          { value: "ORG_MEMBER", label: "Member" },
+                        ]}
+                      />
                     </div>
                     <button
                       type="button"
@@ -248,12 +236,12 @@ export function OrgMembers() {
               onClick={handleSkip}>
               Skip for Now
             </button>
-            <button
-              className="px-4 py-2 rounded-xl  bg-blue-500 text-white border-blue-500 border disabled:bg-gray-300 disabled:border-gray-300 disabled:cursor-not-allowed"
-              disabled={members.length === 0 || isInviting}
-              onClick={handleInviteMembers}>
-              {isInviting ? "Sending Invites..." : "Invite Members"}
-            </button>
+            <PrimaryButton
+              onClick={handleInviteMembers}
+              disabled={members.length === 0}
+              isLoading={isInviting}>
+              Invite Members
+            </PrimaryButton>
           </div>
         </div>
       </div>

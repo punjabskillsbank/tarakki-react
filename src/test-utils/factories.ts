@@ -2,6 +2,7 @@ export const MOCK_PASSWORD = "Password123!";
 export const MOCK_INVALID_PASSWORD = "simplepwd";
 export const MOCK_DIFFERENT_PASSWORD = "Different123!";
 export const MOCK_EMAIL = "john@example.com";
+export const MOCK_EMAIL2 = "johndoe@example.com";
 export const EMAIL_VAL_TEST_ID = "email-val";
 export const PASSWORD_VAL_TEST_ID = "password-val";
 export const STEP1_TEST_ID = "step-1";

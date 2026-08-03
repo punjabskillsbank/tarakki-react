@@ -8,6 +8,8 @@ import { OrgMembers } from "./OrgMembers";
 import OrganizationService from "../../../services/OrganizationServices";
 import config from "../../../config/indexConfig";
 import {
+  MOCK_EMAIL,
+  MOCK_EMAIL2,
   MOCK_ORG_ID,
   mockInviteMember,
   mockInvitePayload,
@@ -155,8 +157,8 @@ describe("OrgMembers", () => {
 
     const inputs = screen.getAllByPlaceholderText("Email Address");
 
-    await user.type(inputs[0], "abc@test.com");
-    await user.type(inputs[1], "abc@test.com");
+    await user.type(inputs[0], MOCK_EMAIL);
+    await user.type(inputs[1], MOCK_EMAIL);
 
     const selects = screen.getAllByRole("combobox");
 
@@ -249,8 +251,8 @@ describe("OrgMembers", () => {
 
     const inputs = screen.getAllByPlaceholderText("Email Address");
 
-    await user.type(inputs[0], "success@test.com");
-    await user.type(inputs[1], "failed@test.com");
+    await user.type(inputs[0], MOCK_EMAIL);
+    await user.type(inputs[1], MOCK_EMAIL2);
 
     const selects = screen.getAllByRole("combobox");
 
@@ -273,11 +275,9 @@ describe("OrgMembers", () => {
       );
     });
 
-    expect(
-      screen.queryByDisplayValue("success@test.com")
-    ).not.toBeInTheDocument();
+    expect(screen.queryByDisplayValue(MOCK_EMAIL)).not.toBeInTheDocument();
 
-    expect(screen.getByDisplayValue("failed@test.com")).toBeInTheDocument();
+    expect(screen.getByDisplayValue(MOCK_EMAIL2)).toBeInTheDocument();
 
     expect(mockNavigate).not.toHaveBeenCalled();
   });
