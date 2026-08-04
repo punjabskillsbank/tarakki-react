@@ -1,0 +1,250 @@
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { PageBackground } from "../../../components/PageBackground";
+import { PageHeader } from "../../../components/PageHeader";
+import { Trash2 } from "lucide-react";
+import config from "../../../config/indexConfig";
+import toast from "react-hot-toast";
+import OrganizationService from "../../../services/OrganizationServices";
+import { PrimaryButton } from "../../../components/PrimaryButton";
+import { FormSelect } from "../../../components/FormSelect";
+import { FormInput } from "../../../components/FormInput";
+
+type OrgMember = {
+  orgId: string;
+  email: string;
+  role: "ORG_ADMIN" | "ORG_MEMBER" | "";
+};
+
+export function OrgMembers() {
+  const navigate = useNavigate();
+  const { orgId } = useParams<{ orgId: string }>();
+  const [members, setMembers] = useState<OrgMember[]>([]);
+  const [submitted, setSubmitted] = useState(false);
+  const [isInviting, setIsInviting] = useState(false);
+
+  const handleSkip = () => {
+    if (orgId) {
+      navigate(config.routes.createBoardWithOrgId(orgId));
+    } else {
+      navigate(config.routes.organizationDecision);
+    }
+  };
+
+  const addMember = () => {
+    setMembers((prev) => [
+      ...prev,
+      {
+        email: "",
+        role: "",
+        orgId: orgId || "",
+      },
+    ]);
+  };
+  const updateEmail = (index: number, value: string) => {
+    setMembers((prev) =>
+      prev.map((member, i) =>
+        i === index ? { ...member, email: value } : member
+      )
+    );
+  };
+  const updateRole = (index: number, value: OrgMember["role"]) => {
+    setMembers((prev) =>
+      prev.map((member, i) =>
+        i === index ? { ...member, role: value } : member
+      )
+    );
+  };
+  const deleteMember = (index: number) => {
+    setMembers((prev) => prev.filter((_, i) => i !== index));
+  };
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+  const isDuplicateEmail = (email: string, currentIndex: number) => {
+    if (!email.trim()) return false;
+
+    return members.some(
+      (member, index) =>
+        index !== currentIndex &&
+        member.email.trim().toLowerCase() === email.trim().toLowerCase()
+    );
+  };
+
+  const handleInviteMembers = async () => {
+    setSubmitted(true);
+
+    const hasErrors = members.some((member, index) => {
+      return (
+        member.email.trim() === "" ||
+        !isValidEmail(member.email) ||
+        isDuplicateEmail(member.email, index) ||
+        member.role === ""
+      );
+    });
+
+    if (!orgId) {
+      toast.error("Organization ID not found.");
+      return;
+    }
+
+    if (hasErrors) {
+      return;
+    }
+
+    setIsInviting(true);
+
+    try {
+      const results = await Promise.allSettled(
+        members.map((member) =>
+          OrganizationService.inviteMember(orgId, {
+            email: member.email,
+            orgMemberRole: member.role,
+            orgId,
+          })
+        )
+      );
+
+      const successfulMembers = members.filter(
+        (_, index) => results[index].status === "fulfilled"
+      );
+
+      const failedMembers = members.filter(
+        (_, index) => results[index].status === "rejected"
+      );
+
+      if (failedMembers.length === 0) {
+        toast.success("Invites sent successfully!");
+        navigate(config.routes.createBoardWithOrgId(orgId));
+        return;
+      }
+
+      setMembers(failedMembers);
+
+      if (successfulMembers.length === 0) {
+        toast.error("Failed to send invites.");
+      } else {
+        toast.success(
+          `${successfulMembers.length} invite(s) sent successfully.`
+        );
+        toast.error(
+          `${failedMembers.length} invite(s) failed. Please try again.`
+        );
+      }
+    } finally {
+      setIsInviting(false);
+    }
+  };
+
+  return (
+    <div className="p-6">
+      <PageBackground></PageBackground>
+      <div>
+        <PageHeader
+          title="Invite Organization Members"
+          subtitle="Invite your teammates to collaborate in your organization. You can always add more members later."
+        />
+        <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl">
+          <p className="text-xl font-bold">Invite Members</p>
+          <p className="text-gray-500 mb-4">
+            Enter your teammates' email addresses and assign their roles before
+            sending invites.
+          </p>
+          {members.length > 0 && (
+            <>
+              <div className="flex gap-4 mb-2">
+                <div className="flex-2">
+                  <p className="font-semibold text-gray-500">EMAIL ADDRESS</p>
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-500">ROLE</p>
+                </div>
+              </div>
+              {members.map((member, index) => {
+                const missingEmail = submitted && member.email.trim() === "";
+
+                const duplicate =
+                  submitted && isDuplicateEmail(member.email, index);
+
+                const invalidEmail =
+                  submitted && !isValidEmail(member.email) && !missingEmail;
+
+                const missingRole = submitted && member.role === "";
+                return (
+                  <div
+                    key={index}
+                    className="flex flex-col md:flex-row gap-4 items-start md:items-center my-4">
+                    <div className="w-full md:flex-[2]">
+                      <FormInput
+                        label=""
+                        placeholder="Email Address"
+                        value={member.email}
+                        onChange={(e) => updateEmail(index, e.target.value)}
+                        error={
+                          missingEmail
+                            ? "Email address is required."
+                            : duplicate
+                            ? "Duplicate Email Address"
+                            : invalidEmail
+                            ? "Invalid email address."
+                            : undefined
+                        }
+                      />
+                    </div>
+                    <div className="w-full md:flex-1">
+                      <FormSelect
+                        value={member.role}
+                        onChange={(e) =>
+                          updateRole(index, e.target.value as OrgMember["role"])
+                        }
+                        error={
+                          missingRole ? "Please select a role." : undefined
+                        }
+                        options={[
+                          { value: "", label: "Select Role" },
+                          { value: "ORG_ADMIN", label: "Admin" },
+                          { value: "ORG_MEMBER", label: "Member" },
+                        ]}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => deleteMember(index)}
+                      className="self-end md:self-auto h-10 w-10 flex items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 transition">
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
+                );
+              })}
+              <hr></hr>
+            </>
+          )}
+
+          <div
+            className="m-2 mt-4 flex gap-2 border-gray-300 border border-dashed p-2 rounded-xl w-fit cursor-pointer hover:bg-gray-100"
+            onClick={addMember}>
+            <div className="w-7 h-7 rounded-full bg-gray-100 item-center justify-center flex">
+              +
+            </div>
+            <p>Add another Member</p>
+          </div>
+          <hr></hr>
+          <div className="mt-4 flex justify-end gap-4">
+            <button
+              type="button"
+              className="px-4 py-2 rounded-xl border-gray-300 border"
+              onClick={handleSkip}>
+              Skip for Now
+            </button>
+            <PrimaryButton
+              onClick={handleInviteMembers}
+              disabled={members.length === 0}
+              isLoading={isInviting}>
+              Invite Members
+            </PrimaryButton>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

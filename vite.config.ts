@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api/members": {
-        target: "http://localhost:8081",
+        target: "http://localhost:8080",
         changeOrigin: true,
       },
       "/api/organizations": {
@@ -16,7 +16,7 @@ export default defineConfig({
         changeOrigin: true,
       },
       "/api/boards": {
-        target: "http://localhost:8080",
+        target: "http://localhost:8081",
         changeOrigin: true,
       },
     },
