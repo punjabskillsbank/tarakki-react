@@ -11,7 +11,7 @@ import {
   mockOpenAIOrganization,
 } from "../test-utils/factories";
 
-jest.mock("../../services/axios", () => ({
+jest.mock("./axios", () => ({
   __esModule: true,
   default: {
     get: jest.fn(),

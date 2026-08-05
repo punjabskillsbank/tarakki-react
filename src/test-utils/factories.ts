@@ -190,6 +190,104 @@ export const mappedTechOrganization = {
   addedAt: "",
 };
 
+// ─── Admin Dashboard Page Test Data ────────────────────────────────────────
+
+export const adminOrganizationFactory = (overrides = {}) => {
+  return {
+    id: "1",
+    name: "Acme Corporation",
+    description: "Leading enterprise software solutions provider",
+    owner: {
+      name: "John Smith",
+      email: "john@acme.com",
+      initials: "JS",
+    },
+    address: "123 Business Park",
+    location: {
+      city: "New York",
+      state: "NY",
+      country: "USA",
+      postalCode: "10001",
+    },
+    memberCount: 24,
+    addedAt: "2024-01-01",
+    ...overrides,
+  };
+};
+
+export const adminMemberFactory = (overrides = {}) => {
+  return {
+    id: "member-1",
+    organizationId: "1",
+    name: "Alex Doe",
+    email: "alex@example.com",
+    initials: "AD",
+    role: "Member" as const,
+    status: "Active" as const,
+    joinedAt: "2024-01-02",
+    updatedAt: "2024-01-03",
+    ...overrides,
+  };
+};
+
+export const adminOrganizationsFactory = (overrides = []) => {
+  return [
+    adminOrganizationFactory(),
+    adminOrganizationFactory({
+      id: "2",
+      name: "Tech Innovations Ltd",
+      description: "AI and cloud transformation company",
+      owner: {
+        name: "Sarah Johnson",
+        email: "sarah@techinnovations.io",
+        initials: "SJ",
+      },
+      address: "45 Silicon Avenue",
+      location: {
+        city: "San Francisco",
+        state: "CA",
+        country: "USA",
+        postalCode: "94105",
+      },
+      memberCount: 12,
+      addedAt: "2024-02-01",
+    }),
+    ...overrides,
+  ];
+};
+
+export const adminMembersByOrganizationFactory = (overrides = {}) => {
+  return {
+    "1": [
+      adminMemberFactory(),
+      adminMemberFactory({
+        id: "member-2",
+        name: "Priya Kumar",
+        email: "priya@example.com",
+        initials: "PK",
+        role: "Admin" as const,
+        status: "Inactive" as const,
+        joinedAt: "2024-02-02",
+        updatedAt: "2024-02-03",
+      }),
+    ],
+    "2": [
+      adminMemberFactory({
+        id: "member-3",
+        organizationId: "2",
+        name: "Morgan Lee",
+        email: "morgan@example.com",
+        initials: "ML",
+        role: "Manager" as const,
+        status: "Active" as const,
+        joinedAt: "2024-03-02",
+        updatedAt: "2024-03-03",
+      }),
+    ],
+    ...overrides,
+  };
+};
+
 // ─── Admin Dashboard Layout Test Data ───────────────────────────────────────
 
 export const appShellPropsFactory = (overrides = {}) => {
