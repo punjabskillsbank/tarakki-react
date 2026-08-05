@@ -190,3 +190,28 @@ export const mappedTechOrganization = {
   addedAt: "",
 };
 
+// ─── Admin Dashboard Layout Test Data ───────────────────────────────────────
+
+export const appShellPropsFactory = (overrides = {}) => {
+  return {
+    activeItem: 'dashboard' as const,
+    children: 'Dashboard content',
+    onNavigate: () => undefined,
+    ...overrides,
+  };
+};
+
+export const sidebarPropsFactory = (overrides = {}) => {
+  return {
+    activeItem: 'dashboard' as const,
+    onNavigate: () => undefined,
+    ...overrides,
+  };
+};
+
+export const topbarPropsFactory = (overrides = {}) => {
+  return {
+    ...overrides,
+  };
+};
+

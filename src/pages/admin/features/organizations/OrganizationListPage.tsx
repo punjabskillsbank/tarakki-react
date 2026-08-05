@@ -1,4 +1,4 @@
-import type { Organization } from '../../types/admin';
+import type { Organization } from '../../../../types/admin';
 import { OrganizationDirectory } from './OrganizationDirectory';
 
 interface OrganizationListPageProps {

@@ -1,6 +1,6 @@
 import { Filter, Search } from 'lucide-react';
 import { type ChangeEvent, useMemo, useState } from 'react';
-import type { Member } from '../../types/admin';
+import type { Member } from '../../../../types/admin';
 import { MembersTable } from './MembersTable';
 
 interface MemberDirectoryProps {

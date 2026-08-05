@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import { AdminDashboard } from "../pages/AdminDashboard";
+import { AdminDashboard } from "../pages/admin/AdminDashboard";
 import { OnboardingFlow } from "../pages/onboarding/OnboardingFlow";
 import { OrganizationDecision } from "../pages/organization/organizationDecision/OrganizationDecision";
 import CreateOrganizationForm from "../pages/organization/createOrganisation/CreateOrganizationForm";

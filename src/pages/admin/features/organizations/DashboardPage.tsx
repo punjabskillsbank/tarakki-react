@@ -1,5 +1,5 @@
 import { Building2, Users } from 'lucide-react';
-import type { Member, Organization } from '../../types/admin';
+import type { Member, Organization } from '../../../../types/admin';
 
 interface DashboardPageProps {
   organizations: Organization[];

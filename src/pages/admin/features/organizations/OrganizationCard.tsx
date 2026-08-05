@@ -1,4 +1,4 @@
-import type { Organization } from '../../types/admin';
+import type { Organization } from '../../../../types/admin';
 
 interface OrganizationCardProps {
   organization: Organization;

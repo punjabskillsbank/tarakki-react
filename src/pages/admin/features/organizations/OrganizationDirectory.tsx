@@ -1,6 +1,6 @@
 import { ArrowUpDown, Filter, Search } from 'lucide-react';
 import { type ChangeEvent, useMemo, useState } from 'react';
-import type { Organization } from '../../types/admin';
+import type { Organization } from '../../../../types/admin';
 import { OrganizationCard } from './OrganizationCard';
 
 interface OrganizationDirectoryProps {

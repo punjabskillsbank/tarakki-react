@@ -1,5 +1,5 @@
 import { Eye, Pencil } from 'lucide-react';
-import type { Member } from '../../types/admin';
+import type { Member } from '../../../../types/admin';
 
 interface MembersTableProps {
   members: Member[];

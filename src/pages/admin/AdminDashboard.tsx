@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AppShell } from '../adminDashboard/components/layout/AppShell';
-import type { NavigationItem } from '../adminDashboard/components/layout/Sidebar';
-import { MembersPage } from '../adminDashboard/features/members/MembersPage';
-import { DashboardPage } from '../adminDashboard/features/organizations/DashboardPage';
-import { OrganizationDetailPage } from '../adminDashboard/features/organizations/OrganizationDetailPage';
-import { OrganizationListPage } from '../adminDashboard/features/organizations/OrganizationListPage';
-import { useAdminData } from '../adminDashboard/hooks/useAdminData';
+import { AppShell } from '../../components/AppShell';
+import type { NavigationItem } from '../../components/Sidebar';
+import { MembersPage } from './features/members/MembersPage';
+import { DashboardPage } from './features/organizations/DashboardPage';
+import { OrganizationDetailPage } from './features/organizations/OrganizationDetailPage';
+import { OrganizationListPage } from './features/organizations/OrganizationListPage';
+import { useAdminData } from './hooks/useAdminData';
 
 type OrganizationView = 'list' | 'detail' | 'members';
 

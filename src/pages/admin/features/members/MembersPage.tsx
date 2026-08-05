@@ -1,5 +1,5 @@
 import { ArrowLeft } from 'lucide-react';
-import type { Member, Organization } from '../../types/admin';
+import type { Member, Organization } from '../../../../types/admin';
 import { MemberDirectory } from './MemberDirectory';
 
 interface MembersPageProps {

@@ -1,6 +1,6 @@
-import API from "../../services/axios";
+import API from "./axios";
 import { adminOrganizationService } from "./AdminOrganizationService";
-import commonConfig from "../../config/commonConfig";
+import commonConfig from "../config/commonConfig";
 import {
  mockApiOrganizations,
  mappedAcmeOrganization,
@@ -9,7 +9,7 @@ import {
   mockOrganizationWithoutOwner,
   mockOrganizationWithoutMemberCount,
   mockOpenAIOrganization,
-} from "../../test-utils/factories";
+} from "../test-utils/factories";
 
 jest.mock("../../services/axios", () => ({
   __esModule: true,
@@ -132,10 +132,39 @@ describe("adminOrganizationService", () => {
   });
 
   describe("listMembers", () => {
-    it("should return an empty array when no members exist", async () => {
+    it("should fetch and map organization members", async () => {
+      (API.get as jest.Mock).mockResolvedValue({
+        data: [
+          {
+            orgId: 1,
+            memberId: MOCK_MEMBER_ID,
+            email: "admin@example.com",
+            memberAccountStatus: "ACCEPTED",
+            orgMemberRole: "ORG_ADMIN",
+            createdAt: "2026-08-04T10:00:00",
+            updatedAt: "2026-08-04T11:00:00",
+          },
+        ],
+      });
+
       const result = await adminOrganizationService.listMembers("1");
 
-      expect(result).toEqual([]);
+      expect(API.get).toHaveBeenCalledWith(
+        `${commonConfig.endpoints.organizations}/1/members`
+      );
+      expect(result).toEqual([
+        {
+          id: MOCK_MEMBER_ID,
+          organizationId: "1",
+          name: "admin@example.com",
+          email: "admin@example.com",
+          initials: "AD",
+          role: "Admin",
+          status: "Active",
+          joinedAt: "2026-08-04T10:00:00",
+          updatedAt: "2026-08-04T11:00:00",
+        },
+      ]);
     });
   });
 });

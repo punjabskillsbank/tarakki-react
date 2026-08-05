@@ -1,8 +1,6 @@
-import API from "../../services/axios";
-import type { AdminDataSource, Organization } from "../types/admin";
-import commonConfig from "../../config/commonConfig";
-
-const members: any[] = [];
+import API from "./axios";
+import type { AdminDataSource, Member, Organization } from "../types/admin";
+import commonConfig from "../config/commonConfig";
 
 interface AdminOrganizationResponse {
   orgId: number;
@@ -20,6 +18,16 @@ interface AdminOrganizationResponse {
   orgCountry: string;
   totalMemberCount: number;
   
+}
+
+interface OrgMemberResponse {
+  orgId: number;
+  memberId: string;
+  email: string;
+  memberAccountStatus: "ACCEPTED" | "REJECTED" | "PENDING";
+  orgMemberRole: "ORG_ADMIN" | "ORG_MEMBER";
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 const getInitials = (firstName = "", lastName = "") =>
@@ -52,6 +60,19 @@ const mapOrganization = (
   };
 };
 
+const mapMember = (member: OrgMemberResponse): Member => ({
+  id: member.memberId,
+  organizationId: String(member.orgId),
+  // The organization-members endpoint provides an email but not a profile name.
+  name: member.email,
+  email: member.email,
+  initials: member.email.slice(0, 2).toUpperCase() || "NA",
+  role: member.orgMemberRole === "ORG_ADMIN" ? "Admin" : "Member",
+  status: member.memberAccountStatus === "ACCEPTED" ? "Active" : "Inactive",
+  joinedAt: member.createdAt ?? "",
+  updatedAt: member.updatedAt ?? "",
+});
+
 export const adminOrganizationService: AdminDataSource = {
   async listOrganizations() {
     const response = await API.get<AdminOrganizationResponse[]>(
@@ -71,11 +92,12 @@ export const adminOrganizationService: AdminDataSource = {
     return mapOrganization(response.data);
   },
 
-  // TLDR: Later org-member API will be hooked here
   async listMembers(organizationId) {
-    return members.filter(
-      (member) => member.organizationId === organizationId
+    const response = await API.get<OrgMemberResponse[]>(
+      `${commonConfig.endpoints.organizations}/${organizationId}/members`
     );
+
+    return response.data.map(mapMember);
   },
 };
 

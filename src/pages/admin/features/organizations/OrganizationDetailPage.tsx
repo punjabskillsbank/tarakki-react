@@ -1,5 +1,5 @@
 import { ArrowLeft, Users } from 'lucide-react';
-import type { Organization } from '../../types/admin';
+import type { Organization } from '../../../../types/admin';
 
 interface OrganizationDetailPageProps {
   organization: Organization;
