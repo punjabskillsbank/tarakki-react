@@ -1,10 +1,33 @@
+export const MOCK_PASSWORD = "Password123!";
+export const MOCK_INVALID_PASSWORD = "simplepwd";
+export const MOCK_DIFFERENT_PASSWORD = "Different123!";
+export const MOCK_EMAIL = "john@example.com";
+export const MOCK_EMAIL2 = "johndoe@example.com";
+export const EMAIL_VAL_TEST_ID = "email-val";
+export const PASSWORD_VAL_TEST_ID = "password-val";
+export const STEP1_TEST_ID = "step-1";
+export const STEP2_TEST_ID = "step-2";
+export const STEP3_TEST_ID = "step-3";
+export const MOCK_SHORT_PASSWORD = "short";
+export const PASSWORD_LABEL = "Password";
+export const CONFIRM_PASSWORD_LABEL = "Confirm Password";
+export const MOCK_NETWORK_ERROR = "Network Error";
+export const MOCK_VALIDATION_ERROR = "Invalid format";
+export const PASSWORD_TYPE = "password";
+export const TEXT_TYPE = "text";
+export const MOCK_FIRST_NAME = "John";
+export const MOCK_LAST_NAME = "Doe";
+export const MOCK_ACCOUNT_STATUS = "ACTIVE";
+export const MOCK_ORG_ID = "org-123";
+
 export const memberFactory = (overrides = {}) => {
   return {
-    firstName: "John",
-    lastName: "Doe",
-    email: "john@example.com",
+    firstName: MOCK_FIRST_NAME,
+    lastName: MOCK_LAST_NAME,
+    email: MOCK_EMAIL,
+    passwordHash: MOCK_PASSWORD,
     profilePhotoS3Key: "photo-key",
-    accountStatus: "ACTIVE",
+    accountStatus: MOCK_ACCOUNT_STATUS,
     ...overrides,
   };
 };
@@ -19,6 +42,16 @@ export const boardPayloadFactory = (overrides = {}) => {
   };
 };
 
+export const mockInviteMember = {
+  email: "john@test.com",
+  role: "ORG_MEMBER",
+} as const;
+
+export const mockInvitePayload = {
+  email: "john@test.com",
+  orgMemberRole: "ORG_MEMBER",
+  orgId: MOCK_ORG_ID,
+} as const;
 /*
 export const onboardingDataFactory = (overrides = {}) => {
   return {

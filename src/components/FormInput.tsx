@@ -34,11 +34,13 @@ export function FormInput({
 
   return (
     <div>
-      <label
-        htmlFor={id}
-        className="block text-[14px] font-medium text-gray-900 mb-2">
-        {label}
-      </label>
+      {label && (
+        <label
+          htmlFor={id}
+          className="block text-[14px] font-medium text-gray-900 mb-2">
+          {label}
+        </label>
+      )}
       <input
         id={id}
         maxLength={maxLength}

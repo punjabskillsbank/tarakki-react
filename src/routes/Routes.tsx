@@ -6,6 +6,7 @@ import CreateOrganizationForm from "../pages/organization/createOrganisation/Cre
 import { UserProfile } from "../pages/user/UserProfile";
 import { CreateBoard } from "../pages/board/CreateBoard";
 import config from "../config/indexConfig";
+import { OrgMembers } from "../pages/organization/organizationMembers/OrgMembers";
 
 export const Router = createBrowserRouter([
   {
@@ -31,5 +32,9 @@ export const Router = createBrowserRouter([
   {
     path: config.routes.createBoard,
     Component: CreateBoard,
+  },
+  {
+    path: config.routes.organizationMembers,
+    Component: OrgMembers,
   },
 ]);

@@ -7,10 +7,11 @@ interface Step2Props {
   onNext: () => void;
   onBack: () => void;
   email: string;
+  password: string;
   onErrorBack: (message: string) => void;
 }
 
-export function Step2ProfileInfo({ onNext, onBack, email, onErrorBack }: Step2Props) {
+export function Step2ProfileInfo({ onNext, onBack, email, password, onErrorBack }: Step2Props) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
@@ -32,6 +33,7 @@ export function Step2ProfileInfo({ onNext, onBack, email, onErrorBack }: Step2Pr
           firstName: formattedFirstName,
           lastName: formattedLastName,
           email: email,
+          passwordHash: password,
           profilePhotoS3Key: "",
           accountStatus: "ACTIVE"
         });
