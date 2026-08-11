@@ -38,6 +38,7 @@ export function Sidebar({ activeItem, onNavigate }: SidebarProps) {
 
           return (
             <button
+              aria-current={isActive ? 'page' : undefined}
               className={`flex h-[42px] items-center gap-3 rounded-lg border-0 border-l-[3px] px-3.5 text-left text-sm font-bold text-[#9aa3b2] hover:bg-[#e9f2ff] hover:text-[#0f7bf2] max-[760px]:h-10 max-[760px]:justify-center max-[760px]:px-2.5 max-[760px]:text-[13px] ${
                 isActive ? 'border-l-[#0f7bf2] bg-[#e9f2ff] text-[#0f7bf2]' : 'border-l-transparent bg-transparent'
               }`}

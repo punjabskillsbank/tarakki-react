@@ -14,12 +14,13 @@ describe('MemberDirectory', () => {
     expect(screen.getByText(/priya kumar/i)).toBeInTheDocument();
   });
 
-  it('filters members by the search input', () => {
+  it('filters members by the search input', async () => {
+    const user = userEvent.setup();
     const members = adminMembersByOrganizationFactory()['1'];
 
     render(<MemberDirectory members={members} />);
 
-    userEvent.type(
+    await user.type(
       screen.getByRole('textbox', { name: /search members/i }),
       'priya'
     );

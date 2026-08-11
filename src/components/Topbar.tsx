@@ -10,11 +10,10 @@ export function Topbar() {
 
 {/* For future references and features like help in admin dashboard topbar and light/dark mode */}
       <div className="flex items-center gap-[18px] text-[#9aa3b2] max-[760px]:gap-2">
-      
         <span
           className="grid size-[34px] place-items-center rounded-full bg-[#0f7bf2] text-[13px] font-extrabold text-white"
-          // aria-label="Admin profile"
-          // <button aria-label="Open admin profile menu"></button>
+          aria-label="Admin profile"
+          role="img"
         >
           AD
         </span>

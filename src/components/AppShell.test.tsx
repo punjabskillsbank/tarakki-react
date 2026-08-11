@@ -18,7 +18,7 @@ describe('AppShell', () => {
     expect(screen.getByText('Dashboard content')).toBeInTheDocument();
   });
 
-  it('forwards navigation selection changes to the callback', () => {
+  it('forwards navigation selection changes to the callback', async () => {
     const onNavigate = jest.fn();
     const props = appShellPropsFactory({
       onNavigate,
@@ -27,7 +27,7 @@ describe('AppShell', () => {
 
     render(<AppShell {...props} />);
 
-    userEvent.click(screen.getByRole('button', { name: /organizations/i }));
+    await userEvent.click(screen.getByRole('button', { name: /organizations/i }));
 
     expect(onNavigate).toHaveBeenCalledWith('organizations');
     expect(onNavigate).toHaveBeenCalledTimes(1);
