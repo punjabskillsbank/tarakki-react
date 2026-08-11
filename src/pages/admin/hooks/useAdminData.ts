@@ -8,6 +8,7 @@ interface AdminDataState {
   isLoading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
+  loadMembersForOrganization: (organizationId: string) => Promise<Member[]>;
 }
 
 export function useAdminData(dataSource: AdminDataSource = adminOrganizationService): AdminDataState {
@@ -16,21 +17,34 @@ export function useAdminData(dataSource: AdminDataSource = adminOrganizationServ
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const loadMembersForOrganization = useCallback(
+    async (organizationId: string) => {
+      if (organizationId in membersByOrganization) {
+        return membersByOrganization[organizationId];
+      }
+
+      try {
+        const nextMembers = await dataSource.listMembers(organizationId);
+        setMembersByOrganization((currentMembers) => ({
+          ...currentMembers,
+          [organizationId]: nextMembers,
+        }));
+        return nextMembers;
+      } catch {
+        setError('Unable to load organization members.');
+        return [];
+      }
+    },
+    [dataSource, membersByOrganization]
+  );
+
   const refresh = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
       const nextOrganizations = await dataSource.listOrganizations();
-      const memberEntries = await Promise.all(
-        nextOrganizations.map(async (organization) => [
-          organization.id,
-          await dataSource.listMembers(organization.id)
-        ] as const)
-      );
-
       setOrganizations(nextOrganizations);
-      setMembersByOrganization(Object.fromEntries(memberEntries));
     } catch {
       setError('Unable to load admin data.');
     } finally {
@@ -48,8 +62,9 @@ export function useAdminData(dataSource: AdminDataSource = adminOrganizationServ
       membersByOrganization,
       isLoading,
       error,
-      refresh
+      refresh,
+      loadMembersForOrganization
     }),
-    [organizations, membersByOrganization, isLoading, error, refresh]
+    [organizations, membersByOrganization, isLoading, error, refresh, loadMembersForOrganization]
   );
 }

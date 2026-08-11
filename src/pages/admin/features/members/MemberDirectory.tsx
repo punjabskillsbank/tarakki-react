@@ -35,6 +35,7 @@ export function MemberDirectory({ members }: MemberDirectoryProps) {
             className="min-w-0 flex-1 border-0 bg-transparent text-[#1f2937] outline-none placeholder:text-[#98a1af]"
             value={searchTerm}
             placeholder="Search members..."
+            aria-label="Search members"
             onChange={handleSearchChange}
           />
         </label>
@@ -42,8 +43,8 @@ export function MemberDirectory({ members }: MemberDirectoryProps) {
           className="inline-flex h-9 min-w-[78px] items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[#dfe5ee] bg-white px-3.5 text-sm font-extrabold leading-none text-[#374151] hover:-translate-y-px"
           type="button"
         >
-          <Filter size={17} />
-          <span>Filter</span>
+          {/* <Filter size={17} />
+          <span>Filter</span> */}
         </button>
       </div>
 

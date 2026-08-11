@@ -4,7 +4,7 @@ import { DashboardPage } from './DashboardPage';
 import { adminOrganizationsFactory, adminMembersByOrganizationFactory } from '../../../../test-utils/factories';
 
 describe('DashboardPage', () => {
-  it('renders total organization and member summaries', () => {
+  it('renders total organization and member summaries from the loaded member data', () => {
     const organizations = adminOrganizationsFactory();
     const membersByOrganization = adminMembersByOrganizationFactory();
 
@@ -13,6 +13,6 @@ describe('DashboardPage', () => {
     expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
     expect(screen.getByText(/overview of organization activity/i)).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
-    expect(screen.getByText('36')).toBeInTheDocument();
+    expect(screen.getByText('3')).toBeInTheDocument();
   });
 });

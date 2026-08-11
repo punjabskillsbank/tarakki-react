@@ -6,8 +6,11 @@ interface DashboardPageProps {
   membersByOrganization: Record<string, Member[]>;
 }
 
-export function DashboardPage({ organizations }: DashboardPageProps) {
-  const totalMembers = organizations.reduce((total, organization) => total + organization.memberCount, 0);
+export function DashboardPage({ organizations, membersByOrganization }: DashboardPageProps) {
+  const totalMembers = Object.values(membersByOrganization).reduce(
+    (total, members) => total + members.length,
+    0
+  );
 
   return (
     <section className="grid gap-7">

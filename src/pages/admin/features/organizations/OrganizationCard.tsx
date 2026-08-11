@@ -6,12 +6,21 @@ interface OrganizationCardProps {
 }
 
 export function OrganizationCard({ organization, onOpen }: OrganizationCardProps) {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onOpen(organization.id);
+    }
+  };
+
   return (
-    <article
-      className="relative grid min-h-[136px] gap-6 rounded-lg border border-[#e7ebf2] bg-[#fbfcfe] px-6 py-[22px] hover:border-[#c9dcfb] hover:shadow-[0_10px_22px_rgba(15,23,42,0.06)] max-[760px]:min-h-0 max-[760px]:p-[18px]"
+    <button
+      type="button"
+      className="relative grid min-h-[136px] w-full gap-6 rounded-lg border border-[#e7ebf2] bg-[#fbfcfe] px-6 py-[22px] text-left hover:border-[#c9dcfb] hover:shadow-[0_10px_22px_rgba(15,23,42,0.06)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0f7bf2] focus-visible:ring-offset-2 max-[760px]:min-h-0 max-[760px]:p-[18px]"
+      aria-label={`Open ${organization.name}`}
       onClick={() => onOpen(organization.id)}
+      onKeyDown={handleKeyDown}
     >
-      <button className="absolute inset-0 border-0 opacity-0" type="button" aria-label={`Open ${organization.name}`} />
       <div className="grid grid-cols-[1fr_auto] items-start gap-8 max-[1100px]:grid-cols-2 max-[760px]:grid-cols-1">
         <div className="max-[1100px]:col-span-full max-[760px]:col-auto">
           <h3 className="m-0 text-base font-extrabold leading-tight text-[#263142]">{organization.name}</h3>
@@ -49,6 +58,6 @@ export function OrganizationCard({ organization, onOpen }: OrganizationCardProps
           <p className="mt-1.5 text-[13px] leading-[1.35] text-[#4b5563]">{organization.location.postalCode}</p>
         </div>
       </div>
-    </article>
+    </button>
   );
 }

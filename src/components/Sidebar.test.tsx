@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { Sidebar } from './Sidebar';
 import { sidebarPropsFactory } from '../test-utils/factories';
@@ -9,23 +10,37 @@ describe('Sidebar', () => {
 
     render(<Sidebar {...props} />);
 
-    const dashboardButton = screen.getByRole('button', { name: /dashboard/i });
-    const organizationButton = screen.getByRole('button', { name: /organizations/i });
+    const dashboardButton = screen.getByRole('button', {
+      name: /dashboard/i,
+    });
+    const organizationButton = screen.getByRole('button', {
+      name: /organizations/i,
+    });
 
-    expect(screen.getByRole('complementary', { name: /primary navigation/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('complementary', {
+        name: /primary navigation/i,
+      })
+    ).toBeInTheDocument();
+
     expect(dashboardButton).toBeInTheDocument();
     expect(organizationButton).toBeInTheDocument();
-    expect(dashboardButton).toHaveClass('text-[#0f7bf2]');
-    expect(dashboardButton).toHaveClass('bg-[#e9f2ff]');
+
+    expect(dashboardButton).toHaveAttribute('aria-current', 'page');
   });
 
-  it('invokes the navigation callback with the clicked menu item', () => {
+  it('invokes the navigation callback with the clicked menu item', async () => {
     const onNavigate = jest.fn();
     const props = sidebarPropsFactory({ onNavigate });
+    const user = userEvent.setup();
 
     render(<Sidebar {...props} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /organizations/i }));
+    await user.click(
+      screen.getByRole('button', {
+        name: /organizations/i,
+      })
+    );
 
     expect(onNavigate).toHaveBeenCalledWith('organizations');
     expect(onNavigate).toHaveBeenCalledTimes(1);

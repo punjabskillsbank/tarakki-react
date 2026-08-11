@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { OrganizationListPage } from './OrganizationListPage';
 import { adminOrganizationsFactory } from '../../../../test-utils/factories';
@@ -15,13 +16,14 @@ describe('OrganizationListPage', () => {
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 
-  it('passes the selected organization id through the open handler', () => {
+  it('passes the selected organization id through the open handler', async () => {
+    const user = userEvent.setup();
     const onOpenOrganization = jest.fn();
     const organizations = adminOrganizationsFactory();
 
     render(<OrganizationListPage organizations={organizations} onOpenOrganization={onOpenOrganization} />);
 
-    fireEvent.click(screen.getByLabelText(/open acme corporation/i));
+    await user.click(screen.getByLabelText(/open acme corporation/i));
 
     expect(onOpenOrganization).toHaveBeenCalledWith('1');
   });

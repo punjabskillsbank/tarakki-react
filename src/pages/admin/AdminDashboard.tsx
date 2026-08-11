@@ -10,15 +10,16 @@ import { useAdminData } from './hooks/useAdminData';
 type OrganizationView = 'list' | 'detail' | 'members';
 
 export function AdminDashboard() {
-  const { organizations, membersByOrganization, isLoading, error } = useAdminData();
+  const { organizations, membersByOrganization, isLoading, error, loadMembersForOrganization } = useAdminData();
   const [activeItem, setActiveItem] = useState<NavigationItem>('dashboard');
   const [organizationView, setOrganizationView] = useState<OrganizationView>('list');
-  const [selectedOrganizationId, setSelectedOrganizationId] = useState<string>('acme-corporation');
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState<string>('');
 
   const selectedOrganization = useMemo(
     () =>
-      organizations.find((organization) => organization.id === selectedOrganizationId) ??
-      organizations[0],
+      selectedOrganizationId
+        ? organizations.find((organization) => organization.id === selectedOrganizationId) ?? null
+        : null,
     [organizations, selectedOrganizationId]
   );
 
@@ -37,6 +38,15 @@ export function AdminDashboard() {
     setActiveItem('organizations');
     setSelectedOrganizationId(organizationId);
     setOrganizationView('detail');
+  };
+
+  const handleViewMembers = async () => {
+    if (!selectedOrganization) {
+      return;
+    }
+
+    await loadMembersForOrganization(selectedOrganization.id);
+    setOrganizationView('members');
   };
 
   const renderWorkspace = () => {
@@ -60,6 +70,10 @@ export function AdminDashboard() {
       return <DashboardPage organizations={organizations} membersByOrganization={membersByOrganization} />;
     }
 
+    if (activeItem === 'organizations' && organizationView === 'list') {
+      return <OrganizationListPage organizations={organizations} onOpenOrganization={openOrganization} />;
+    }
+
     if (!selectedOrganization) {
       return (
         <div className="grid min-h-[220px] place-items-center rounded-lg border border-[#e7ebf2] bg-white text-base font-bold text-[#f15d75] shadow-[0_1px_2px_rgba(15,23,42,0.08),0_1px_4px_rgba(15,23,42,0.04)]">
@@ -73,16 +87,26 @@ export function AdminDashboard() {
         <OrganizationDetailPage
           organization={selectedOrganization}
           onBack={() => setOrganizationView('list')}
-          onViewMembers={() => setOrganizationView('members')}
+          onViewMembers={handleViewMembers}
         />
       );
     }
 
     if (organizationView === 'members') {
+      const members = membersByOrganization[selectedOrganization.id] ?? [];
+
+      if (!members.length && selectedOrganization.id in membersByOrganization === false) {
+        return (
+          <div className="grid min-h-[220px] place-items-center rounded-lg border border-[#e7ebf2] bg-white text-base font-bold text-[#6b7280] shadow-[0_1px_2px_rgba(15,23,42,0.08),0_1px_4px_rgba(15,23,42,0.04)]">
+            Loading members...
+          </div>
+        );
+      }
+
       return (
         <MembersPage
           organization={selectedOrganization}
-          members={membersByOrganization[selectedOrganization.id] ?? []}
+          members={members}
           onBack={() => setOrganizationView('detail')}
         />
       );

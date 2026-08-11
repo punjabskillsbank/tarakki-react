@@ -11,42 +11,10 @@ export function Topbar() {
 {/* For future references and features like help in admin dashboard topbar and light/dark mode */}
       <div className="flex items-center gap-[18px] text-[#9aa3b2] max-[760px]:gap-2">
       
-
-        {/* <button
-          className="relative grid size-7 place-items-center rounded-md border-0 bg-transparent p-0 text-inherit hover:bg-[#e9f2ff] hover:text-[#0f7bf2]"
-          type="button"
-          aria-label="Search"
-          title="Search"
-        >
-          <Search size={20} />
-        </button>
-        <button
-          className="relative grid size-7 place-items-center rounded-md border-0 bg-transparent p-0 text-inherit after:absolute after:right-1 after:top-[3px] after:size-[7px] after:rounded-full after:border-2 after:border-white after:bg-[#f15d75] after:content-[''] hover:bg-[#e9f2ff] hover:text-[#0f7bf2]"
-          type="button"
-          aria-label="Notifications"
-          title="Notifications"
-        >
-          <Bell size={20} />
-        </button>
-        <button
-          className="relative grid size-7 place-items-center rounded-md border-0 bg-transparent p-0 text-inherit hover:bg-[#e9f2ff] hover:text-[#0f7bf2]"
-          type="button"
-          aria-label="Help"
-          title="Help"
-        >
-          <CircleHelp size={19} />
-        </button>
-        <button
-          className="relative grid size-7 place-items-center rounded-md border-0 bg-transparent p-0 text-inherit hover:bg-[#e9f2ff] hover:text-[#0f7bf2]"
-          type="button"
-          aria-label="Theme"
-          title="Theme"
-        >
-          <Moon size={19} />
-        </button> */}
         <span
           className="grid size-[34px] place-items-center rounded-full bg-[#0f7bf2] text-[13px] font-extrabold text-white"
-          aria-label="Admin profile"
+          // aria-label="Admin profile"
+          // <button aria-label="Open admin profile menu"></button>
         >
           AD
         </span>

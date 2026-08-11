@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { OrganizationDecision } from "./OrganizationDecision";
 import { MemoryRouter } from "react-router-dom";
 import "@testing-library/jest-dom";
@@ -87,7 +88,8 @@ describe("OrganizationDecision", () => {
     expect(continueButton).toBeDisabled();
   });
 
-  it('enables the continue button when "Join an Organization" is selected', () => {
+  it('enables the continue button when "Join an Organization" is selected', async () => {
+    const user = userEvent.setup();
     render(
       <MemoryRouter>
         <OrganizationDecision />
@@ -95,7 +97,7 @@ describe("OrganizationDecision", () => {
     );
 
     const joinCard = screen.getByText("Join an Organization").closest("button");
-    fireEvent.click(joinCard!);
+    await user.click(joinCard!);
 
     const continueButton = screen
       .getByRole("button", { name: /continue/i })
@@ -103,7 +105,8 @@ describe("OrganizationDecision", () => {
     expect(continueButton).not.toBeDisabled();
   });
 
-  it('enables the continue button when "Create an Organization" is selected', () => {
+  it('enables the continue button when "Create an Organization" is selected', async () => {
+    const user = userEvent.setup();
     render(
       <MemoryRouter>
         <OrganizationDecision />
@@ -113,7 +116,7 @@ describe("OrganizationDecision", () => {
     const createCard = screen
       .getByText("Create an Organization")
       .closest("button");
-    fireEvent.click(createCard!);
+    await user.click(createCard!);
 
     const continueButton = screen
       .getByRole("button", { name: /continue/i })
@@ -121,7 +124,8 @@ describe("OrganizationDecision", () => {
     expect(continueButton).not.toBeDisabled();
   });
 
-  it('navigates to /create-organization when "Create an Organization" is selected and Continue is clicked', () => {
+  it('navigates to /create-organization when "Create an Organization" is selected and Continue is clicked', async () => {
+    const user = userEvent.setup();
     render(
       <MemoryRouter>
         <OrganizationDecision />
@@ -131,15 +135,16 @@ describe("OrganizationDecision", () => {
     const createCard = screen
       .getByText("Create an Organization")
       .closest("button");
-    fireEvent.click(createCard!);
+    await user.click(createCard!);
 
     const continueButton = screen.getByRole("button", { name: /continue/i });
-    fireEvent.click(continueButton);
+    await user.click(continueButton);
     
     expect(mockNavigate).toHaveBeenCalledWith(config.routes.createOrganization);
   });
 
-  it('does not navigate when "Join an Organization" is selected and Continue is clicked', () => {
+  it('does not navigate when "Join an Organization" is selected and Continue is clicked', async () => {
+    const user = userEvent.setup();
     render(
       <MemoryRouter>
         <OrganizationDecision />
@@ -147,10 +152,10 @@ describe("OrganizationDecision", () => {
     );
 
     const joinCard = screen.getByText("Join an Organization").closest("button");
-    fireEvent.click(joinCard!);
+    await user.click(joinCard!);
 
     const continueButton = screen.getByRole("button", { name: /continue/i });
-    fireEvent.click(continueButton);
+    await user.click(continueButton);
 
     expect(mockNavigate).not.toHaveBeenCalled();
   });

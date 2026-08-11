@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import {render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { AppShell } from './AppShell';
 import { appShellPropsFactory } from '../test-utils/factories';
@@ -26,7 +27,7 @@ describe('AppShell', () => {
 
     render(<AppShell {...props} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /organizations/i }));
+    userEvent.click(screen.getByRole('button', { name: /organizations/i }));
 
     expect(onNavigate).toHaveBeenCalledWith('organizations');
     expect(onNavigate).toHaveBeenCalledTimes(1);

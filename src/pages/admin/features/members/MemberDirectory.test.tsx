@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { MemberDirectory } from './MemberDirectory';
 import { adminMembersByOrganizationFactory } from '../../../../test-utils/factories';
@@ -18,7 +19,10 @@ describe('MemberDirectory', () => {
 
     render(<MemberDirectory members={members} />);
 
-    fireEvent.change(screen.getByPlaceholderText(/search members/i), { target: { value: 'priya' } });
+    userEvent.type(
+      screen.getByRole('textbox', { name: /search members/i }),
+      'priya'
+    );
 
     expect(screen.getByText(/priya kumar/i)).toBeInTheDocument();
     expect(screen.queryByText(/alex doe/i)).not.toBeInTheDocument();

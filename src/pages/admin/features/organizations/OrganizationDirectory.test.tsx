@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { OrganizationDirectory } from './OrganizationDirectory';
 import { adminOrganizationsFactory } from '../../../../test-utils/factories';
@@ -13,12 +14,14 @@ describe('OrganizationDirectory', () => {
     expect(screen.getByText(/tech innovations ltd/i)).toBeInTheDocument();
   });
 
-  it('filters organizations by the search term', () => {
+  it('filters organizations by the search term', async () => {
+    const user = userEvent.setup();
     const organizations = adminOrganizationsFactory();
 
     render(<OrganizationDirectory organizations={organizations} onOpenOrganization={jest.fn()} />);
 
-    fireEvent.change(screen.getByPlaceholderText(/search organizations/i), { target: { value: 'tech' } });
+    await user.clear(screen.getByPlaceholderText(/search organizations/i));
+    await user.type(screen.getByPlaceholderText(/search organizations/i), 'tech');
 
     expect(screen.getByText(/tech innovations ltd/i)).toBeInTheDocument();
     expect(screen.queryByText(/acme corporation/i)).not.toBeInTheDocument();

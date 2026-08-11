@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { PrimaryButton } from './PrimaryButton';
 
 describe('PrimaryButton', () => {
@@ -8,11 +9,12 @@ describe('PrimaryButton', () => {
     expect(screen.getByText('Click Me')).toBeInTheDocument();
   });
 
-  it('handles click events', () => {
+  it('handles click events', async () => {
+    const user = userEvent.setup();
     const handleClick = jest.fn();
     render(<PrimaryButton onClick={handleClick}>Submit</PrimaryButton>);
     
-    fireEvent.click(screen.getByText('Submit'));
+    await user.click(screen.getByText('Submit'));
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 

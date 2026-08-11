@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { OrganizationCard } from './OrganizationCard';
 import { adminOrganizationFactory } from '../../../../test-utils/factories';
@@ -15,13 +16,13 @@ describe('OrganizationCard', () => {
     expect(screen.getByText(/john smith/i)).toBeInTheDocument();
   });
 
-  it('invokes the open callback when clicked', () => {
+  it('invokes the open callback when clicked', async () => {
     const onOpen = jest.fn();
     const organization = adminOrganizationFactory();
 
     render(<OrganizationCard organization={organization} onOpen={onOpen} />);
 
-    fireEvent.click(screen.getByLabelText(/open acme corporation/i));
+    await userEvent.click(screen.getByRole('button', { name: /open acme corporation/i }));
 
     expect(onOpen).toHaveBeenCalledWith('1');
   });
