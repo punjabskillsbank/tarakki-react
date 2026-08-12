@@ -9,18 +9,22 @@ interface MemberDirectoryProps {
 
 export function MemberDirectory({ members }: MemberDirectoryProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'name' | 'joinedAt' | 'updatedAt'>('name');
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
 
   const filteredMembers = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
 
-    if (!term) {
-      return members;
-    }
+    const nextMembers = term
+      ? members.filter((member) => [member.name, member.email, member.role, member.status].join(' ').toLowerCase().includes(term))
+      : members;
 
-    return members.filter((member) =>
-      [member.name, member.email, member.role, member.status].join(' ').toLowerCase().includes(term)
-    );
-  }, [members, searchTerm]);
+    const sorted = [...nextMembers];
+
+    if (sortBy === 'name') return sorted.sort((a, b) => a.name.localeCompare(b.name));
+    if (sortBy === 'joinedAt') return sorted.sort((a, b) => (b.joinedAt ?? '').localeCompare(a.joinedAt ?? ''));
+    return sorted.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''));
+  }, [members, searchTerm, sortBy]);
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -39,13 +43,30 @@ export function MemberDirectory({ members }: MemberDirectoryProps) {
             onChange={handleSearchChange}
           />
         </label>
-        <button
-          className="inline-flex h-9 min-w-[78px] items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[#dfe5ee] bg-white px-3.5 text-sm font-extrabold leading-none text-[#374151] hover:-translate-y-px"
-          type="button"
-        >
-          {/* <Filter size={17} />
-          <span>Filter</span> */}
-        </button>
+        <div className="relative">
+          <button
+            className="inline-flex h-9 min-w-[78px] items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[#dfe5ee] bg-white px-3.5 text-sm font-extrabold leading-none text-[#374151] hover:-translate-y-px"
+            type="button"
+            onClick={() => setShowFilterMenu((v) => !v)}
+          >
+            <Filter size={17} />
+            <span>Filter</span>
+          </button>
+
+          {showFilterMenu && (
+            <div className="absolute right-0 z-10 mt-2 w-40 rounded-md border bg-white shadow-lg">
+              <button className="block w-full text-left px-3 py-2 text-sm" type="button" onClick={() => { setSortBy('name'); setShowFilterMenu(false); }}>
+                Name (A-Z)
+              </button>
+              <button className="block w-full text-left px-3 py-2 text-sm" type="button" onClick={() => { setSortBy('joinedAt'); setShowFilterMenu(false); }}>
+                Joined
+              </button>
+              <button className="block w-full text-left px-3 py-2 text-sm" type="button" onClick={() => { setSortBy('updatedAt'); setShowFilterMenu(false); }}>
+                Updated
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <MembersTable members={filteredMembers} />

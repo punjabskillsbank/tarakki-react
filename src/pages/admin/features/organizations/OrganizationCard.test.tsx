@@ -10,10 +10,10 @@ describe('OrganizationCard', () => {
 
     render(<OrganizationCard organization={organization} onOpen={jest.fn()} />);
 
-    expect(screen.getByText(/acme corporation/i)).toBeInTheDocument();
-    expect(screen.getByText(/leading enterprise software solutions provider/i)).toBeInTheDocument();
-    expect(screen.getByText(/24 members/i)).toBeInTheDocument();
-    expect(screen.getByText(/john smith/i)).toBeInTheDocument();
+    expect(screen.getByText(organization.name)).toBeInTheDocument();
+    expect(screen.getByText(organization.description)).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`${organization.memberCount}\\s*members`, 'i'))).toBeInTheDocument();
+    expect(screen.getByText(organization.owner.name)).toBeInTheDocument();
   });
 
   it('invokes the open callback when clicked', async () => {
@@ -22,8 +22,8 @@ describe('OrganizationCard', () => {
 
     render(<OrganizationCard organization={organization} onOpen={onOpen} />);
 
-    await userEvent.click(screen.getByRole('button', { name: /open acme corporation/i }));
+    await userEvent.click(screen.getByRole('button', { name: new RegExp(`open ${organization.name}`, 'i') }));
 
-    expect(onOpen).toHaveBeenCalledWith('1');
+    expect(onOpen).toHaveBeenCalledWith(organization.id);
   });
 });

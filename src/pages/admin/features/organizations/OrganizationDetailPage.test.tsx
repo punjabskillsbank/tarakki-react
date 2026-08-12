@@ -10,9 +10,9 @@ describe('OrganizationDetailPage', () => {
 
     render(<OrganizationDetailPage organization={organization} onBack={jest.fn()} onViewMembers={jest.fn()} />);
 
-    expect(screen.getByText(/acme corporation/i)).toBeInTheDocument();
-    expect(screen.getByText(/leading enterprise software solutions provider/i)).toBeInTheDocument();
-    expect(screen.getByText(/view members/i)).toBeInTheDocument();
+    expect(screen.getByText(organization.name)).toBeInTheDocument();
+    expect(screen.getByText(organization.description)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /view members/i })).toBeInTheDocument();
   });
 
   it('triggers the member navigation callback when the view members button is clicked', async () => {

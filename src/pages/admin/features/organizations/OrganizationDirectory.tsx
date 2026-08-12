@@ -10,7 +10,8 @@ interface OrganizationDirectoryProps {
 
 export function OrganizationDirectory({ organizations, onOpenOrganization }: OrganizationDirectoryProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [isSorted, setIsSorted] = useState(false);
+  const [sortBy, setSortBy] = useState<'name' | 'memberCount' | 'addedAt'>('name');
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
 
   const filteredOrganizations = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -23,10 +24,19 @@ export function OrganizationDirectory({ organizations, onOpenOrganization }: Org
         )
       : organizations;
 
-    return isSorted
-      ? [...nextOrganizations].sort((first, second) => first.name.localeCompare(second.name))
-      : nextOrganizations;
-  }, [isSorted, organizations, searchTerm]);
+    const sorted = [...nextOrganizations];
+
+    if (sortBy === 'name') {
+      return sorted.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    if (sortBy === 'memberCount') {
+      return sorted.sort((a, b) => (b.memberCount ?? 0) - (a.memberCount ?? 0));
+    }
+
+    // addedAt
+    return sorted.sort((a, b) => (b.addedAt ?? '').localeCompare(a.addedAt ?? ''));
+  }, [sortBy, organizations, searchTerm]);
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -44,18 +54,35 @@ export function OrganizationDirectory({ organizations, onOpenOrganization }: Org
             onChange={handleSearchChange}
           />
         </label>
-        <button
-          className="inline-flex h-9 min-w-[78px] items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[#dfe5ee] bg-white px-3.5 text-sm font-extrabold leading-none text-[#374151] hover:-translate-y-px"
-          type="button"
-        >
-          <Filter size={17} />
-          <span>Filter</span>
-        </button>
+        <div className="relative">
+          <button
+            className="inline-flex h-9 min-w-[78px] items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[#dfe5ee] bg-white px-3.5 text-sm font-extrabold leading-none text-[#374151] hover:-translate-y-px"
+            type="button"
+            onClick={() => setShowFilterMenu((v) => !v)}
+          >
+            <Filter size={17} />
+            <span>Filter</span>
+          </button>
+
+          {showFilterMenu && (
+            <div className="absolute right-0 z-10 mt-2 w-40 rounded-md border bg-white shadow-lg">
+              <button className="block w-full text-left px-3 py-2 text-sm" type="button" onClick={() => { setSortBy('name'); setShowFilterMenu(false); }}>
+                Name (A-Z)
+              </button>
+              <button className="block w-full text-left px-3 py-2 text-sm" type="button" onClick={() => { setSortBy('memberCount'); setShowFilterMenu(false); }}>
+                Members
+              </button>
+              <button className="block w-full text-left px-3 py-2 text-sm" type="button" onClick={() => { setSortBy('addedAt'); setShowFilterMenu(false); }}>
+                Date added
+              </button>
+            </div>
+          )}
+        </div>
 
         <button
           className="inline-flex h-9 min-w-[78px] items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[#dfe5ee] bg-white px-3.5 text-sm font-extrabold leading-none text-[#374151] hover:-translate-y-px"
           type="button"
-          onClick={() => setIsSorted((value) => !value)}
+          onClick={() => setSortBy((prev) => (prev === 'name' ? 'memberCount' : 'name'))}
         >
           <ArrowUpDown size={17} />
           <span>Sort</span>

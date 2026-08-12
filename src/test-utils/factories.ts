@@ -166,6 +166,10 @@ export const mockOrganizationWithoutMemberCount = {
   totalMemberCount: undefined,
 };
 
+export const ORGANIZATIONS_PAGE_SUMMARY = "Manage all organizations";
+export const TOTAL_ORGANIZATIONS_LABEL = "Total Organizations";
+export const OPEN_ORGANIZATION_LABEL_PREFIX = "Open ";
+
 export const mockOpenAIOrganization = {
   orgId: 5,
   orgName: "OpenAI",
