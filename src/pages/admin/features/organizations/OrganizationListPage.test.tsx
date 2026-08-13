@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { OrganizationListPage } from './OrganizationListPage';
 import {
+  adminOrganizationFactory,
   adminOrganizationsFactory,
   OPEN_ORGANIZATION_LABEL_PREFIX,
   ORGANIZATIONS_PAGE_SUMMARY,
@@ -24,12 +25,16 @@ describe('OrganizationListPage', () => {
   it('passes the selected organization id through the open handler', async () => {
     const user = userEvent.setup();
     const onOpenOrganization = jest.fn();
-    const organizations = adminOrganizationsFactory();
+    const randomOrganization = adminOrganizationFactory({
+      id: `org-${Math.random().toString(36).slice(2)}`,
+      name: 'Random Org',
+    });
+    const organizations = [randomOrganization, ...adminOrganizationsFactory().slice(1)];
 
     render(<OrganizationListPage organizations={organizations} onOpenOrganization={onOpenOrganization} />);
 
-    await user.click(screen.getByLabelText(`${OPEN_ORGANIZATION_LABEL_PREFIX}${organizations[0].name}`));
+    await user.click(screen.getByLabelText(`${OPEN_ORGANIZATION_LABEL_PREFIX}${randomOrganization.name}`));
 
-    expect(onOpenOrganization).toHaveBeenCalledWith('1');
+    expect(onOpenOrganization).toHaveBeenCalledWith(randomOrganization.id);
   });
 });
