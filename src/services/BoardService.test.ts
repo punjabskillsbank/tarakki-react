@@ -20,7 +20,10 @@ describe('BoardService', () => {
 
       const result = await BoardService.createBoard(boardPayload);
 
-      expect(mockedAPI.post).toHaveBeenCalledWith(config.endpoints.boards, boardPayload);
+      expect(mockedAPI.post).toHaveBeenCalledWith(
+        `${config.baseURLs.boardTaskService}${config.endpoints.boards}`,
+        boardPayload
+      );
       expect(result).toEqual(responseData);
     });
 

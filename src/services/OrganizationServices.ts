@@ -22,7 +22,11 @@ type OrganizationMember = {
 export default class OrganizationService {
   static async createOrganization(data: CreateOrganizationData) {
     try {
-      const response = await API.post(config.endpoints.organizations, data);
+      const baseURL = config.baseURLs.organizationService || "";
+      const response = await API.post(
+        `${baseURL}${config.endpoints.organizations}`,
+        data
+      );
       return response.data;
     } catch (error: unknown) {
       const message = isAxiosError(error)
