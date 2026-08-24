@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { DecisionCard } from './DecisionCard';
 import { Users } from 'lucide-react';
 import '@testing-library/jest-dom';
@@ -28,9 +29,10 @@ describe('DecisionCard', () => {
     expect(screen.getByText('Test Description')).toBeInTheDocument();
   });
 
-  it('calls onClick when clicked', () => {
+  it('calls onClick when clicked', async () => {
+    const user = userEvent.setup();
     render(<DecisionCard {...mockProps} />);
-    fireEvent.click(screen.getByRole('button'));
+    await user.click(screen.getByRole('button'));
     expect(mockProps.onClick).toHaveBeenCalledTimes(1);
   });
 

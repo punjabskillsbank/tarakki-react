@@ -16,9 +16,11 @@ const commonConfig = {
     boards: "/boards",
     members: "/members",
     organizations: "/organizations",
+    all_organizations: "/admin/organizations/",
     organizationMember: (orgId: string | number) =>
       `/organizations/${orgId}/members`,
   },
 };
 
 export default commonConfig;
+

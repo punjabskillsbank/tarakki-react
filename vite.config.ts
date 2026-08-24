@@ -1,9 +1,6 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -32,6 +29,7 @@ export default defineConfig(({ mode }) => {
     define: defineVars,
     server: {
       proxy: {
+       
         "/api/members": {
           target: "http://localhost:8080",
           changeOrigin: true,
@@ -40,6 +38,10 @@ export default defineConfig(({ mode }) => {
           target: "http://localhost:8082",
           changeOrigin: true,
         },
+         "/api/admin": {
+      target: "http://localhost:8082",
+      changeOrigin: true,
+    },
         "/api/boards": {
           target: "http://localhost:8081",
           changeOrigin: true,
