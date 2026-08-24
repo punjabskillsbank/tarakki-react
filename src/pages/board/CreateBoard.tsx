@@ -50,7 +50,7 @@ if (!orgId) {
   return;
 }
 
-      await BoardService.createBoard({
+      const createdBoard = await BoardService.createBoard({
   orgId: Number(orgId),
   boardName,
   boardDesc: boardDescription,
@@ -58,7 +58,7 @@ if (!orgId) {
 });
 
       toast.success('Board created successfully!');
-      navigate("/task-board");
+      navigate(`/task-board/${createdBoard.boardId}`);
 
       // Clear form on success
       setBoardName('');

@@ -8,7 +8,9 @@ export interface CreateBoardPayload {
   createdBy: string;
 }
 
-export type CreateBoardResponse = CreateBoardPayload;
+export interface CreateBoardResponse extends CreateBoardPayload {
+  boardId: number;
+}
 
 export default class BoardService {
   static async createBoard(payload: CreateBoardPayload): Promise<CreateBoardResponse> {

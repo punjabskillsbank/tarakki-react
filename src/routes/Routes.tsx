@@ -29,6 +29,10 @@ export const Router = createBrowserRouter([
     Component: CreateBoard,
   },
   {
+    path: config.routes.taskBoardRoot,
+    Component: TaskBoardPage,
+  },
+  {
     path: config.routes.taskBoard,
     Component: TaskBoardPage,
   },

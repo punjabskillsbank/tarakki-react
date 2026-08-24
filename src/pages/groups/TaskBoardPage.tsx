@@ -11,8 +11,12 @@ import { SectionColumn } from "./taskBoard/SectionColumn";
 import { TaskDetailsModal } from "./taskBoard/TaskDetailsModal";
 import type { Member, Priority, Section, Task } from "./taskBoard/types";
 import { getInitials, uid } from "./taskBoard/utils";
+import GroupService from "../../services/GroupService";
+import toast from "react-hot-toast";
+import { useParams } from "react-router-dom";
 
 export default function TaskBoardPage() {
+  const { boardId } = useParams();
   const [sections, setSections] = useState<Section[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
@@ -41,20 +45,40 @@ export default function TaskBoardPage() {
       (!priorityFilter || task.priority === priorityFilter),
   );
 
-  const addSection = () => {
+  const addSection = async () => {
+    const memberId = localStorage.getItem("memberId");
+    const parsedBoardId = Number(boardId);
     if (!newSectionName.trim()) return;
-    setSections((current) => [
-      ...current,
-      {
-        id: uid(),
-        name: newSectionName.trim().toUpperCase(),
-        color: SECTION_COLORS[current.length % SECTION_COLORS.length],
-        collapsed: false,
-        position: current.length,
-      },
-    ]);
-    setNewSectionName("");
-    setAddingSection(false);
+    if (!Number.isInteger(parsedBoardId) || !memberId) {
+      toast.error("Board or member information is missing.");
+      return;
+    }
+
+    const currentPosition = sections.length;
+    try {
+      const createdGroup = await GroupService.createGroup(parsedBoardId, {
+        boardId: parsedBoardId,
+        groupName: newSectionName.trim(),
+        position: currentPosition,
+        createdBy: memberId,
+      });
+
+      setSections((current) => [
+        ...current,
+        {
+          id: String(createdGroup.groupId),
+          name: createdGroup.groupName.toUpperCase(),
+          color: SECTION_COLORS[current.length % SECTION_COLORS.length],
+          collapsed: false,
+          position: createdGroup.position,
+        },
+      ]);
+      setNewSectionName("");
+      setAddingSection(false);
+    } catch (error) {
+      console.error("Failed to create group:", error);
+      toast.error("Group couldn't be created. Please try again.");
+    }
   };
   const addTask = (task: Omit<Task, "id" | "ticketNum">) => {
     const next = ticketCounter + 1;
