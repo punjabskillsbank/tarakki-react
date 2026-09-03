@@ -21,7 +21,7 @@ describe("MemberServices", () => {
       const result = await MemberServices.createMember(memberData);
 
       expect(mockedAPI.post).toHaveBeenCalledWith(
-        config.endpoints.members,
+        `${config.baseURLs.memberService}${config.endpoints.members}`,
         memberData
       );
       expect(result).toEqual(responseData);
@@ -57,7 +57,10 @@ describe("MemberServices", () => {
         data: memberData,
       });
       const result = await MemberServices.getMemberById(memberId);
-      expect(mockedAPI.get).toHaveBeenCalledWith(`/members/${memberId}`);
+      expect(mockedAPI.get).toHaveBeenCalledWith(
+        `${config.baseURLs.memberService}${config.endpoints.members}/${memberId}`,
+        { headers: { "Cache-Control": "no-cache" } }
+      );
       expect(result).toEqual(memberData);
     });
 
@@ -91,7 +94,10 @@ describe("MemberServices", () => {
         data: memberData,
       });
       const result = await MemberServices.getMemberByEmail(email);
-      expect(mockedAPI.get).toHaveBeenCalledWith(`/members/email/${email}`);
+      expect(mockedAPI.get).toHaveBeenCalledWith(
+        `${config.baseURLs.memberService}${config.endpoints.members}/email/${email}`,
+        { headers: { "Cache-Control": "no-cache" } }
+      );
       expect(result).toEqual(memberData);
     });
 

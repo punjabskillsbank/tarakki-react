@@ -1,4 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
+import { AdminDashboard } from "../pages/admin/AdminDashboard";
 import { OnboardingFlow } from "../pages/onboarding/OnboardingFlow";
 import { OrganizationDecision } from "../pages/organization/organizationDecision/OrganizationDecision";
 import CreateOrganizationForm from "../pages/organization/createOrganisation/CreateOrganizationForm";
@@ -6,6 +7,7 @@ import { UserProfile } from "../pages/user/UserProfile";
 import { CreateBoard } from "../pages/board/CreateBoard";
 import TaskBoardPage from "../pages/groups/TaskBoardPage";
 import config from "../config/indexConfig";
+import { OrgMembers } from "../pages/organization/organizationMembers/OrgMembers";
 
 export const Router = createBrowserRouter([
   {
@@ -15,6 +17,10 @@ export const Router = createBrowserRouter([
   {
     path: config.routes.organizationDecision,
     Component: OrganizationDecision,
+  },
+  {
+    path: "/admin-dashboard",
+    Component: AdminDashboard,
   },
   {
     path: config.routes.createOrganization,
@@ -35,5 +41,9 @@ export const Router = createBrowserRouter([
   {
     path: config.routes.taskBoard,
     Component: TaskBoardPage,
+  },
+  {
+    path: config.routes.organizationMembers,
+    Component: OrgMembers,
   },
 ]);

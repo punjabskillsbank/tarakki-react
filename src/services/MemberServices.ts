@@ -12,7 +12,11 @@ export default class MemberServices {
     accountStatus: string;
   }) {
     try {
-      const response = await API.post(config.endpoints.members, memberData);
+      const baseURL = config.baseURLs.memberService || "";
+      const response = await API.post(
+        `${baseURL}${config.endpoints.members}`,
+        memberData
+      );
       return response.data;
     } catch (error: any) {
       console.log(
@@ -30,7 +34,11 @@ export default class MemberServices {
   }
   static async getMemberById(memberId: string) {
     try {
-      const response = await API.get(`/members/${memberId}`);
+      const baseURL = config.baseURLs.memberService || "";
+      const response = await API.get(
+        `${baseURL}${config.endpoints.members}/${memberId}`,
+        { headers: { "Cache-Control": "no-cache" } }
+      );
       return response.data;
     } catch (error: any) {
       console.log(
@@ -48,7 +56,11 @@ export default class MemberServices {
   }
   static async getMemberByEmail(email: string) {
     try {
-      const response = await API.get(`/members/email/${email}`);
+      const baseURL = config.baseURLs.memberService || "";
+      const response = await API.get(
+        `${baseURL}${config.endpoints.members}/email/${email}`,
+        { headers: { "Cache-Control": "no-cache" } }
+      );
       return response.data;
     } catch (error: unknown) {
       const axiosError = isAxiosError(error) ? error : undefined;

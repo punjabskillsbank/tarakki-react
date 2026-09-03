@@ -13,10 +13,20 @@ type CreateOrganizationData = {
   orgCountry: string;
 };
 
+type OrganizationMember = {
+  orgId: string;
+  email: string;
+  orgMemberRole: "ORG_ADMIN" | "ORG_MEMBER" | "";
+};
+
 export default class OrganizationService {
   static async createOrganization(data: CreateOrganizationData) {
     try {
-      const response = await API.post(config.endpoints.organizations, data);
+      const baseURL = config.baseURLs.organizationService || "";
+      const response = await API.post(
+        `${baseURL}${config.endpoints.organizations}`,
+        data
+      );
       return response.data;
     } catch (error: unknown) {
       const message = isAxiosError(error)
@@ -26,6 +36,24 @@ export default class OrganizationService {
         : "Failed to create organization";
       throw new Error(
         typeof message === "string" ? message : "Failed to create organization"
+      );
+    }
+  }
+  static async inviteMember(orgId: string, data: OrganizationMember) {
+    try {
+      const response = await API.post(
+        config.endpoints.organizationMember(orgId),
+        data
+      );
+      return response.data;
+    } catch (error: unknown) {
+      const message = isAxiosError(error)
+        ? error.response?.data?.message ||
+          error.response?.data ||
+          "Failed to invite members"
+        : "Failed to invite members";
+      throw new Error(
+        typeof message === "string" ? message : "Failed to invite members"
       );
     }
   }

@@ -2,6 +2,7 @@ export const MOCK_PASSWORD = "Password123!";
 export const MOCK_INVALID_PASSWORD = "simplepwd";
 export const MOCK_DIFFERENT_PASSWORD = "Different123!";
 export const MOCK_EMAIL = "john@example.com";
+export const MOCK_EMAIL2 = "johndoe@example.com";
 export const EMAIL_VAL_TEST_ID = "email-val";
 export const PASSWORD_VAL_TEST_ID = "password-val";
 export const STEP1_TEST_ID = "step-1";
@@ -17,6 +18,7 @@ export const TEXT_TYPE = "text";
 export const MOCK_FIRST_NAME = "John";
 export const MOCK_LAST_NAME = "Doe";
 export const MOCK_ACCOUNT_STATUS = "ACTIVE";
+export const MOCK_ORG_ID = "org-123";
 
 export const memberFactory = (overrides = {}) => {
   return {
@@ -40,6 +42,16 @@ export const boardPayloadFactory = (overrides = {}) => {
   };
 };
 
+export const mockInviteMember = {
+  email: "john@test.com",
+  role: "ORG_MEMBER",
+} as const;
+
+export const mockInvitePayload = {
+  email: "john@test.com",
+  orgMemberRole: "ORG_MEMBER",
+  orgId: MOCK_ORG_ID,
+} as const;
 /*
 export const onboardingDataFactory = (overrides = {}) => {
   return {
@@ -88,3 +100,253 @@ export const mockOrgValidationError = {
     },
   },
 };
+
+
+// ─── Admin Organization ───────────────────────────────────────────────────────
+
+export const mockApiOrganizations = [
+  {
+    orgId: 1,
+    orgName: "Acme Corporation",
+    orgDesc: "Leading enterprise software solutions provider",
+    owner: {
+      firstName: "John",
+      lastName: "Smith",
+      email: "john@acme.com",
+    },
+    orgAddress: "123 Business Park",
+    orgCity: "New York",
+    orgState: "NY",
+    orgPostalCode: "10001",
+    orgCountry: "USA",
+    totalMemberCount: 24,
+  },
+  {
+    orgId: 2,
+    orgName: "Tech Innovations Ltd",
+    orgDesc: "AI and cloud transformation company",
+    owner: {
+      firstName: "Sarah",
+      lastName: "Johnson",
+      email: "sarah@techinnovations.io",
+    },
+    orgAddress: "45 Silicon Avenue",
+    orgCity: "San Francisco",
+    orgState: "CA",
+    orgPostalCode: "94105",
+    orgCountry: "USA",
+    totalMemberCount: 12,
+  },
+];
+
+
+export const mockOrganizationWithoutOwner = {
+  orgId: 3,
+  orgName: "Test Org",
+  orgDesc: "Testing",
+  owner: null,
+  orgAddress: "Test Address",
+  orgCity: "Test City",
+  orgState: "Punjab",
+  orgPostalCode: "140001",
+  orgCountry: "India",
+  totalMemberCount: 5,
+};
+
+export const mockOrganizationWithoutMemberCount = {
+  orgId: 4,
+  orgName: "Demo Org",
+  orgDesc: "Demo",
+  owner: null,
+  orgAddress: "Demo Address",
+  orgCity: "Demo City",
+  orgState: "Punjab",
+  orgPostalCode: "140001",
+  orgCountry: "India",
+  totalMemberCount: undefined,
+};
+
+export const ORGANIZATIONS_PAGE_SUMMARY = "Manage all organizations";
+export const TOTAL_ORGANIZATIONS_LABEL = "Total Organizations";
+export const OPEN_ORGANIZATION_LABEL_PREFIX = "Open ";
+
+export const mockOpenAIOrganization = {
+  orgId: 5,
+  orgName: "OpenAI",
+  orgDesc: "AI Research",
+  owner: {
+    firstName: "Sam",
+    lastName: "Altman",
+    email: "sam@openai.com",
+  },
+  orgAddress: "Address",
+  orgCity: "San Francisco",
+  orgState: "CA",
+  orgPostalCode: "94107",
+  orgCountry: "USA",
+  totalMemberCount: 10,
+};
+
+export const mappedAcmeOrganization = {
+  id: "1",
+  name: "Acme Corporation",
+  description: "Leading enterprise software solutions provider",
+  owner: {
+    name: "John Smith",
+    email: "john@acme.com",
+    initials: "JS",
+  },
+  address: "123 Business Park",
+  location: {
+    city: "New York",
+    state: "NY",
+    country: "USA",
+    postalCode: "10001",
+  },
+  memberCount: 24,
+  addedAt: "",
+};
+
+export const mappedTechOrganization = {
+  id: "2",
+  name: "Tech Innovations Ltd",
+  description: "AI and cloud transformation company",
+  owner: {
+    name: "Sarah Johnson",
+    email: "sarah@techinnovations.io",
+    initials: "SJ",
+  },
+  address: "45 Silicon Avenue",
+  location: {
+    city: "San Francisco",
+    state: "CA",
+    country: "USA",
+    postalCode: "94105",
+  },
+  memberCount: 12,
+  addedAt: "",
+};
+
+// ─── Admin Dashboard Page Test Data ────────────────────────────────────────
+
+export const adminOrganizationFactory = (overrides = {}) => {
+  return {
+    id: "1",
+    name: "Acme Corporation",
+    description: "Leading enterprise software solutions provider",
+    owner: {
+      name: "John Smith",
+      email: "john@acme.com",
+      initials: "JS",
+    },
+    address: "123 Business Park",
+    location: {
+      city: "New York",
+      state: "NY",
+      country: "USA",
+      postalCode: "10001",
+    },
+    memberCount: 24,
+    addedAt: "2024-01-01",
+    ...overrides,
+  };
+};
+
+export const adminMemberFactory = (overrides = {}) => {
+  return {
+    id: "member-1",
+    organizationId: "1",
+    name: "Alex Doe",
+    email: "alex@example.com",
+    initials: "AD",
+    role: "Member" as const,
+    status: "Active" as const,
+    joinedAt: "2024-01-02",
+    updatedAt: "2024-01-03",
+    ...overrides,
+  };
+};
+
+export const adminOrganizationsFactory = (overrides = []) => {
+  return [
+    adminOrganizationFactory(),
+    adminOrganizationFactory({
+      id: "2",
+      name: "Tech Innovations Ltd",
+      description: "AI and cloud transformation company",
+      owner: {
+        name: "Sarah Johnson",
+        email: "sarah@techinnovations.io",
+        initials: "SJ",
+      },
+      address: "45 Silicon Avenue",
+      location: {
+        city: "San Francisco",
+        state: "CA",
+        country: "USA",
+        postalCode: "94105",
+      },
+      memberCount: 12,
+      addedAt: "2024-02-01",
+    }),
+    ...overrides,
+  ];
+};
+
+export const adminMembersByOrganizationFactory = (overrides = {}) => {
+  return {
+    "1": [
+      adminMemberFactory(),
+      adminMemberFactory({
+        id: "member-2",
+        name: "Priya Kumar",
+        email: "priya@example.com",
+        initials: "PK",
+        role: "Admin" as const,
+        status: "Inactive" as const,
+        joinedAt: "2024-02-02",
+        updatedAt: "2024-02-03",
+      }),
+    ],
+    "2": [
+      adminMemberFactory({
+        id: "member-3",
+        organizationId: "2",
+        name: "Morgan Lee",
+        email: "morgan@example.com",
+        initials: "ML",
+        role: "Manager" as const,
+        status: "Active" as const,
+        joinedAt: "2024-03-02",
+        updatedAt: "2024-03-03",
+      }),
+    ],
+    ...overrides,
+  };
+};
+
+// ─── Admin Dashboard Layout Test Data ───────────────────────────────────────
+
+export const appShellPropsFactory = (overrides = {}) => {
+  return {
+    activeItem: 'dashboard' as const,
+    children: 'Dashboard content',
+    onNavigate: () => undefined,
+    ...overrides,
+  };
+};
+
+export const sidebarPropsFactory = (overrides = {}) => {
+  return {
+    activeItem: 'dashboard' as const,
+    onNavigate: () => undefined,
+    ...overrides,
+  };
+};
+
+export const topbarPropsFactory = (overrides = {}) => {
+  return {
+    ...overrides,
+  };
+};
+
