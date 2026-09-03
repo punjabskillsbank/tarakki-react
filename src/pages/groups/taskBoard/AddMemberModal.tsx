@@ -1,19 +1,22 @@
 import { X } from "lucide-react";
-import { useState } from "react";
-import { PrimaryButton } from "../../../components/PrimaryButton";
+import type { Member } from "./types";
 
 export function AddMemberModal({
   onClose,
   onAdd,
+  availableMembers,
 }: {
   onClose: () => void;
-  onAdd: (name: string) => void;
+  onAdd: (member: Member) => Promise<void>;
+  availableMembers: Member[];
 }) {
-  const [name, setName] = useState("");
-  const add = () => {
-    if (!name.trim()) return;
-    onAdd(name.trim());
-    onClose();
+  const add = async (member: Member) => {
+    try {
+      await onAdd(member);
+      onClose();
+    } catch {
+      // The page displays the server error and keeps the member picker open.
+    }
   };
   return (
     <div
@@ -33,16 +36,25 @@ export function AddMemberModal({
           </button>
         </div>
         <p className="mb-3 text-[12px] text-[#9CA3AF]">
-          Enter the member's name to add them to Punjab Skills Bank.
+          Select an organization member to add to this board.
         </p>
-        <input
-          autoFocus
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          onKeyDown={(event) => event.key === "Enter" && add()}
-          placeholder="Full name..."
-          className="mb-4 w-full rounded-lg border border-[#E6E9EF] bg-[#F6F7FB] px-3 py-2.5 text-[13px] text-[#1F2937] outline-none transition-colors placeholder:text-[#C4C4C4] focus:border-[#0073EA]"
-        />
+        <div className="mb-4 max-h-52 space-y-1 overflow-y-auto">
+          {availableMembers.length > 0 ? (
+            availableMembers.map((member) => (
+              <button
+                key={member.id}
+                onClick={() => add(member)}
+                className="w-full rounded-lg px-3 py-2 text-left text-[13px] text-[#1F2937] hover:bg-[#F6F7FB]"
+              >
+                {member.name}
+              </button>
+            ))
+          ) : (
+            <p className="py-3 text-center text-[12px] text-[#9CA3AF]">
+              No organization members are available.
+            </p>
+          )}
+        </div>
         <div className="flex justify-end gap-2">
           <button
             onClick={onClose}
@@ -50,13 +62,6 @@ export function AddMemberModal({
           >
             Cancel
           </button>
-          <PrimaryButton
-            onClick={add}
-            disabled={!name.trim()}
-            className="h-auto px-4 py-1.5 text-[12px]"
-          >
-            Add Member
-          </PrimaryButton>
         </div>
       </div>
     </div>

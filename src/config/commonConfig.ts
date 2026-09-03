@@ -16,6 +16,7 @@ const commonConfig = {
   },
   endpoints: {
     boards: "/boards",
+    boardMembers: "/board-members",
     members: "/members",
     organizations: "/organizations",
     all_organizations: "/admin/organizations/",

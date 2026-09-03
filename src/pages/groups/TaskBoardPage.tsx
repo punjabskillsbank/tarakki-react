@@ -1,5 +1,5 @@
 import { LayoutGrid, Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PageBackground } from "../../components/PageBackground";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { AddMemberModal } from "./taskBoard/AddMemberModal";
@@ -12,6 +12,12 @@ import { TaskDetailsModal } from "./taskBoard/TaskDetailsModal";
 import type { Member, Priority, Section, Task } from "./taskBoard/types";
 import { getInitials, uid } from "./taskBoard/utils";
 import GroupService from "../../services/GroupService";
+import TaskService, { type BoardTaskResponse } from "../../services/TaskService";
+import BoardService from "../../services/BoardService";
+import BoardMemberService from "../../services/BoardMemberService";
+import OrganizationService, {
+  type OrganizationMemberResponse,
+} from "../../services/OrganizationServices";
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 
@@ -20,6 +26,7 @@ export default function TaskBoardPage() {
   const [sections, setSections] = useState<Section[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
+  const [organizationMembers, setOrganizationMembers] = useState<Member[]>([]);
   const [search, setSearch] = useState("");
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null);
   const [priorityFilter, setPriorityFilter] = useState<Priority | null>(null);
@@ -34,6 +41,41 @@ export default function TaskBoardPage() {
   const [addingSection, setAddingSection] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
   const [ticketCounter, setTicketCounter] = useState(0);
+
+  useEffect(() => {
+    const parsedBoardId = Number(boardId);
+    if (!Number.isInteger(parsedBoardId)) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadTasks = async () => {
+      try {
+        const [loadedTasks, board] = await Promise.all([
+          TaskService.getTasks(parsedBoardId),
+          BoardService.getBoard(parsedBoardId),
+        ]);
+        const loadedMembers = await OrganizationService.getOrganizationMembers(
+          board.orgId,
+        );
+        if (cancelled) return;
+
+        setTasks(loadedTasks.map(toBoardTask));
+        setTicketCounter(loadedTasks.length);
+        setOrganizationMembers(loadedMembers.map(toBoardMember));
+      } catch (error) {
+        if (cancelled) return;
+        console.error("Failed to load tasks:", error);
+        toast.error("Tasks couldn't be loaded. Please try again.");
+      }
+    };
+
+    void loadTasks();
+    return () => {
+      cancelled = true;
+    };
+  }, [boardId]);
 
   const sortedSections = [...sections].sort(
     (first, second) => first.position - second.position,
@@ -77,7 +119,11 @@ export default function TaskBoardPage() {
       setAddingSection(false);
     } catch (error) {
       console.error("Failed to create group:", error);
-      toast.error("Group couldn't be created. Please try again.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Group couldn't be created. Please try again.",
+      );
     }
   };
   const addTask = (task: Omit<Task, "id" | "ticketNum">) => {
@@ -88,16 +134,28 @@ export default function TaskBoardPage() {
       { ...task, id: uid(), ticketNum: `T-${next}` },
     ]);
   };
-  const addMember = (name: string) =>
-    setMembers((current) => [
-      ...current,
-      {
-        id: uid(),
-        name,
-        initials: getInitials(name),
-        color: MEMBER_COLORS[current.length % MEMBER_COLORS.length],
-      },
-    ]);
+  const addMember = async (member: Member) => {
+    const parsedBoardId = Number(boardId);
+    if (!Number.isInteger(parsedBoardId)) {
+      toast.error("Board information is missing.");
+      return;
+    }
+
+    try {
+      await BoardMemberService.addMember(parsedBoardId, member.id);
+      setMembers((current) => [
+        ...current,
+        {
+          ...member,
+          color: MEMBER_COLORS[current.length % MEMBER_COLORS.length],
+        },
+      ]);
+    } catch (error) {
+      console.error("Failed to add board member:", error);
+      toast.error("Member couldn't be added to this board. Please try again.");
+      throw error;
+    }
+  };
   const updateTask = (updated: Task) => {
     setTasks((current) =>
       current.map((task) => (task.id === updated.id ? updated : task)),
@@ -230,10 +288,40 @@ export default function TaskBoardPage() {
         <AddMemberModal
           onClose={() => setShowAddMember(false)}
           onAdd={addMember}
+          availableMembers={organizationMembers.filter(
+            (candidate) =>
+              !members.some((member) => member.id === candidate.id),
+          )}
         />
       )}
     </div>
   );
+}
+
+function toBoardTask(task: BoardTaskResponse): Task {
+  return {
+    id: String(task.taskId),
+    ticketNum: `T-${task.taskId}`,
+    title: task.title,
+    description: "",
+    assignee: null,
+    dueDate: null,
+    priority: "none",
+    status: "open",
+    labels: [],
+    comments: 0,
+    attachments: 0,
+    sectionId: String(task.groupId),
+  };
+}
+
+function toBoardMember(member: OrganizationMemberResponse): Member {
+  return {
+    id: member.memberId,
+    name: member.email,
+    initials: getInitials(member.email),
+    color: MEMBER_COLORS[0],
+  };
 }
 
 function EmptyBoard({ onCreate }: { onCreate: () => void }) {

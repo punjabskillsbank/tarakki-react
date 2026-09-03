@@ -1,4 +1,4 @@
-export const uid = () => Math.random().toString(36).slice(2, 10);
+export const uid = () => crypto.randomUUID();
 
 export function getInitials(name: string) {
   const words = name.trim().split(/\s+/);

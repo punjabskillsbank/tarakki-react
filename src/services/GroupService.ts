@@ -1,5 +1,6 @@
-import API from './axios';
-import config from '../config/indexConfig';
+import { isAxiosError } from "axios";
+import API from "./axios";
+import config from "../config/indexConfig";
 
 export interface CreateGroupPayload {
   boardId: number;
@@ -19,10 +20,22 @@ export default class GroupService {
     boardId: number,
     payload: CreateGroupPayload,
   ): Promise<CreateGroupResponse> {
-    const response = await API.post<CreateGroupResponse>(
-      `${config.endpoints.boards}/${boardId}/groups`,
-      payload,
-    );
-    return response.data;
+    try {
+      const response = await API.post<CreateGroupResponse>(
+        `${config.endpoints.boards}/${boardId}/groups`,
+        payload,
+      );
+      return response.data;
+    } catch (error: unknown) {
+      const message = isAxiosError(error)
+        ? error.response?.data?.message ||
+          error.response?.data ||
+          "Failed to create group"
+        : "Failed to create group";
+      throw new Error(
+        typeof message === "string" ? message : "Failed to create group",
+        { cause: error },
+      );
+    }
   }
 }
