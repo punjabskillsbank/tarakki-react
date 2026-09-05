@@ -21,8 +21,9 @@ export default class GroupService {
     payload: CreateGroupPayload,
   ): Promise<CreateGroupResponse> {
     try {
+      const baseURL = config.baseURLs.boardTaskService || "";
       const response = await API.post<CreateGroupResponse>(
-        `${config.endpoints.boards}/${boardId}/groups`,
+        `${baseURL}${config.endpoints.boards}/${boardId}/groups`,
         payload,
       );
       return response.data;
@@ -32,10 +33,11 @@ export default class GroupService {
           error.response?.data ||
           "Failed to create group"
         : "Failed to create group";
-      throw new Error(
-        typeof message === "string" ? message : "Failed to create group",
-        { cause: error },
-      );
+      const finalMessage =
+        typeof message === "string" ? message : "Failed to create group";
+      const wrappedError = new Error(finalMessage);
+      (wrappedError as Error & { cause?: unknown }).cause = error;
+      throw wrappedError;
     }
   }
 }
