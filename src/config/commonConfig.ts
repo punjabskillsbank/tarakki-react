@@ -7,6 +7,8 @@ const commonConfig = {
     organizationDecision: "/organization-decision",
     createOrganization: "/create-organization",
     createBoard: "/create-board/:orgId",
+    taskBoardRoot: "/task-board",
+    taskBoard: "/task-board/:boardId",
     createBoardWithOrgId: (orgId: string | number) => `/create-board/${orgId}`,
     organizationMembers: "/organization-members/:orgId",
     organizationMembersWithOrgId: (orgId: string | number) =>
@@ -14,6 +16,7 @@ const commonConfig = {
   },
   endpoints: {
     boards: "/boards",
+    boardMembers: "/board-members",
     members: "/members",
     organizations: "/organizations",
     all_organizations: "/admin/organizations/",

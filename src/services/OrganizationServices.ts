@@ -19,6 +19,11 @@ type OrganizationMember = {
   orgMemberRole: "ORG_ADMIN" | "ORG_MEMBER" | "";
 };
 
+export type OrganizationMemberResponse = {
+  memberId: string;
+  email: string;
+};
+
 export default class OrganizationService {
   static async createOrganization(data: CreateOrganizationData) {
     try {
@@ -54,6 +59,29 @@ export default class OrganizationService {
         : "Failed to invite members";
       throw new Error(
         typeof message === "string" ? message : "Failed to invite members"
+      );
+    }
+  }
+
+  static async getOrganizationMembers(
+    orgId: number,
+  ): Promise<OrganizationMemberResponse[]> {
+    try {
+      const baseURL = config.baseURLs.organizationService || "";
+      const response = await API.get<OrganizationMemberResponse[]>(
+        `${baseURL}${config.endpoints.organizationMember(orgId)}`,
+      );
+      return response.data;
+    } catch (error: unknown) {
+      const message = isAxiosError(error)
+        ? error.response?.data?.message ||
+          error.response?.data ||
+          "Failed to fetch organization members"
+        : "Failed to fetch organization members";
+      throw new Error(
+        typeof message === "string"
+          ? message
+          : "Failed to fetch organization members",
       );
     }
   }
