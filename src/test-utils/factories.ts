@@ -327,6 +327,35 @@ export const adminMembersByOrganizationFactory = (overrides = {}) => {
 
 // ─── Admin Dashboard Layout Test Data ───────────────────────────────────────
 
+// ─── Auth ─────────────────────────────────────────────────────────────────
+
+export const MOCK_TOKEN = "mock.jwt.token";
+
+export const loginCredentialsFactory = (overrides = {}) => {
+  return {
+    email: MOCK_EMAIL,
+    password: MOCK_PASSWORD,
+    ...overrides,
+  };
+};
+
+export const loginResponseFactory = (overrides = {}) => {
+  return {
+    token: MOCK_TOKEN,
+    tokenType: "Bearer",
+    expiresIn: 3600,
+    member: {
+      memberId: MOCK_MEMBER_ID,
+      firstName: MOCK_FIRST_NAME,
+      lastName: MOCK_LAST_NAME,
+      email: MOCK_EMAIL,
+      profilePhotoS3Key: "",
+      accountStatus: MOCK_ACCOUNT_STATUS,
+    },
+    ...overrides,
+  };
+};
+
 export const appShellPropsFactory = (overrides = {}) => {
   return {
     activeItem: 'dashboard' as const,
