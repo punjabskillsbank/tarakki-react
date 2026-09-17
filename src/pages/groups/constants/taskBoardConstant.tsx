@@ -7,7 +7,7 @@ import {
   Zap,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import type { Label, Priority, TaskStatus } from "./types";
+import type { Label, Priority, TaskStatus } from "../types/taskBoardtypes";
 
 export const LABELS: Label[] = [
   { id: "l1", name: "Frontend", color: "#0073EA" },

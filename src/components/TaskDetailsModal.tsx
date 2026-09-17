@@ -1,8 +1,8 @@
 import { MessageSquare, User, X } from "lucide-react";
 import { useState } from "react";
 import { Avatar } from "./Avatar";
-import { LABELS, PRIORITY_CFG, STATUS_CFG } from "./constants";
-import type { Member, Priority, Section, Task, TaskStatus } from "./types";
+import { LABELS, PRIORITY_CFG, STATUS_CFG } from "../pages/groups/constants/taskBoardConstant";
+import type { Member, Priority, Section, Task, TaskStatus } from "../pages/groups/types/taskBoardtypes";
 
 type Props = {
   task: Task;
@@ -64,7 +64,7 @@ export function TaskDetailsModal({
           </div>
           <button
             onClick={onClose}
-            className="mt-0.5 flex-shrink-0 rounded-lg p-1.5 text-[#9CA3AF] transition-colors hover:bg-[#F6F7FB] hover:text-[#1F2937]"
+            className="mt-0.5 shrink-0 rounded-lg p-1.5 text-[#9CA3AF] transition-colors hover:bg-[#F6F7FB] hover:text-[#1F2937]"
           >
             <X size={16} />
           </button>
@@ -129,7 +129,7 @@ export function TaskDetailsModal({
               </div>
             </div>
           </div>
-          <aside className="w-48 flex-shrink-0 space-y-5 overflow-y-auto rounded-br-xl border-l border-[#E6E9EF] bg-[#FAFBFC] px-4 py-4">
+          <aside className="w-48 shrink-0 space-y-5 overflow-y-auto rounded-br-xl border-l border-[#E6E9EF] bg-[#FAFBFC] px-4 py-4">
             <div>
               <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-[#C4C4C4]">
                 Status

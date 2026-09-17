@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { TaskCard } from "./TaskCard";
-import type { Section, Task } from "./types";
+import type { Section, Task } from "../pages/groups/types/taskBoardtypes";
 
 type Props = {
   section: Section;

@@ -1,4 +1,4 @@
-import type { Member } from "./types";
+import type { Member } from "../pages/groups/types/taskBoardtypes";
 
 export function Avatar({
   member,
@@ -10,7 +10,7 @@ export function Avatar({
   return (
     <div
       title={member.name}
-      className="flex flex-shrink-0 select-none items-center justify-center rounded-full text-white font-semibold ring-[1.5px] ring-white"
+      className="flex shrink-0 select-none items-center justify-center rounded-full text-white font-semibold ring-[1.5px] ring-white"
       style={{
         width: size,
         height: size,

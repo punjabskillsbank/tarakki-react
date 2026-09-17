@@ -1,8 +1,8 @@
 import { GripVertical } from "lucide-react";
-import { PRIORITY_CFG } from "./constants";
+import { PRIORITY_CFG } from "../pages/groups/constants/taskBoardConstant";
 import { Avatar } from "./Avatar";
-import type { Task } from "./types";
-import { formatDate } from "./utils";
+import type { Task } from "../pages/groups/types/taskBoardtypes";
+import { formatDate } from "../pages/groups/utils/taskBoardUtils";
 
 type Props = {
   task: Task;

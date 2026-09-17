@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import { useState } from "react";
-import { PrimaryButton } from "../../../components/PrimaryButton";
-import type { Member, Priority, Section, Task } from "./types";
+import { PrimaryButton } from "./PrimaryButton";
+import type { Member, Priority, Section, Task } from "../pages/groups/types/taskBoardtypes";
 
 type Props = {
   initialSectionId: string | null;
