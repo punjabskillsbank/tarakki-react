@@ -5,7 +5,7 @@ import { OrganizationDecision } from "../pages/organization/organizationDecision
 import CreateOrganizationForm from "../pages/organization/createOrganisation/CreateOrganizationForm";
 import { UserProfile } from "../pages/user/UserProfile";
 import { CreateBoard } from "../pages/board/CreateBoard";
-import TaskBoardPage from "../pages/groups/TaskBoardPage";
+import TaskBoard from "../pages/taskBoard/TaskBoard";
 import config from "../config/indexConfig";
 import { OrgMembers } from "../pages/organization/organizationMembers/OrgMembers";
 
@@ -36,11 +36,11 @@ export const Router = createBrowserRouter([
   },
   {
     path: config.routes.taskBoardRoot,
-    Component: TaskBoardPage,
+    Component: TaskBoard,
   },
   {
     path: config.routes.taskBoard,
-    Component: TaskBoardPage,
+    Component: TaskBoard,
   },
   {
     path: config.routes.organizationMembers,

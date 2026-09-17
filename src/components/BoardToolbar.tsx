@@ -1,7 +1,7 @@
 import { Filter, Plus, Search, SlidersHorizontal, X } from "lucide-react";
 import { Avatar } from "./Avatar";
-import { PRIORITY_CFG } from "../pages/groups/constants/taskBoardConstant";
-import type { Member, Priority } from "../pages/groups/types/taskBoardtypes";
+import { PRIORITY_CFG } from "../constants/taskBoardConstant";
+import type { Member, Priority } from "../types/taskBoardtypes";
 
 type Props = {
   members: Member[];

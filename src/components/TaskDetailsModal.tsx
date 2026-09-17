@@ -1,8 +1,8 @@
 import { MessageSquare, User, X } from "lucide-react";
 import { useState } from "react";
 import { Avatar } from "./Avatar";
-import { LABELS, PRIORITY_CFG, STATUS_CFG } from "../pages/groups/constants/taskBoardConstant";
-import type { Member, Priority, Section, Task, TaskStatus } from "../pages/groups/types/taskBoardtypes";
+import { LABELS, PRIORITY_CFG, STATUS_CFG } from "../constants/taskBoardConstant";
+import type { Member, Priority, Section, Task, TaskStatus } from "../types/taskBoardtypes";
 
 type Props = {
   task: Task;

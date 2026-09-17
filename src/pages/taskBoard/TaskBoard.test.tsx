@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import toast from "react-hot-toast";
-import TaskBoardPage from "./TaskBoardPage";
+import TaskBoard from "./TaskBoard";
 import BoardMemberService from "../../services/BoardMemberService";
 import BoardService from "../../services/BoardService";
 import GroupService from "../../services/GroupService";
@@ -50,7 +50,7 @@ const configureLoadedBoard = () => {
   ]);
 };
 
-describe("TaskBoardPage", () => {
+describe("TaskBoard", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(console, "error").mockImplementation(() => undefined);
@@ -64,7 +64,7 @@ describe("TaskBoardPage", () => {
   });
 
   it("loads board data and shows the empty-board state", async () => {
-    render(<TaskBoardPage />);
+    render(<TaskBoard />);
 
     expect(
       await screen.findByText("This board has no groups yet"),
@@ -82,7 +82,7 @@ describe("TaskBoardPage", () => {
     const response = groupResponseFactory();
     mockedGroupService.createGroup.mockResolvedValue(response);
 
-    render(<TaskBoardPage />);
+    render(<TaskBoard />);
 
     await user.click(
       await screen.findByRole("button", { name: "Create first group" }),
@@ -103,7 +103,7 @@ describe("TaskBoardPage", () => {
     const user = userEvent.setup();
     mockedBoardMemberService.addMember.mockResolvedValue();
 
-    render(<TaskBoardPage />);
+    render(<TaskBoard />);
 
     await user.click(
       await screen.findByRole("button", { name: "Add Member" }),
@@ -125,7 +125,7 @@ describe("TaskBoardPage", () => {
       new Error(MOCK_NETWORK_ERROR),
     );
 
-    render(<TaskBoardPage />);
+    render(<TaskBoard />);
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(

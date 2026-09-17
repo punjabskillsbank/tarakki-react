@@ -5,12 +5,12 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { AddMemberModal } from "../../components/AddMemberModal";
 import { BoardHeader } from "../../components/BoardHeader";
 import { BoardToolbar } from "../../components/BoardToolbar";
-import { MEMBER_COLORS, SECTION_COLORS } from "./constants/taskBoardConstant";
+import { MEMBER_COLORS, SECTION_COLORS } from "../../constants/taskBoardConstant";
 import { QuickAddModal } from "../../components/QuickAddModal";
 import { SectionColumn } from "../../components/SectionColumn";
 import { TaskDetailsModal } from "../../components/TaskDetailsModal";
-import type { Member, Priority, Section, Task } from "./types/taskBoardtypes";
-import { getInitials, uid } from "./utils/taskBoardUtils";
+import type { Member, Priority, Section, Task } from "../../types/taskBoardtypes";
+import { getInitials, uid } from "../../utils/taskBoardUtils";
 import GroupService from "../../services/GroupService";
 import TaskService, { type BoardTaskResponse } from "../../services/TaskService";
 import BoardService from "../../services/BoardService";
@@ -21,7 +21,7 @@ import OrganizationService, {
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 
-export default function TaskBoardPage() {
+export default function TaskBoard() {
   const { boardId } = useParams();
   const [sections, setSections] = useState<Section[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);

@@ -1,6 +1,6 @@
 import { Bell, ChevronRight, UserPlus } from "lucide-react";
 import { Avatar } from "./Avatar";
-import type { Member } from "../pages/groups/types/taskBoardtypes";
+import type { Member } from "../types/taskBoardtypes";
 
 export function BoardHeader({
   members,

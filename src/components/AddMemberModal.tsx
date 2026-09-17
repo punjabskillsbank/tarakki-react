@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import type { Member } from "../pages/groups/types/taskBoardtypes";
+import type { Member } from "../types/taskBoardtypes";
 
 export function AddMemberModal({
   onClose,

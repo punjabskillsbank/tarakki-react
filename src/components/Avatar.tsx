@@ -1,4 +1,4 @@
-import type { Member } from "../pages/groups/types/taskBoardtypes";
+import type { Member } from "../types/taskBoardtypes";
 
 export function Avatar({
   member,

@@ -1,7 +1,15 @@
 import { isAxiosError } from "axios";
-import GroupService, { CreateGroupPayload } from "./GroupService";
+import GroupService from "./GroupService";
+import type { CreateGroupPayload } from "./GroupService";
 import API from "./axios";
 import config from "../config/indexConfig";
+import {
+  FAILED_TO_CREATE_GROUP,
+  groupPayloadFactory,
+  groupResponseFactory,
+  MOCK_BOARD_ID,
+  MOCK_GROUP_ERROR,
+} from "../test-utils/factories";
 
 jest.mock("./axios");
 jest.mock("axios", () => ({
@@ -22,21 +30,11 @@ describe("GroupService", () => {
   });
 
   describe("createGroup", () => {
-    const boardId = 42;
-    const groupPayload: CreateGroupPayload = {
-      boardId,
-      groupName: "Sprint Backlog",
-      position: 1,
-      createdBy: "user-1",
-    };
+    const boardId = MOCK_BOARD_ID;
+    const groupPayload: CreateGroupPayload = groupPayloadFactory();
 
     it("successfully creates a group", async () => {
-      const responseData = {
-        ...groupPayload,
-        groupId: 7,
-        createdAt: "2026-09-05T00:00:00Z",
-        updatedAt: "2026-09-05T00:00:00Z",
-      };
+      const responseData = groupResponseFactory();
 
       mockedAPI.post.mockResolvedValueOnce({ data: responseData });
 
@@ -50,16 +48,15 @@ describe("GroupService", () => {
     });
 
     it("throws an error with message from response on failure", async () => {
-      const errorMessage = "Group name already exists";
       mockedIsAxiosError.mockReturnValueOnce(true);
       mockedAPI.post.mockRejectedValueOnce({
         response: {
-          data: { message: errorMessage },
+          data: { message: MOCK_GROUP_ERROR },
         },
       });
 
       await expect(GroupService.createGroup(boardId, groupPayload)).rejects.toThrow(
-        errorMessage,
+        MOCK_GROUP_ERROR,
       );
     });
 
@@ -72,7 +69,7 @@ describe("GroupService", () => {
       });
 
       await expect(GroupService.createGroup(boardId, groupPayload)).rejects.toThrow(
-        "Failed to create group",
+        FAILED_TO_CREATE_GROUP,
       );
     });
   });

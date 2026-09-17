@@ -52,6 +52,8 @@ export const boardPayloadFactory = (overrides = {}) => {
 export const MOCK_BOARD_ID = 42;
 export const MOCK_BOARD_ERROR = "Board name already exists";
 export const FAILED_TO_CREATE_BOARD = "Failed to create board";
+export const MOCK_GROUP_ERROR = "Group name already exists";
+export const FAILED_TO_CREATE_GROUP = "Failed to create group";
 
 export const boardResponseFactory = (overrides = {}) => ({
   ...boardPayloadFactory(),
