@@ -12,6 +12,12 @@ export const MOCK_SHORT_PASSWORD = "short";
 export const PASSWORD_LABEL = "Password";
 export const CONFIRM_PASSWORD_LABEL = "Confirm Password";
 export const MOCK_NETWORK_ERROR = "Network Error";
+export const MOCK_ORGANIZATION_ERROR = "Organization already exists";
+export const MOCK_INVITATION_ERROR = "Member already invited";
+export const FAILED_TO_CREATE_ORGANIZATION = "Failed to create organization";
+export const FAILED_TO_INVITE_MEMBERS = "Failed to invite members";
+export const FAILED_TO_FETCH_ORGANIZATION_MEMBERS =
+  "Failed to fetch organization members";
 export const MOCK_VALIDATION_ERROR = "Invalid format";
 export const PASSWORD_TYPE = "password";
 export const TEXT_TYPE = "text";
@@ -19,6 +25,7 @@ export const MOCK_FIRST_NAME = "John";
 export const MOCK_LAST_NAME = "Doe";
 export const MOCK_ACCOUNT_STATUS = "ACTIVE";
 export const MOCK_ORG_ID = "org-123";
+export const MOCK_ORGANIZATION_ID = 123;
 
 export const memberFactory = (overrides = {}) => {
   return {
@@ -41,6 +48,54 @@ export const boardPayloadFactory = (overrides = {}) => {
     ...overrides,
   };
 };
+
+export const MOCK_BOARD_ID = 42;
+export const MOCK_BOARD_ERROR = "Board name already exists";
+export const FAILED_TO_CREATE_BOARD = "Failed to create board";
+export const MOCK_GROUP_ERROR = "Group name already exists";
+export const FAILED_TO_CREATE_GROUP = "Failed to create group";
+
+export const boardResponseFactory = (overrides = {}) => ({
+  ...boardPayloadFactory(),
+  boardId: MOCK_BOARD_ID,
+  ...overrides,
+});
+
+export const boardMemberPayloadFactory = (overrides = {}) => ({
+  boardId: MOCK_BOARD_ID,
+  memberId: MOCK_MEMBER_ID,
+  ...overrides,
+});
+
+export const groupPayloadFactory = (overrides = {}) => ({
+  boardId: MOCK_BOARD_ID,
+  groupName: "Sprint Backlog",
+  position: 0,
+  createdBy: MOCK_MEMBER_ID,
+  ...overrides,
+});
+
+export const groupResponseFactory = (overrides = {}) => ({
+  ...groupPayloadFactory(),
+  groupId: 3,
+  createdAt: "2026-09-05T00:00:00Z",
+  updatedAt: "2026-09-05T00:00:00Z",
+  ...overrides,
+});
+
+export const MOCK_TASK_ID = 7;
+
+export const taskResponseFactory = (overrides = {}) => ({
+  taskId: MOCK_TASK_ID,
+  boardId: MOCK_BOARD_ID,
+  groupId: 3,
+  title: "Write tests",
+  position: 1,
+  createdBy: MOCK_MEMBER_ID,
+  createdAt: "2026-09-05T00:00:00Z",
+  updatedAt: "2026-09-05T00:00:00Z",
+  ...overrides,
+});
 
 export const mockInviteMember = {
   email: "john@test.com",
@@ -89,6 +144,45 @@ export const mockOrgSuccessResponse = {
   orgId: "org-abc-123",
   orgName: mockOrgFormData.orgName,
 };
+
+export const organizationMemberResponseFactory = (overrides = {}) => ({
+  memberId: MOCK_MEMBER_ID,
+  email: MOCK_EMAIL,
+  ...overrides,
+});
+
+export const boardMemberFactory = (overrides = {}) => ({
+  id: MOCK_MEMBER_ID,
+  name: MOCK_EMAIL,
+  initials: "JO",
+  color: "#0073EA",
+  ...overrides,
+});
+
+export const taskBoardSectionFactory = (overrides = {}) => ({
+  id: "3",
+  name: "SPRINT BACKLOG",
+  color: "#0073EA",
+  collapsed: false,
+  position: 0,
+  ...overrides,
+});
+
+export const taskBoardTaskFactory = (overrides = {}) => ({
+  id: String(MOCK_TASK_ID),
+  ticketNum: `T-${MOCK_TASK_ID}`,
+  title: "Write tests",
+  description: "Task description",
+  assignee: null,
+  dueDate: null,
+  priority: "medium" as const,
+  status: "open" as const,
+  labels: [],
+  comments: 0,
+  attachments: 0,
+  sectionId: "3",
+  ...overrides,
+});
 
 export const mockOrgValidationError = {
   status: 400,

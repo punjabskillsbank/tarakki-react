@@ -1,22 +1,30 @@
-import OrganizationService from "./OrganizationServices";
-import API from "./axios";
 import { isAxiosError } from "axios";
+import API from "./axios";
+import OrganizationService from "./OrganizationServices";
+import config from "../config/indexConfig";
 import {
+  FAILED_TO_CREATE_ORGANIZATION,
+  FAILED_TO_FETCH_ORGANIZATION_MEMBERS,
+  FAILED_TO_INVITE_MEMBERS,
+  MOCK_INVITATION_ERROR,
+  MOCK_NETWORK_ERROR,
+  MOCK_ORGANIZATION_ERROR,
   MOCK_ORG_ID,
+  MOCK_ORGANIZATION_ID,
   mockInvitePayload,
   mockOrgPayload,
   mockOrgSuccessResponse,
+  organizationMemberResponseFactory,
 } from "../test-utils/factories";
-import config from "../config/indexConfig";
 
 jest.mock("./axios");
 jest.mock("axios", () => ({
   __esModule: true,
   default: {
-    create: jest.fn(() => ({ post: jest.fn() })),
+    create: jest.fn(() => ({ post: jest.fn(), get: jest.fn() })),
   },
   isAxiosError: jest.fn(),
-  create: jest.fn(() => ({ post: jest.fn() })),
+  create: jest.fn(() => ({ post: jest.fn(), get: jest.fn() })),
 }));
 
 const mockedAPI = API as jest.Mocked<typeof API>;
@@ -30,113 +38,117 @@ describe("OrganizationService", () => {
   });
 
   describe("createOrganization", () => {
-    it("successfully creates an organization", async () => {
+    it("creates an organization", async () => {
       mockedAPI.post.mockResolvedValueOnce({ data: mockOrgSuccessResponse });
 
-      const result = await OrganizationService.createOrganization(
-        mockOrgPayload
-      );
+      await expect(
+        OrganizationService.createOrganization(mockOrgPayload),
+      ).resolves.toEqual(mockOrgSuccessResponse);
 
       expect(mockedAPI.post).toHaveBeenCalledWith(
         `${config.baseURLs.organizationService}${config.endpoints.organizations}`,
-        mockOrgPayload
+        mockOrgPayload,
       );
-      expect(result).toEqual(mockOrgSuccessResponse);
     });
 
-    it("throws an error with message from axios response on failure", async () => {
-      const errorMessage = "Organization already exists";
+    it("uses the API error message when creation fails", async () => {
       mockedIsAxiosError.mockReturnValueOnce(true);
       mockedAPI.post.mockRejectedValueOnce({
-        response: {
-          data: { message: errorMessage },
-        },
+        response: { data: { message: MOCK_ORGANIZATION_ERROR } },
       });
 
       await expect(
-        OrganizationService.createOrganization(mockOrgPayload)
-      ).rejects.toThrow(errorMessage);
+        OrganizationService.createOrganization(mockOrgPayload),
+      ).rejects.toThrow(MOCK_ORGANIZATION_ERROR);
     });
 
-    it("throws a default error message when axios response has no message", async () => {
+    it("uses the default error message when creation fails without one", async () => {
       mockedIsAxiosError.mockReturnValueOnce(true);
-      mockedAPI.post.mockRejectedValueOnce({
-        response: {
-          data: null,
-        },
-      });
+      mockedAPI.post.mockRejectedValueOnce({ response: { data: null } });
 
       await expect(
-        OrganizationService.createOrganization(mockOrgPayload)
-      ).rejects.toThrow("Failed to create organization");
+        OrganizationService.createOrganization(mockOrgPayload),
+      ).rejects.toThrow(FAILED_TO_CREATE_ORGANIZATION);
     });
 
-    it("throws a default error message for non-axios errors", async () => {
+    it("uses the default error message for non-Axios failures", async () => {
       mockedIsAxiosError.mockReturnValueOnce(false);
-      mockedAPI.post.mockRejectedValueOnce(new Error("Network Error"));
+      mockedAPI.post.mockRejectedValueOnce(new Error(MOCK_NETWORK_ERROR));
 
       await expect(
-        OrganizationService.createOrganization(mockOrgPayload)
-      ).rejects.toThrow("Failed to create organization");
+        OrganizationService.createOrganization(mockOrgPayload),
+      ).rejects.toThrow(FAILED_TO_CREATE_ORGANIZATION);
     });
   });
 
   describe("inviteMember", () => {
-    it("successfully invites a member", async () => {
-      mockedAPI.post.mockResolvedValueOnce({ data: { success: true } });
+    it("invites an organization member", async () => {
+      const response = organizationMemberResponseFactory();
+      mockedAPI.post.mockResolvedValueOnce({ data: response });
 
-      const result = await OrganizationService.inviteMember(
-        MOCK_ORG_ID,
-        mockInvitePayload
-      );
+      await expect(
+        OrganizationService.inviteMember(MOCK_ORG_ID, mockInvitePayload),
+      ).resolves.toEqual(response);
 
       expect(mockedAPI.post).toHaveBeenCalledWith(
         config.endpoints.organizationMember(MOCK_ORG_ID),
-        mockInvitePayload
+        mockInvitePayload,
       );
-
-      expect(result).toEqual({ success: true });
     });
 
-    it("throws an error with message from axios response on failure", async () => {
-      const errorMessage = "Member already invited";
-
+    it("uses the API error message when inviting a member fails", async () => {
       mockedIsAxiosError.mockReturnValueOnce(true);
       mockedAPI.post.mockRejectedValueOnce({
-        response: {
-          data: {
-            message: errorMessage,
-          },
-        },
+        response: { data: { message: MOCK_INVITATION_ERROR } },
       });
 
       await expect(
-        OrganizationService.inviteMember(MOCK_ORG_ID, mockInvitePayload)
-      ).rejects.toThrow(errorMessage);
+        OrganizationService.inviteMember(MOCK_ORG_ID, mockInvitePayload),
+      ).rejects.toThrow(MOCK_INVITATION_ERROR);
     });
 
-    it("throws a default error message when axios response has no message", async () => {
+    it("uses the default error message when invitation fails without one", async () => {
       mockedIsAxiosError.mockReturnValueOnce(true);
+      mockedAPI.post.mockRejectedValueOnce({ response: { data: null } });
 
-      mockedAPI.post.mockRejectedValueOnce({
-        response: {
-          data: null,
-        },
+      await expect(
+        OrganizationService.inviteMember(MOCK_ORG_ID, mockInvitePayload),
+      ).rejects.toThrow(FAILED_TO_INVITE_MEMBERS);
+    });
+  });
+
+  describe("getOrganizationMembers", () => {
+    it("fetches organization members", async () => {
+      const members = [organizationMemberResponseFactory()];
+      mockedAPI.get.mockResolvedValueOnce({ data: members });
+
+      await expect(
+        OrganizationService.getOrganizationMembers(MOCK_ORGANIZATION_ID),
+      ).resolves.toEqual(members);
+
+      expect(mockedAPI.get).toHaveBeenCalledWith(
+        `${config.baseURLs.organizationService}${config.endpoints.organizationMember(MOCK_ORGANIZATION_ID)}`,
+      );
+    });
+
+    it("uses the API error message when member loading fails", async () => {
+      mockedIsAxiosError.mockReturnValueOnce(true);
+      mockedAPI.get.mockRejectedValueOnce({
+        response: { data: { message: MOCK_INVITATION_ERROR } },
       });
 
       await expect(
-        OrganizationService.inviteMember(MOCK_ORG_ID, mockInvitePayload)
-      ).rejects.toThrow("Failed to invite members");
+        OrganizationService.getOrganizationMembers(MOCK_ORGANIZATION_ID),
+      ).rejects.toThrow(MOCK_INVITATION_ERROR);
     });
 
-    it("throws a default error message for non-axios errors", async () => {
-      mockedIsAxiosError.mockReturnValueOnce(false);
-
-      mockedAPI.post.mockRejectedValueOnce(new Error("Network Error"));
+    it("uses the default error message when member loading fails without one", async () => {
+      mockedIsAxiosError.mockReturnValueOnce(true);
+      mockedAPI.get.mockRejectedValueOnce({ response: { data: null } });
 
       await expect(
-        OrganizationService.inviteMember(MOCK_ORG_ID, mockInvitePayload)
-      ).rejects.toThrow("Failed to invite members");
+        OrganizationService.getOrganizationMembers(MOCK_ORGANIZATION_ID),
+      ).rejects.toThrow(FAILED_TO_FETCH_ORGANIZATION_MEMBERS);
     });
   });
 });

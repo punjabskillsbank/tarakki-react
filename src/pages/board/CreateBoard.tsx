@@ -8,9 +8,10 @@ import { FormInput } from '../../components/FormInput';
 import { FormTextarea } from '../../components/FormTextarea';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import toast from 'react-hot-toast';
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export function CreateBoard() {
+  const navigate = useNavigate();
   const [boardName, setBoardName] = useState('');
   const [boardDescription, setBoardDescription] = useState('');
   const [errors, setErrors] = useState<{ name?: string; description?: string }>({});
@@ -49,7 +50,7 @@ if (!orgId) {
   return;
 }
 
-     await BoardService.createBoard({
+      const createdBoard = await BoardService.createBoard({
   orgId: Number(orgId),
   boardName,
   boardDesc: boardDescription,
@@ -57,6 +58,7 @@ if (!orgId) {
 });
 
       toast.success('Board created successfully!');
+      navigate(`/task-board/${createdBoard.boardId}`);
 
       // Clear form on success
       setBoardName('');

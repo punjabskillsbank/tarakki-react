@@ -1,47 +1,76 @@
-import BoardService from './BoardService';
-import API from './axios';
-import { boardPayloadFactory } from '../test-utils/factories';
-import config from '../config/indexConfig';
+import BoardService from "./BoardService";
+import API from "./axios";
+import config from "../config/indexConfig";
+import {
+  boardPayloadFactory,
+  boardResponseFactory,
+  FAILED_TO_CREATE_BOARD,
+  MOCK_BOARD_ERROR,
+  MOCK_BOARD_ID,
+  MOCK_NETWORK_ERROR,
+} from "../test-utils/factories";
 
-jest.mock('./axios');
+jest.mock("./axios");
+
 const mockedAPI = API as jest.Mocked<typeof API>;
 
-describe('BoardService', () => {
+describe("BoardService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('createBoard', () => {
-    const boardPayload = boardPayloadFactory();
+  describe("createBoard", () => {
+    it("creates a board", async () => {
+      const payload = boardPayloadFactory();
+      const response = boardResponseFactory();
+      mockedAPI.post.mockResolvedValueOnce({ data: response });
 
-    it('successfully creates a board', async () => {
-      const responseData = { id: 1, ...boardPayload };
-      mockedAPI.post.mockResolvedValueOnce({ data: responseData });
-
-      const result = await BoardService.createBoard(boardPayload);
+      await expect(BoardService.createBoard(payload)).resolves.toEqual(response);
 
       expect(mockedAPI.post).toHaveBeenCalledWith(
         `${config.baseURLs.boardTaskService}${config.endpoints.boards}`,
-        boardPayload
+        payload,
       );
-      expect(result).toEqual(responseData);
     });
 
-    it('throws an error with message from response on failure', async () => {
-      const errorMessage = 'Board name already exists';
+    it("uses the API error message when creation fails", async () => {
       mockedAPI.post.mockRejectedValueOnce({
-        response: {
-          data: { message: errorMessage },
-        },
+        response: { data: { message: MOCK_BOARD_ERROR } },
       });
 
-      await expect(BoardService.createBoard(boardPayload)).rejects.toThrow(errorMessage);
+      await expect(
+        BoardService.createBoard(boardPayloadFactory()),
+      ).rejects.toThrow(MOCK_BOARD_ERROR);
     });
 
-    it('throws a default error message on failure if no message in response', async () => {
-      mockedAPI.post.mockRejectedValueOnce(new Error('Network Error'));
+    it("uses the default error message when creation fails without one", async () => {
+      mockedAPI.post.mockRejectedValueOnce(new Error(MOCK_NETWORK_ERROR));
 
-      await expect(BoardService.createBoard(boardPayload)).rejects.toThrow('Failed to create board');
+      await expect(
+        BoardService.createBoard(boardPayloadFactory()),
+      ).rejects.toThrow(FAILED_TO_CREATE_BOARD);
+    });
+  });
+
+  describe("getBoard", () => {
+    it("fetches a board by ID", async () => {
+      const response = boardResponseFactory();
+      mockedAPI.get.mockResolvedValueOnce({ data: response });
+
+      await expect(BoardService.getBoard(MOCK_BOARD_ID)).resolves.toEqual(
+        response,
+      );
+
+      expect(mockedAPI.get).toHaveBeenCalledWith(
+        `${config.baseURLs.boardTaskService}${config.endpoints.boards}/${MOCK_BOARD_ID}`,
+      );
+    });
+
+    it("propagates fetch failures", async () => {
+      const error = new Error(MOCK_NETWORK_ERROR);
+      mockedAPI.get.mockRejectedValueOnce(error);
+
+      await expect(BoardService.getBoard(MOCK_BOARD_ID)).rejects.toThrow(error);
     });
   });
 });
