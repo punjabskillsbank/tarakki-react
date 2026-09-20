@@ -18,19 +18,10 @@ import {
 } from "../test-utils/factories";
 
 jest.mock("./axios");
-<<<<<<< HEAD
-jest.mock("axios", () => ({
-  __esModule: true,
-  default: {
-    create: jest.fn(() => ({ post: jest.fn(), get: jest.fn() })),
-  },
-  isAxiosError: jest.fn(),
-  create: jest.fn(() => ({ post: jest.fn(), get: jest.fn() })),
-}));
-=======
 jest.mock("axios", () => {
   const createInstance = () => ({
     post: jest.fn(),
+    get: jest.fn(),
     interceptors: {
       request: { use: jest.fn() },
       response: { use: jest.fn() },
@@ -45,7 +36,6 @@ jest.mock("axios", () => {
     create: jest.fn(createInstance),
   };
 });
->>>>>>> 9ebb08b (TK_115: Added Login Page)
 
 const mockedAPI = API as jest.Mocked<typeof API>;
 const mockedIsAxiosError = isAxiosError as jest.MockedFunction<
