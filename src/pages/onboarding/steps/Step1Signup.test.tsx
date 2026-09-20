@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { Step1Signup } from "./Step1Signup";
 import "@testing-library/jest-dom";
 import MemberServices from "../../../services/MemberServices";
@@ -32,14 +33,16 @@ describe("Step1Signup", () => {
 
   const renderComponent = (props: Partial<React.ComponentProps<typeof Step1Signup>> = {}) => {
     return render(
-      <Step1Signup
-        onNext={onNext}
-        email=""
-        setEmail={setEmail}
-        password=""
-        setPassword={setPassword}
-        {...props}
-      />
+      <MemoryRouter>
+        <Step1Signup
+          onNext={onNext}
+          email=""
+          setEmail={setEmail}
+          password=""
+          setPassword={setPassword}
+          {...props}
+        />
+      </MemoryRouter>
     );
   };
 

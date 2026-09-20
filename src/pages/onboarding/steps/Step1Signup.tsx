@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { OnboardingLayout } from "../OnboardingLayout";
 import signupIllustration from "../../../assets/images/onboarding-signup.jpg";
 import MemberService from "../../../services/MemberServices";
 import { FormInput } from "../../../components/FormInput";
 import { PasswordInput } from "../../../components/PasswordInput";
 import { PrimaryButton } from "../../../components/PrimaryButton";
+import config from "../../../config/indexConfig";
 
 interface Step1Props {
   onNext: () => void;
@@ -188,9 +190,9 @@ export function Step1Signup({
         {/* Footer */}
         <p className="text-center text-[14px] text-[#6B7280]">
           Already have an account?{" "}
-          <span className="text-[#0073EA] cursor-pointer hover:underline">
+          <Link to={config.routes.login} className="text-[#0073EA] cursor-pointer hover:underline">
             Log in
-          </span>
+          </Link>
         </p>
       </div>
     </OnboardingLayout>
