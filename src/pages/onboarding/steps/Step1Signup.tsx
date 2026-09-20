@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { OnboardingLayout } from "../OnboardingLayout";
 import signupIllustration from "../../../assets/images/onboarding-signup.jpg";
-import MemberService from "../../../services/MemberServices";
 import { FormInput } from "../../../components/FormInput";
 import { PasswordInput } from "../../../components/PasswordInput";
 import { PrimaryButton } from "../../../components/PrimaryButton";
@@ -33,8 +32,6 @@ export function Step1Signup({
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
-  const [generalError, setGeneralError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setEmailError(externalError || "");
@@ -44,12 +41,11 @@ export function Step1Signup({
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleContinue = async () => {
+  const handleContinue = () => {
     // Reset all errors before checking
     setEmailError("");
     setPasswordError("");
     setConfirmPasswordError("");
-    setGeneralError("");
     onClearError?.();
 
     if (!isValidEmail(localEmail)) {
@@ -78,24 +74,10 @@ export function Step1Signup({
 
     setEmail(localEmail);
     setParentPassword?.(password);
-    
-    setIsLoading(true);
-    try {
-      await MemberService.getMemberByEmail(localEmail);
-      setEmailError("Member with this email already exist");
-    } catch (error: unknown) {
-      const status = (error as any)?.response?.status;
-      if (status === 404) {
-        // Member not found, proceed to next step
-        onNext();
-      } else {
-        setGeneralError(
-          "Something went wrong while checking your email. Please try again."
-        );
-      }
-    } finally {
-      setIsLoading(false);
-    }
+
+    // No email lookup here: member lookups now require a token, which a new user does not have yet.
+    // A duplicate email is rejected when the account is created in the next step.
+    onNext();
   };
 
   return (
@@ -173,15 +155,12 @@ export function Step1Signup({
             }}
             onKeyPress={(e) => e.key === "Enter" && handleContinue()}
           />
-
-          {generalError && <p className="text-red-500 text-xs mt-1">{generalError}</p>}
         </div>
 
         {/* Continue Button */}
         <PrimaryButton
           onClick={handleContinue}
-          disabled={!localEmail || isLoading}
-          isLoading={isLoading}
+          disabled={!localEmail}
           className="w-full"
         >
           Continue
