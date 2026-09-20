@@ -8,7 +8,11 @@ export interface CreateBoardPayload {
   createdBy: string;
 }
 
-export type CreateBoardResponse = CreateBoardPayload;
+export interface CreateBoardResponse extends CreateBoardPayload {
+  boardId: number;
+}
+
+export type BoardResponse = CreateBoardResponse;
 
 export default class BoardService {
   static async createBoard(payload: CreateBoardPayload): Promise<CreateBoardResponse> {
@@ -23,5 +27,13 @@ export default class BoardService {
       const message = error.response?.data?.message || error.response?.data || 'Failed to create board';
       throw new Error(typeof message === 'string' ? message : 'Failed to create board');
     }
+  }
+
+  static async getBoard(boardId: number): Promise<BoardResponse> {
+    const baseURL = config.baseURLs.boardTaskService || "";
+    const response = await API.get<BoardResponse>(
+      `${baseURL}${config.endpoints.boards}/${boardId}`,
+    );
+    return response.data;
   }
 }
