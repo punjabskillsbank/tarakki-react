@@ -8,6 +8,7 @@ import { CreateBoard } from "../pages/board/CreateBoard";
 import TaskBoard from "../pages/taskBoard/TaskBoard";
 import config from "../config/indexConfig";
 import { OrgMembers } from "../pages/organization/organizationMembers/OrgMembers";
+import { UserSupportPage } from "../pages/support/UserSupportPage/UserSupportPage";
 
 export const Router = createBrowserRouter([
   {
@@ -45,5 +46,9 @@ export const Router = createBrowserRouter([
   {
     path: config.routes.organizationMembers,
     Component: OrgMembers,
+  },
+  {
+    path: config.routes.userSupport,
+    Component: UserSupportPage,
   },
 ]);
