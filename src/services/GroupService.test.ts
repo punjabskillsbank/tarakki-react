@@ -12,14 +12,23 @@ import {
 } from "../test-utils/factories";
 
 jest.mock("./axios");
-jest.mock("axios", () => ({
-  __esModule: true,
-  default: {
-    create: jest.fn(() => ({ post: jest.fn() })),
-  },
-  isAxiosError: jest.fn(),
-  create: jest.fn(() => ({ post: jest.fn() })),
-}));
+jest.mock("axios", () => {
+  const createInstance = () => ({
+    post: jest.fn(),
+    interceptors: {
+      request: { use: jest.fn() },
+      response: { use: jest.fn() },
+    },
+  });
+  return {
+    __esModule: true,
+    default: {
+      create: jest.fn(createInstance),
+    },
+    isAxiosError: jest.fn(),
+    create: jest.fn(createInstance),
+  };
+});
 
 const mockedAPI = API as jest.Mocked<typeof API>;
 const mockedIsAxiosError = isAxiosError as jest.MockedFunction<typeof isAxiosError>;
