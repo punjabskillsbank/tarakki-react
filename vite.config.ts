@@ -11,8 +11,7 @@ export default defineConfig(({ mode }) => {
     env.VITE_ORGANIZATION_SERVICE_URL ||
     process.env.VITE_ORGANIZATION_SERVICE_URL;
   const boardService =
-    env.VITE_BOARD_TASK_SERVICE_URL ||
-    process.env.VITE_BOARD_TASK_SERVICE_URL;
+    env.VITE_BOARD_TASK_SERVICE_URL || process.env.VITE_BOARD_TASK_SERVICE_URL;
   const apiRoot = env.VITE_API_ROOT || process.env.VITE_API_ROOT;
 
   const defineVars: Record<string, string> = {};
@@ -35,6 +34,13 @@ export default defineConfig(({ mode }) => {
   if (apiRoot && apiRoot.trim() !== "") {
     defineVars["process.env.VITE_API_ROOT"] = JSON.stringify(apiRoot);
   }
+
+  defineVars["process.env"] = JSON.stringify({
+    VITE_API_ROOT: apiRoot,
+    VITE_MEMBER_SERVICE_URL: memberService,
+    VITE_ORGANIZATION_SERVICE_URL: orgService,
+    VITE_BOARD_TASK_SERVICE_URL: boardService,
+  });
 
   return {
     plugins: [react(), tailwindcss()],
