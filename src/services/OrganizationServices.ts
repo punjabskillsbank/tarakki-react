@@ -20,6 +20,7 @@ type OrganizationMember = {
 };
 
 export type OrganizationMemberResponse = {
+  orgMemberId?: number;
   memberId: string;
   email: string;
 };

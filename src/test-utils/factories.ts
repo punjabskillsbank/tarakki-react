@@ -123,6 +123,8 @@ export const onboardingDataFactory = (overrides = {}) => {
 
 // ─── Organization ─────────────────────────────────────────────────────────────
 export const MOCK_MEMBER_ID = "550e8400-e29b-41d4-a716-446655440000";
+export const MOCK_ORG_MEMBER_ID = 101;
+export const MOCK_ORG_MEMBER_ID_2 = 102;
 export const STEP1_INPUT_PLACEHOLDER = "name@company.com";
 
 export const mockOrgFormData = {
@@ -146,6 +148,7 @@ export const mockOrgSuccessResponse = {
 };
 
 export const organizationMemberResponseFactory = (overrides = {}) => ({
+  orgMemberId: MOCK_ORG_MEMBER_ID,
   memberId: MOCK_MEMBER_ID,
   email: MOCK_EMAIL,
   ...overrides,
