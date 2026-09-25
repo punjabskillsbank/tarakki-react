@@ -131,6 +131,45 @@ describe('AddBoardMembers', () => {
     });
   });
 
+  it('keeps only failed members selected when some additions succeed and treats 409 as already added', async () => {
+    const user = userEvent.setup();
+
+    (BoardMemberService.addOrgMemberToBoard as jest.Mock)
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error('network failure'));
+
+    render(<AddBoardMembers />);
+
+    await user.click(await screen.findByText(MOCK_EMAIL));
+    await user.click(screen.getByText(MOCK_EMAIL2));
+    await user.click(screen.getByRole('button', { name: /add members/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('1 selected')).toBeInTheDocument();
+      expect(toast.success).toHaveBeenCalledWith('1 member(s) added successfully.');
+      expect(toast.error).toHaveBeenCalledWith('network failure');
+    });
+  });
+
+  it('treats a 409 conflict as an already-added member', async () => {
+    const user = userEvent.setup();
+
+    (BoardMemberService.addOrgMemberToBoard as jest.Mock).mockRejectedValueOnce({
+      response: { status: 409 },
+    });
+
+    render(<AddBoardMembers />);
+
+    await user.click(await screen.findByText(MOCK_EMAIL));
+    await user.click(screen.getByRole('button', { name: /add members/i }));
+
+    await waitFor(() => {
+      expect(BoardMemberService.addOrgMemberToBoard).toHaveBeenCalledTimes(1);
+      expect(toast.success).toHaveBeenCalledWith('Board members added successfully!');
+      expect(mockNavigate).toHaveBeenCalledWith(`/task-board/${MOCK_BOARD_ID}`);
+    });
+  });
+
   it('shows a friendly state when there are no members to add', async () => {
     (OrganizationService.getOrganizationMembers as jest.Mock).mockResolvedValueOnce([]);
 

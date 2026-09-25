@@ -67,10 +67,50 @@ export function AddBoardMembers() {
     if (boardId) navigate(`/task-board/${boardId}`);
   };
 
-  const availableMembers = members.filter(
-    (member): member is OrganizationMemberResponse & { orgMemberId: number } =>
-      member.orgMemberId !== undefined,
-  );
+  const availableMembers = members;
+
+  const getErrorMessage = (error: unknown): string => {
+    if (typeof error === "string" && error.trim()) return error.trim();
+
+    if (error && typeof error === "object") {
+      const maybeError = error as {
+        response?: { data?: { message?: string } | string; status?: number };
+        message?: string;
+      };
+
+      const responseData = maybeError.response?.data;
+      if (typeof responseData === "string" && responseData.trim()) {
+        return responseData.trim();
+      }
+
+      if (responseData && typeof responseData === "object") {
+        const dataMessage = responseData.message;
+        if (typeof dataMessage === "string" && dataMessage.trim()) {
+          return dataMessage.trim();
+        }
+      }
+
+      if (typeof maybeError.message === "string" && maybeError.message.trim()) {
+        return maybeError.message.trim();
+      }
+    }
+
+    return "Some members couldn't be added. Please try again.";
+  };
+
+  const isAlreadyAddedError = (error: unknown) => {
+    if (!error || typeof error !== "object") return false;
+
+    const maybeError = error as {
+      response?: { status?: number };
+      message?: string;
+    };
+
+    return (
+      maybeError.response?.status === 409 ||
+      maybeError.message?.toLowerCase().includes("already")
+    );
+  };
 
   const handleSubmit = async () => {
     const parsedBoardId = Number(boardId);
@@ -79,24 +119,68 @@ export function AddBoardMembers() {
       return;
     }
 
+    const selectedMembers = availableMembers.filter((member) =>
+      selectedMemberIds.has(member.orgMemberId),
+    );
+
+    if (selectedMembers.length === 0) {
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await Promise.all(
-        availableMembers
-          .filter((member) => selectedMemberIds.has(member.orgMemberId))
-          .map((member) =>
-            BoardMemberService.addOrgMemberToBoard(
-              parsedBoardId,
-              member.orgMemberId,
-              { email: member.email, canEdit: true, canView: true },
-            ),
+      const results = await Promise.allSettled(
+        selectedMembers.map((member) =>
+          BoardMemberService.addOrgMemberToBoard(
+            parsedBoardId,
+            member.orgMemberId,
+            { email: member.email, canEdit: true, canView: true },
           ),
+        ),
       );
-      toast.success("Board members added successfully!");
-      goToBoard();
+
+      const successfulIds: number[] = [];
+      const failedIds: number[] = [];
+
+      results.forEach((result, index) => {
+        const memberId = selectedMembers[index].orgMemberId;
+
+        if (result.status === "fulfilled" || isAlreadyAddedError(result.reason)) {
+          successfulIds.push(memberId);
+          return;
+        }
+
+        failedIds.push(memberId);
+      });
+
+      setSelectedMemberIds((current) => {
+        const next = new Set<number>();
+        for (const memberId of current) {
+          if (failedIds.includes(memberId)) next.add(memberId);
+        }
+        return next;
+      });
+
+      if (failedIds.length === 0) {
+        toast.success("Board members added successfully!");
+        goToBoard();
+        return;
+      }
+
+      const failedReason = results.find(
+        (result): result is PromiseRejectedResult =>
+          result.status === "rejected" && !isAlreadyAddedError(result.reason),
+      )?.reason;
+
+      if (successfulIds.length > 0) {
+        toast.success(`${successfulIds.length} member(s) added successfully.`);
+      }
+      toast.error(
+        getErrorMessage(failedReason ?? "Some members couldn't be added. Please try again."),
+      );
     } catch (error) {
       console.error("Failed to add board members:", error);
-      toast.error("Some members couldn't be added. Please try again.");
+      toast.error(getErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }

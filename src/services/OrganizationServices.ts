@@ -20,7 +20,7 @@ type OrganizationMember = {
 };
 
 export type OrganizationMemberResponse = {
-  orgMemberId?: number;
+  orgMemberId: number;
   memberId: string;
   email: string;
 };
