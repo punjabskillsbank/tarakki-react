@@ -18,6 +18,22 @@ import {
 } from '../../test-utils/factories';
 
 const mockNavigate = jest.fn();
+let mockBoardId = String(MOCK_BOARD_ID);
+const submissionErrorCases: [string, unknown, string][] = [
+  ['string rejection', '  Permission denied  ', 'Permission denied'],
+  ['response string', { response: { data: '  Request failed  ' } }, 'Request failed'],
+  [
+    'response message',
+    { response: { data: { message: '  Access denied  ' } } },
+    'Access denied',
+  ],
+  ['Error instance', new Error('Network unavailable'), 'Network unavailable'],
+  [
+    'unknown reason',
+    42,
+    "Some members couldn't be added. Please try again.",
+  ],
+];
 
 jest.mock('react-hot-toast');
 jest.mock('../../services/BoardService');
@@ -28,13 +44,14 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockNavigate,
   useParams: () => ({
-    boardId: String(MOCK_BOARD_ID),
+    boardId: mockBoardId,
   }),
 }));
 
 describe('AddBoardMembers', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockBoardId = String(MOCK_BOARD_ID);
 
     const board = boardResponseFactory({
       boardId: MOCK_BOARD_ID,
@@ -58,6 +75,16 @@ describe('AddBoardMembers', () => {
     ]);
   });
 
+  it('shows an error and skips API calls when the board ID is invalid', async () => {
+    mockBoardId = 'invalid-board-id';
+
+    render(<AddBoardMembers />);
+
+    expect(toast.error).toHaveBeenCalledWith('Board information is missing.');
+    expect(BoardService.getBoard).not.toHaveBeenCalled();
+    expect(OrganizationService.getOrganizationMembers).not.toHaveBeenCalled();
+  });
+
   it('renders the organization members and allows selection', async () => {
     render(<AddBoardMembers />);
 
@@ -67,12 +94,25 @@ describe('AddBoardMembers', () => {
     expect(screen.getByText(MOCK_EMAIL2)).toBeInTheDocument();
     expect(screen.getByText('Organization members')).toBeInTheDocument();
     expect(screen.getByText('0 selected')).toBeInTheDocument();
+    const addMembersButton = screen.getByRole('button', { name: /add members/i });
+    expect(addMembersButton).toBeDisabled();
 
     const firstMemberButton = screen.getByRole('button', { name: new RegExp(MOCK_EMAIL, 'i') });
     await userEvent.click(firstMemberButton);
 
     expect(screen.getByText('1 selected')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /add members/i })).not.toBeDisabled();
+    expect(addMembersButton).not.toBeDisabled();
+  });
+
+  it('navigates to the board when skipping member selection', async () => {
+    const user = userEvent.setup();
+
+    render(<AddBoardMembers />);
+
+    await user.click(screen.getByRole('button', { name: /skip for now/i }));
+
+    expect(mockNavigate).toHaveBeenCalledWith(`/task-board/${MOCK_BOARD_ID}`);
+    expect(BoardMemberService.addOrgMemberToBoard).not.toHaveBeenCalled();
   });
 
   it('adds selected members to the board and navigates to the board', async () => {
@@ -155,21 +195,60 @@ describe('AddBoardMembers', () => {
 
   it('keeps only failed members selected when some additions succeed and treats 409 as already added', async () => {
     const user = userEvent.setup();
+    const thirdMember = organizationMemberResponseFactory({
+      orgMemberId: 103,
+      email: 'member3@example.com',
+    });
+
+    (OrganizationService.getOrganizationMembers as jest.Mock).mockResolvedValueOnce([
+      organizationMemberResponseFactory({ orgMemberId: MOCK_ORG_MEMBER_ID, email: MOCK_EMAIL }),
+      organizationMemberResponseFactory({ orgMemberId: MOCK_ORG_MEMBER_ID_2, email: MOCK_EMAIL2 }),
+      thirdMember,
+    ]);
 
     (BoardMemberService.addOrgMemberToBoard as jest.Mock)
       .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce({ response: { status: 409 } })
       .mockRejectedValueOnce(new Error('network failure'));
 
     render(<AddBoardMembers />);
 
     await user.click(await screen.findByText(MOCK_EMAIL));
     await user.click(screen.getByText(MOCK_EMAIL2));
+    await user.click(screen.getByText(thirdMember.email));
     await user.click(screen.getByRole('button', { name: /add members/i }));
 
     await waitFor(() => {
       expect(screen.getByText('1 selected')).toBeInTheDocument();
-      expect(toast.success).toHaveBeenCalledWith('1 member(s) added successfully.');
+      expect(
+        screen.getByRole('button', { name: new RegExp(MOCK_EMAIL, 'i') }),
+      ).toHaveAttribute('aria-pressed', 'false');
+      expect(
+        screen.getByRole('button', { name: new RegExp(MOCK_EMAIL2, 'i') }),
+      ).toHaveAttribute('aria-pressed', 'false');
+      expect(
+        screen.getByRole('button', { name: new RegExp(thirdMember.email, 'i') }),
+      ).toHaveAttribute('aria-pressed', 'true');
+      expect(toast.success).toHaveBeenCalledWith('2 member(s) added successfully.');
       expect(toast.error).toHaveBeenCalledWith('network failure');
+      expect(BoardMemberService.addOrgMemberToBoard).toHaveBeenNthCalledWith(
+        1,
+        MOCK_BOARD_ID,
+        MOCK_ORG_MEMBER_ID,
+        { email: MOCK_EMAIL, canEdit: false, canView: true },
+      );
+      expect(BoardMemberService.addOrgMemberToBoard).toHaveBeenNthCalledWith(
+        2,
+        MOCK_BOARD_ID,
+        MOCK_ORG_MEMBER_ID_2,
+        { email: MOCK_EMAIL2, canEdit: false, canView: true },
+      );
+      expect(BoardMemberService.addOrgMemberToBoard).toHaveBeenNthCalledWith(
+        3,
+        MOCK_BOARD_ID,
+        thirdMember.orgMemberId,
+        { email: thirdMember.email, canEdit: false, canView: true },
+      );
     });
   });
 
@@ -190,6 +269,92 @@ describe('AddBoardMembers', () => {
       expect(toast.success).toHaveBeenCalledWith('Board members added successfully!');
       expect(mockNavigate).toHaveBeenCalledWith(`/task-board/${MOCK_BOARD_ID}`);
     });
+  });
+
+  it('treats an unrelated error containing "already" as a failure', async () => {
+    const user = userEvent.setup();
+
+    (BoardMemberService.addOrgMemberToBoard as jest.Mock).mockRejectedValueOnce(
+      new Error('Already timed out'),
+    );
+
+    render(<AddBoardMembers />);
+
+    await user.click(await screen.findByText(MOCK_EMAIL));
+    await user.click(screen.getByRole('button', { name: /add members/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('1 selected')).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: new RegExp(MOCK_EMAIL, 'i') }),
+      ).toHaveAttribute('aria-pressed', 'true');
+      expect(toast.error).toHaveBeenCalledWith('Already timed out');
+      expect(toast.success).not.toHaveBeenCalled();
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+  });
+
+  it.each(submissionErrorCases)(
+    'shows the expected message for a %s',
+    async (_description, error, expectedMessage) => {
+      const user = userEvent.setup();
+
+      (BoardMemberService.addOrgMemberToBoard as jest.Mock).mockRejectedValueOnce(
+        error,
+      );
+
+      render(<AddBoardMembers />);
+
+      await user.click(await screen.findByText(MOCK_EMAIL));
+      await user.click(screen.getByRole('button', { name: /add members/i }));
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith(expectedMessage);
+      });
+    },
+  );
+
+  it('shows an error and skips organization loading when board loading fails', async () => {
+    const user = userEvent.setup();
+    (BoardService.getBoard as jest.Mock).mockRejectedValueOnce(new Error('board failure'));
+
+    render(<AddBoardMembers />);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith(
+        "Members couldn't be loaded. Please try again.",
+      );
+    });
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Unable to load organization members.',
+    );
+    expect(screen.queryByText('No organization members are available yet.')).not.toBeInTheDocument();
+    expect(OrganizationService.getOrganizationMembers).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: /try again/i }));
+    expect(await screen.findByText(MOCK_EMAIL)).toBeInTheDocument();
+  });
+
+  it('shows an error when organization member loading fails', async () => {
+    const user = userEvent.setup();
+    (OrganizationService.getOrganizationMembers as jest.Mock).mockRejectedValueOnce(
+      new Error('organization members failure'),
+    );
+
+    render(<AddBoardMembers />);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith(
+        "Members couldn't be loaded. Please try again.",
+      );
+    });
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Unable to load organization members.',
+    );
+    expect(screen.queryByText('No organization members are available yet.')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /try again/i }));
+    expect(await screen.findByText(MOCK_EMAIL)).toBeInTheDocument();
   });
 
   it('shows a friendly state when there are no members to add', async () => {

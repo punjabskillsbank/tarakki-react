@@ -20,12 +20,15 @@ export function AddBoardMembers() {
   );
   const [canEditMembers, setCanEditMembers] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const parsedBoardId = Number(boardId);
     if (!Number.isInteger(parsedBoardId)) {
       setIsLoading(false);
+      setLoadError(true);
       toast.error("Board information is missing.");
       return;
     }
@@ -38,9 +41,13 @@ export function AddBoardMembers() {
         const organizationMembers = await OrganizationService.getOrganizationMembers(
           board.orgId,
         );
-        if (!cancelled) setMembers(organizationMembers);
+        if (!cancelled) {
+          setMembers(organizationMembers);
+          setLoadError(false);
+        }
       } catch (error) {
         if (!cancelled) {
+          setLoadError(true);
           console.error("Failed to load organization members:", error);
           toast.error("Members couldn't be loaded. Please try again.");
         }
@@ -53,7 +60,13 @@ export function AddBoardMembers() {
     return () => {
       cancelled = true;
     };
-  }, [boardId]);
+  }, [boardId, loadAttempt]);
+
+  const retryLoadingMembers = () => {
+    setIsLoading(true);
+    setLoadError(false);
+    setLoadAttempt((attempt) => attempt + 1);
+  };
 
   const toggleMember = (orgMemberId: number) => {
     setSelectedMemberIds((current) => {
@@ -104,13 +117,9 @@ export function AddBoardMembers() {
 
     const maybeError = error as {
       response?: { status?: number };
-      message?: string;
     };
 
-    return (
-      maybeError.response?.status === 409 ||
-      maybeError.message?.toLowerCase().includes("already")
-    );
+    return maybeError.response?.status === 409;
   };
 
   const handleSubmit = async () => {
@@ -224,6 +233,17 @@ export function AddBoardMembers() {
 
           {isLoading ? (
             <p className="py-10 text-center text-gray-500">Loading members...</p>
+          ) : loadError ? (
+            <div className="flex flex-col items-center gap-4 py-10 text-center" role="alert">
+              <p className="text-gray-700">Unable to load organization members.</p>
+              <button
+                type="button"
+                onClick={retryLoadingMembers}
+                className="rounded-lg border border-[#0073EA] px-4 py-2 font-medium text-[#0073EA] hover:bg-[#F0F6FF]"
+              >
+                Try again
+              </button>
+            </div>
           ) : availableMembers.length === 0 ? (
             <p className="py-10 text-center text-gray-500">
               No organization members are available yet.
@@ -273,7 +293,7 @@ export function AddBoardMembers() {
             </button>
             <PrimaryButton
               onClick={handleSubmit}
-              disabled={selectedMemberIds.size === 0 || isLoading}
+              disabled={selectedMemberIds.size === 0 || isLoading || loadError}
               isLoading={isSubmitting}
             >
               Add Members
