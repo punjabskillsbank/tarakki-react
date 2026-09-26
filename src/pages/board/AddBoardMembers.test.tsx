@@ -96,7 +96,7 @@ describe('AddBoardMembers', () => {
         firstMember.orgMemberId,
         {
           email: firstMember.email,
-          canEdit: true,
+          canEdit: false,
           canView: true,
         },
       );
@@ -120,13 +120,35 @@ describe('AddBoardMembers', () => {
         1,
         MOCK_BOARD_ID,
         MOCK_ORG_MEMBER_ID,
-        { email: MOCK_EMAIL, canEdit: true, canView: true },
+        { email: MOCK_EMAIL, canEdit: false, canView: true },
       );
       expect(BoardMemberService.addOrgMemberToBoard).toHaveBeenNthCalledWith(
         2,
         MOCK_BOARD_ID,
         MOCK_ORG_MEMBER_ID_2,
-        { email: MOCK_EMAIL2, canEdit: true, canView: true },
+        { email: MOCK_EMAIL2, canEdit: false, canView: true },
+      );
+    });
+  });
+
+  it('grants edit permission when the owner enables it', async () => {
+    const user = userEvent.setup();
+    const firstMember = organizationMemberResponseFactory({
+      orgMemberId: MOCK_ORG_MEMBER_ID,
+      email: MOCK_EMAIL,
+    });
+
+    render(<AddBoardMembers />);
+
+    await user.click(await screen.findByRole('checkbox', { name: /added members can edit this board/i }));
+    await user.click(screen.getByRole('button', { name: new RegExp(MOCK_EMAIL, 'i') }));
+    await user.click(screen.getByRole('button', { name: /add members/i }));
+
+    await waitFor(() => {
+      expect(BoardMemberService.addOrgMemberToBoard).toHaveBeenCalledWith(
+        MOCK_BOARD_ID,
+        firstMember.orgMemberId,
+        { email: firstMember.email, canEdit: true, canView: true },
       );
     });
   });

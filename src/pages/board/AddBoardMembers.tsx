@@ -18,6 +18,7 @@ export function AddBoardMembers() {
   const [selectedMemberIds, setSelectedMemberIds] = useState<Set<number>>(
     new Set(),
   );
+  const [canEditMembers, setCanEditMembers] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -134,7 +135,7 @@ export function AddBoardMembers() {
           BoardMemberService.addOrgMemberToBoard(
             parsedBoardId,
             member.orgMemberId,
-            { email: member.email, canEdit: true, canView: true },
+            { email: member.email, canEdit: canEditMembers, canView: true },
           ),
         ),
       );
@@ -210,6 +211,16 @@ export function AddBoardMembers() {
               <p className="text-sm text-gray-500">{selectedMemberIds.size} selected</p>
             </div>
           </div>
+
+          <label className="mb-6 flex w-fit cursor-pointer items-center gap-3 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={canEditMembers}
+              onChange={(event) => setCanEditMembers(event.target.checked)}
+              className="h-4 w-4 accent-[#0073EA]"
+            />
+            <span>Added members can edit this board</span>
+          </label>
 
           {isLoading ? (
             <p className="py-10 text-center text-gray-500">Loading members...</p>
