@@ -8,32 +8,28 @@ import BoardMemberService from '../../services/BoardMemberService';
 import BoardService from '../../services/BoardService';
 import OrganizationService from '../../services/OrganizationServices';
 import {
+  addBoardMembersSubmissionErrorCases,
+  alreadyAddedConflictErrorFactory,
+  alreadyTimedOutErrorFactory,
+  boardLoadErrorFactory,
+  boardMemberNetworkErrorFactory,
   boardResponseFactory,
+  MOCK_EMAIL3,
   MOCK_BOARD_ID,
   MOCK_EMAIL,
   MOCK_EMAIL2,
+  MOCK_ALREADY_TIMED_OUT_ERROR,
+  MOCK_BOARD_MEMBER_NETWORK_ERROR,
+  MOCK_INVALID_BOARD_ID,
   MOCK_ORG_MEMBER_ID,
   MOCK_ORG_MEMBER_ID_2,
+  MOCK_ORG_MEMBER_ID_3,
+  organizationMembersLoadErrorFactory,
   organizationMemberResponseFactory,
 } from '../../test-utils/factories';
 
 const mockNavigate = jest.fn();
 let mockBoardId = String(MOCK_BOARD_ID);
-const submissionErrorCases: [string, unknown, string][] = [
-  ['string rejection', '  Permission denied  ', 'Permission denied'],
-  ['response string', { response: { data: '  Request failed  ' } }, 'Request failed'],
-  [
-    'response message',
-    { response: { data: { message: '  Access denied  ' } } },
-    'Access denied',
-  ],
-  ['Error instance', new Error('Network unavailable'), 'Network unavailable'],
-  [
-    'unknown reason',
-    42,
-    "Some members couldn't be added. Please try again.",
-  ],
-];
 
 jest.mock('react-hot-toast');
 jest.mock('../../services/BoardService');
@@ -76,7 +72,7 @@ describe('AddBoardMembers', () => {
   });
 
   it('shows an error and skips API calls when the board ID is invalid', async () => {
-    mockBoardId = 'invalid-board-id';
+    mockBoardId = MOCK_INVALID_BOARD_ID;
 
     render(<AddBoardMembers />);
 
@@ -196,8 +192,8 @@ describe('AddBoardMembers', () => {
   it('keeps only failed members selected when some additions succeed and treats 409 as already added', async () => {
     const user = userEvent.setup();
     const thirdMember = organizationMemberResponseFactory({
-      orgMemberId: 103,
-      email: 'member3@example.com',
+      orgMemberId: MOCK_ORG_MEMBER_ID_3,
+      email: MOCK_EMAIL3,
     });
 
     (OrganizationService.getOrganizationMembers as jest.Mock).mockResolvedValueOnce([
@@ -208,8 +204,8 @@ describe('AddBoardMembers', () => {
 
     (BoardMemberService.addOrgMemberToBoard as jest.Mock)
       .mockResolvedValueOnce(undefined)
-      .mockRejectedValueOnce({ response: { status: 409 } })
-      .mockRejectedValueOnce(new Error('network failure'));
+      .mockRejectedValueOnce(alreadyAddedConflictErrorFactory())
+      .mockRejectedValueOnce(boardMemberNetworkErrorFactory());
 
     render(<AddBoardMembers />);
 
@@ -230,7 +226,7 @@ describe('AddBoardMembers', () => {
         screen.getByRole('button', { name: new RegExp(thirdMember.email, 'i') }),
       ).toHaveAttribute('aria-pressed', 'true');
       expect(toast.success).toHaveBeenCalledWith('2 member(s) added successfully.');
-      expect(toast.error).toHaveBeenCalledWith('network failure');
+      expect(toast.error).toHaveBeenCalledWith(MOCK_BOARD_MEMBER_NETWORK_ERROR);
       expect(BoardMemberService.addOrgMemberToBoard).toHaveBeenNthCalledWith(
         1,
         MOCK_BOARD_ID,
@@ -255,9 +251,9 @@ describe('AddBoardMembers', () => {
   it('treats a 409 conflict as an already-added member', async () => {
     const user = userEvent.setup();
 
-    (BoardMemberService.addOrgMemberToBoard as jest.Mock).mockRejectedValueOnce({
-      response: { status: 409 },
-    });
+    (BoardMemberService.addOrgMemberToBoard as jest.Mock).mockRejectedValueOnce(
+      alreadyAddedConflictErrorFactory(),
+    );
 
     render(<AddBoardMembers />);
 
@@ -275,7 +271,7 @@ describe('AddBoardMembers', () => {
     const user = userEvent.setup();
 
     (BoardMemberService.addOrgMemberToBoard as jest.Mock).mockRejectedValueOnce(
-      new Error('Already timed out'),
+      alreadyTimedOutErrorFactory(),
     );
 
     render(<AddBoardMembers />);
@@ -288,13 +284,13 @@ describe('AddBoardMembers', () => {
       expect(
         screen.getByRole('button', { name: new RegExp(MOCK_EMAIL, 'i') }),
       ).toHaveAttribute('aria-pressed', 'true');
-      expect(toast.error).toHaveBeenCalledWith('Already timed out');
+      expect(toast.error).toHaveBeenCalledWith(MOCK_ALREADY_TIMED_OUT_ERROR);
       expect(toast.success).not.toHaveBeenCalled();
       expect(mockNavigate).not.toHaveBeenCalled();
     });
   });
 
-  it.each(submissionErrorCases)(
+  it.each(addBoardMembersSubmissionErrorCases())(
     'shows the expected message for a %s',
     async (_description, error, expectedMessage) => {
       const user = userEvent.setup();
@@ -316,7 +312,9 @@ describe('AddBoardMembers', () => {
 
   it('shows an error and skips organization loading when board loading fails', async () => {
     const user = userEvent.setup();
-    (BoardService.getBoard as jest.Mock).mockRejectedValueOnce(new Error('board failure'));
+    (BoardService.getBoard as jest.Mock).mockRejectedValueOnce(
+      boardLoadErrorFactory(),
+    );
 
     render(<AddBoardMembers />);
 
@@ -338,7 +336,7 @@ describe('AddBoardMembers', () => {
   it('shows an error when organization member loading fails', async () => {
     const user = userEvent.setup();
     (OrganizationService.getOrganizationMembers as jest.Mock).mockRejectedValueOnce(
-      new Error('organization members failure'),
+      organizationMembersLoadErrorFactory(),
     );
 
     render(<AddBoardMembers />);
