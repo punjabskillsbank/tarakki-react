@@ -49,7 +49,6 @@ export function LoginPage() {
           ? error.message
           : "Something went wrong. Please try again.";
       setGlobalError(errorMsg);
-      toast.error(errorMsg);
     } finally {
       setIsSubmitting(false);
     }
