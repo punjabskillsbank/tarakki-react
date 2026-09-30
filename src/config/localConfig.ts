@@ -38,6 +38,10 @@ const localConfig = {
       process.env.VITE_BOARD_TASK_SERVICE_URL,
       "http://localhost:8081"
     ),
+    supportService: formatServiceURL(
+      process.env.VITE_SUPPORT_SERVICE_URL,
+      "http://localhost:8083"
+    ),
   },
 };
 

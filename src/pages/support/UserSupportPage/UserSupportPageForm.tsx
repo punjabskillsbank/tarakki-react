@@ -4,6 +4,8 @@ import { FormInput } from "../../../components/FormInput";
 import { FormSelect } from "../../../components/FormSelect";
 import { Upload } from "lucide-react";
 import { PrimaryButton } from "../../../components/PrimaryButton";
+import SupportServices from "../../../services/SupportServices";
+import toast from "react-hot-toast";
 
 const issueTypesByCategory = {
   ACCOUNT: [
@@ -82,26 +84,154 @@ const issueTypesByCategory = {
     },
   ],
 };
+
 export function UserSupportPageForm() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
   const [category, setCategory] = useState("");
   const [issueType, setIssueType] = useState("");
+  const [message, setMessage] = useState("");
+
+  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const issueTypeOptions = category
     ? issueTypesByCategory[category as keyof typeof issueTypesByCategory]
     : [];
 
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const handleSubmit = async () => {
+    setSubmitted(true);
+
+    const memberId = localStorage.getItem("memberId");
+
+    if (!memberId) {
+      toast.error("Member ID not found.");
+      return;
+    }
+
+    const hasErrors =
+      firstName.trim() === "" ||
+      lastName.trim() === "" ||
+      email.trim() === "" ||
+      !isValidEmail(email) ||
+      subject.trim() === "" ||
+      category === "" ||
+      issueType === "" ||
+      message.trim() === "";
+
+    if (hasErrors) {
+      return;
+    }
+
+    const payload = {
+      memberId,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.trim(),
+      subject: subject.trim(),
+      issueCategory: category,
+      issueType,
+      message: message.trim(),
+    };
+
+    try {
+      setIsSubmitting(true);
+
+      await SupportServices.createTicket(payload);
+
+      toast.success("Support request submitted successfully!");
+
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setSubject("");
+      setCategory("");
+      setIssueType("");
+      setMessage("");
+      setSubmitted(false);
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to submit support request."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="relative z-10 px-4 py-8 bg-white rounded-2xl shadow-xl">
       <p className="text-xl font-bold">Submit a Support Request</p>
+
       <p className="text-lg text-gray-500 pb-4">
         Describe your issue and our support team will get back to you as soon as
         possible.
       </p>
+
       <div className="flex flex-col gap-4 pb-4">
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <FormInput
+              label="First Name"
+              placeholder="Enter your first name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              error={
+                submitted && firstName.trim() === ""
+                  ? "First name is required."
+                  : undefined
+              }
+            />
+          </div>
+
+          <div className="flex-1">
+            <FormInput
+              label="Last Name"
+              placeholder="Enter your last name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              error={
+                submitted && lastName.trim() === ""
+                  ? "Last name is required."
+                  : undefined
+              }
+            />
+          </div>
+        </div>
+
+        <FormInput
+          label="Email Address"
+          placeholder="Enter your email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          error={
+            submitted && email.trim() === ""
+              ? "Email address is required."
+              : submitted && !isValidEmail(email)
+              ? "Invalid email address."
+              : undefined
+          }
+        />
+
         <FormInput
           label="Subject"
           placeholder="Briefly describe your issue"
-          value={""}
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          error={
+            submitted && subject.trim() === ""
+              ? "Subject is required."
+              : undefined
+          }
         />
+
         <FormSelect
           label="Category"
           value={category}
@@ -109,6 +239,11 @@ export function UserSupportPageForm() {
             setCategory(e.target.value);
             setIssueType("");
           }}
+          error={
+            submitted && category === ""
+              ? "Please select a category."
+              : undefined
+          }
           options={[
             { value: "", label: "Select a Category" },
             { value: "ACCOUNT", label: "ACCOUNT" },
@@ -117,15 +252,22 @@ export function UserSupportPageForm() {
             { value: "GENERAL", label: "GENERAL" },
           ]}
         />
+
         <FormSelect
           label="Issue Type"
           value={issueType}
           onChange={(e) => setIssueType(e.target.value)}
+          error={
+            submitted && issueType === ""
+              ? "Please select an issue type."
+              : undefined
+          }
           options={[
             { value: "", label: "Select an Issue Type" },
             ...issueTypeOptions,
           ]}
         />
+
         <FormTextarea
           label="Message"
           id="supportMessage"
@@ -134,8 +276,16 @@ export function UserSupportPageForm() {
           maxLength={500}
           showCount
           autoResize
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          error={
+            submitted && message.trim() === ""
+              ? "Message is required."
+              : undefined
+          }
         />
       </div>
+
       <label className="h-64 w-full border-2 border-dashed rounded-2xl flex flex-col items-center justify-center bg-gray-100 cursor-pointer hover:bg-gray-50 transition">
         <div className="mb-4 text-4xl h-20 w-20 flex items-center justify-center rounded-2xl bg-gray-100">
           <Upload
@@ -143,19 +293,32 @@ export function UserSupportPageForm() {
             className="text-gray-400"
           />
         </div>
+
         <p className="text-lg font-semibold text-gray-700">
           Attach screenshots or supporting files
         </p>
+
         <p className="mt-2 text-sm text-gray-400">PNG, JPG, PDF — Max 10 MB</p>
+
         <input
           type="file"
-          className="hidden"></input>
+          className="hidden"
+        />
       </label>
+
       <div className="flex gap-4 pt-4 justify-end">
-        <button className="px-4 py-2 rounded-xl border-gray-300 border">
+        <button
+          type="button"
+          className="px-4 py-2 rounded-xl border-gray-300 border">
           Cancel
         </button>
-        <PrimaryButton>Submit Request</PrimaryButton>
+
+        <PrimaryButton
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          isLoading={isSubmitting}>
+          Submit Request
+        </PrimaryButton>
       </div>
     </div>
   );

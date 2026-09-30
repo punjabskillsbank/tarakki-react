@@ -23,6 +23,7 @@ const commonConfig = {
     all_organizations: "/admin/organizations/",
     organizationMember: (orgId: string | number) =>
       `/organizations/${orgId}/members`,
+    supportTickets: "/support/tickets",
   },
 };
 
