@@ -89,6 +89,7 @@ describe("LoginPage", () => {
     await user.click(screen.getByRole("button", { name: /log in/i }));
 
     expect(await screen.findByText(/invalid email or password/i)).toBeInTheDocument();
+    expect(toast.error).not.toHaveBeenCalled();
     expect(getToken()).toBe("");
     expect(mockNavigate).not.toHaveBeenCalled();
   });
