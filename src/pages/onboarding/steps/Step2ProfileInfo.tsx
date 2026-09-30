@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
 import profileIllustration from '../../../assets/images/onboarding-profile.jpg';
 import MemberServices from '../../../services/MemberServices';
+import AuthService from '../../../services/AuthService';
+import { setToken } from '../../../utils/authStorage';
+import config from '../../../config/indexConfig';
 
 interface Step2Props {
   onNext: () => void;
@@ -17,11 +20,13 @@ export function Step2ProfileInfo({ onNext, onBack, email, password, onErrorBack 
 
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [loginRequired, setLoginRequired] = useState(false);
 
   const handleContinue = async () => {
     if (firstName && lastName) {
       setLoading(true);
       setApiError(null);
+      setLoginRequired(false);
       try {
         const trimmedFirstName = firstName.trim();
         const trimmedLastName = lastName.trim();
@@ -42,6 +47,17 @@ export function Step2ProfileInfo({ onNext, onBack, email, password, onErrorBack 
           localStorage.setItem('memberId', memberResponse.memberId.toString());
           localStorage.setItem('firstName', formattedFirstName);
           localStorage.setItem('lastName', formattedLastName);
+        }
+
+        // Every API after signup needs a token, so sign the new member in right away.
+        try {
+          const loginResponse = await AuthService.login({ email, password });
+          setToken(loginResponse.token);
+        } catch (loginError: unknown) {
+          console.log('Error signing in after signup:', loginError);
+          setLoginRequired(true);
+          setApiError("Your account was created, but we couldn't sign you in automatically.");
+          return;
         }
         onNext();
       } catch (error: unknown) {
@@ -112,6 +128,14 @@ export function Step2ProfileInfo({ onNext, onBack, email, password, onErrorBack 
         {apiError && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm font-medium">
             {apiError}
+            {loginRequired && (
+              <>
+                {' '}
+                <a href={config.routes.login} className="underline">
+                  Log in
+                </a>
+              </>
+            )}
           </div>
         )}
 
