@@ -26,7 +26,9 @@ export default function TaskBoard() {
   const [sections, setSections] = useState<Section[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
-  const [organizationMembers, setOrganizationMembers] = useState<Member[]>([]);
+  const [organizationMembers, setOrganizationMembers] = useState<
+    OrganizationMemberResponse[]
+  >([]);
   const [search, setSearch] = useState("");
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null);
   const [priorityFilter, setPriorityFilter] = useState<Priority | null>(null);
@@ -63,7 +65,7 @@ export default function TaskBoard() {
 
         setTasks(loadedTasks.map(toBoardTask));
         setTicketCounter(loadedTasks.length);
-        setOrganizationMembers(loadedMembers.map(toBoardMember));
+        setOrganizationMembers(loadedMembers);
       } catch (error) {
         if (cancelled) return;
         console.error("Failed to load tasks:", error);
@@ -134,7 +136,7 @@ export default function TaskBoard() {
       { ...task, id: uid(), ticketNum: `T-${next}` },
     ]);
   };
-  const addMember = async (member: Member) => {
+  const addMember = async (member: Member, canEdit: boolean) => {
     const parsedBoardId = Number(boardId);
     if (!Number.isInteger(parsedBoardId)) {
       toast.error("Board information is missing.");
@@ -142,7 +144,19 @@ export default function TaskBoard() {
     }
 
     try {
-      await BoardMemberService.addMember(parsedBoardId, member.id);
+      const organizationMember = organizationMembers.find(
+        (candidate) => candidate.memberId === member.id,
+      );
+      if (!organizationMember) {
+        toast.error("This organization member is no longer available.");
+        return;
+      }
+
+      await BoardMemberService.addOrgMemberToBoard(
+        parsedBoardId,
+        organizationMember.orgMemberId,
+        { email: organizationMember.email, canEdit, canView: true },
+      );
       setMembers((current) => [
         ...current,
         {
@@ -290,8 +304,8 @@ export default function TaskBoard() {
           onAdd={addMember}
           availableMembers={organizationMembers.filter(
             (candidate) =>
-              !members.some((member) => member.id === candidate.id),
-          )}
+              !members.some((member) => member.id === candidate.memberId),
+          ).map(toBoardMember)}
         />
       )}
     </div>
