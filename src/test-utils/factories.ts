@@ -123,6 +123,8 @@ export const onboardingDataFactory = (overrides = {}) => {
 
 // ─── Organization ─────────────────────────────────────────────────────────────
 export const MOCK_MEMBER_ID = "550e8400-e29b-41d4-a716-446655440000";
+export const MOCK_ORG_MEMBER_ID = 101;
+export const MOCK_ORG_MEMBER_ID_2 = 102;
 export const STEP1_INPUT_PLACEHOLDER = "name@company.com";
 
 export const mockOrgFormData = {
@@ -146,10 +148,44 @@ export const mockOrgSuccessResponse = {
 };
 
 export const organizationMemberResponseFactory = (overrides = {}) => ({
+  orgMemberId: MOCK_ORG_MEMBER_ID,
   memberId: MOCK_MEMBER_ID,
   email: MOCK_EMAIL,
   ...overrides,
 });
+
+export const MOCK_ORG_MEMBER_ID_3 = 103;
+export const MOCK_EMAIL3 = "member3@example.com";
+export const MOCK_INVALID_BOARD_ID = "invalid-board-id";
+export const MOCK_BOARD_MEMBER_NETWORK_ERROR = "network failure";
+export const MOCK_ALREADY_TIMED_OUT_ERROR = "Already timed out";
+
+export const boardLoadErrorFactory = () => new Error("board failure");
+export const organizationMembersLoadErrorFactory = () =>
+  new Error("organization members failure");
+export const boardMemberNetworkErrorFactory = () =>
+  new Error(MOCK_BOARD_MEMBER_NETWORK_ERROR);
+export const alreadyTimedOutErrorFactory = () =>
+  new Error(MOCK_ALREADY_TIMED_OUT_ERROR);
+export const alreadyAddedConflictErrorFactory = () => ({
+  response: { status: 409 },
+});
+
+export const addBoardMembersSubmissionErrorCases = (): [string, unknown, string][] => [
+  ["string rejection", "  Permission denied  ", "Permission denied"],
+  ["response string", { response: { data: "  Request failed  " } }, "Request failed"],
+  [
+    "response message",
+    { response: { data: { message: "  Access denied  " } } },
+    "Access denied",
+  ],
+  ["Error instance", new Error("Network unavailable"), "Network unavailable"],
+  [
+    "unknown reason",
+    42,
+    "Some members couldn't be added. Please try again.",
+  ],
+];
 
 export const boardMemberFactory = (overrides = {}) => ({
   id: MOCK_MEMBER_ID,

@@ -101,7 +101,7 @@ describe("TaskBoard", () => {
 
   it("adds an organization member to the board", async () => {
     const user = userEvent.setup();
-    mockedBoardMemberService.addMember.mockResolvedValue();
+    mockedBoardMemberService.addOrgMemberToBoard.mockResolvedValue();
 
     render(<TaskBoard />);
 
@@ -111,11 +111,13 @@ describe("TaskBoard", () => {
     await user.click(
       await screen.findByRole("button", { name: organizationMember.email }),
     );
+    await user.click(screen.getByRole("button", { name: /add selected member/i }));
 
     await waitFor(() => {
-      expect(mockedBoardMemberService.addMember).toHaveBeenCalledWith(
+      expect(mockedBoardMemberService.addOrgMemberToBoard).toHaveBeenCalledWith(
         MOCK_BOARD_ID,
-        organizationMember.memberId,
+        organizationMember.orgMemberId,
+        { email: organizationMember.email, canEdit: false, canView: true },
       );
     });
   });

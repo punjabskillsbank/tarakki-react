@@ -40,4 +40,25 @@ describe("BoardMemberService", () => {
       ).rejects.toThrow(error);
     });
   });
+
+  describe("addOrgMemberToBoard", () => {
+    it("posts an organization member to the board path", async () => {
+      mockedAPI.post.mockResolvedValueOnce({ data: undefined });
+
+      await BoardMemberService.addOrgMemberToBoard(42, 7, {
+        email: "member@example.com",
+        canEdit: true,
+        canView: true,
+      });
+
+      expect(mockedAPI.post).toHaveBeenCalledWith(
+        `${config.baseURLs.boardTaskService}${config.endpoints.boardMember(42, 7)}`,
+        {
+          email: "member@example.com",
+          canEdit: true,
+          canView: true,
+        },
+      );
+    });
+  });
 });
