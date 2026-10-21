@@ -5,9 +5,13 @@ import type { Member } from "../types/taskBoardtypes";
 export function BoardHeader({
   members,
   onAddMember,
+  orgName,
+  boardName,
 }: {
   members: Member[];
   onAddMember: () => void;
+  orgName: string;
+  boardName: string;
 }) {
   return (
     <div className="flex h-[52px] flex-shrink-0 items-center gap-4 border-b border-[#E6E9EF] bg-white px-5">
@@ -16,14 +20,14 @@ export function BoardHeader({
           T
         </div>
         <span className="text-[13px] font-bold text-[#1F2937]">
-          {"{orgName}"}
+          {orgName}
         </span>
       </div>
       <div className="h-4 w-px bg-[#E6E9EF]" />
       <div className="flex items-center gap-1.5 text-[12px] text-[#9CA3AF]">
-        <span>{"{workspaceName}"}</span>
+        <span>Workspace</span>
         <ChevronRight size={12} className="text-[#C4C4C4]" />
-        <span className="font-semibold text-[#1F2937]">{"{boardName}"}</span>
+        <span className="font-semibold text-[#1F2937]">{boardName}</span>
       </div>
       <div className="ml-auto flex items-center gap-1.5">
         {members.length > 0 && (

@@ -15,9 +15,11 @@ describe("BoardToolbar", () => {
         search=""
         assigneeFilter={null}
         priorityFilter={null}
+        groupBy="none"
         onSearchChange={onSearchChange}
         onAssigneeFilter={jest.fn()}
         onPriorityFilter={jest.fn()}
+        onGroupByChange={jest.fn()}
         onCreate={onCreate}
       />,
     );
@@ -27,5 +29,30 @@ describe("BoardToolbar", () => {
 
     expect(onCreate).toHaveBeenCalledTimes(1);
     expect(onSearchChange).toHaveBeenCalled();
+  });
+
+  it("lets the user select a task grouping", async () => {
+    const user = userEvent.setup();
+    const onGroupByChange = jest.fn();
+
+    render(
+      <BoardToolbar
+        members={[]}
+        search=""
+        assigneeFilter={null}
+        priorityFilter={null}
+        groupBy="none"
+        onSearchChange={jest.fn()}
+        onAssigneeFilter={jest.fn()}
+        onPriorityFilter={jest.fn()}
+        onGroupByChange={onGroupByChange}
+        onCreate={jest.fn()}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /group by/i }));
+    await user.click(screen.getByRole("menuitem", { name: "Created by" }));
+
+    expect(onGroupByChange).toHaveBeenCalledWith("creator");
   });
 });

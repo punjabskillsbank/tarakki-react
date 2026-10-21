@@ -8,12 +8,14 @@ import BoardService from "../../services/BoardService";
 import GroupService from "../../services/GroupService";
 import OrganizationService from "../../services/OrganizationServices";
 import TaskService from "../../services/TaskService";
+import { adminOrganizationService } from "../../services/AdminOrganizationService";
 import {
   boardResponseFactory,
   groupPayloadFactory,
   groupResponseFactory,
   MOCK_BOARD_ID,
   MOCK_NETWORK_ERROR,
+  mappedTechOrganization,
   organizationMemberResponseFactory,
   taskResponseFactory,
 } from "../../test-utils/factories";
@@ -22,6 +24,7 @@ jest.mock("../../services/BoardMemberService");
 jest.mock("../../services/BoardService");
 jest.mock("../../services/GroupService");
 jest.mock("../../services/OrganizationServices");
+jest.mock("../../services/AdminOrganizationService");
 jest.mock("../../services/TaskService");
 jest.mock("react-hot-toast", () => ({ error: jest.fn() }));
 jest.mock("react-router-dom", () => ({
@@ -37,6 +40,9 @@ const mockedGroupService = GroupService as jest.Mocked<typeof GroupService>;
 const mockedOrganizationService = OrganizationService as jest.Mocked<
   typeof OrganizationService
 >;
+const mockedAdminOrganizationService = adminOrganizationService as jest.Mocked<
+  typeof adminOrganizationService
+>;
 const mockedTaskService = TaskService as jest.Mocked<typeof TaskService>;
 
 const board = boardResponseFactory();
@@ -49,6 +55,9 @@ const configureLoadedBoard = () => {
   mockedOrganizationService.getOrganizationMembers.mockResolvedValue([
     organizationMember,
   ]);
+  mockedAdminOrganizationService.getOrganization.mockResolvedValue(
+    mappedTechOrganization,
+  );
 };
 
 describe("TaskBoard", () => {
@@ -75,6 +84,31 @@ describe("TaskBoard", () => {
     expect(mockedOrganizationService.getOrganizationMembers).toHaveBeenCalledWith(
       board.orgId,
     );
+    expect(mockedAdminOrganizationService.getOrganization).toHaveBeenCalledWith(
+      String(board.orgId),
+    );
+    expect(
+      await screen.findByText(mappedTechOrganization.name),
+    ).toBeInTheDocument();
+    expect(screen.getByText(board.boardName)).toBeInTheDocument();
+  });
+
+  it("groups task cards by priority", async () => {
+    const user = userEvent.setup();
+    mockedGroupService.createGroup.mockResolvedValue(groupResponseFactory());
+
+    render(<TaskBoard />);
+
+    await user.click(
+      await screen.findByRole("button", { name: "Create first group" }),
+    );
+    await user.type(screen.getByPlaceholderText("Group name..."), "Backlog");
+    await user.click(screen.getByRole("button", { name: "Add" }));
+    await user.click(screen.getByRole("button", { name: /group by/i }));
+    await user.click(screen.getByRole("menuitem", { name: "Priority" }));
+
+    expect(await screen.findByText("No priority")).toBeInTheDocument();
+    expect(screen.getByText("Write tests")).toBeInTheDocument();
   });
 
   it("creates a group from the empty-board action", async () => {
