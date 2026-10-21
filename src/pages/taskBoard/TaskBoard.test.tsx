@@ -45,6 +45,7 @@ const organizationMember = organizationMemberResponseFactory();
 const configureLoadedBoard = () => {
   mockedTaskService.getTasks.mockResolvedValue([taskResponseFactory()]);
   mockedBoardService.getBoard.mockResolvedValue(board);
+  mockedBoardMemberService.getBoardMembers.mockResolvedValue([]);
   mockedOrganizationService.getOrganizationMembers.mockResolvedValue([
     organizationMember,
   ]);
@@ -120,6 +121,28 @@ describe("TaskBoard", () => {
         { email: organizationMember.email, canEdit: false, canView: true },
       );
     });
+  });
+
+  it("does not offer a member who is already on the board", async () => {
+    mockedBoardMemberService.getBoardMembers.mockResolvedValue([
+      {
+        boardMemberId: 1,
+        boardId: MOCK_BOARD_ID,
+        memberId: organizationMember.memberId,
+        role: "BOARD_ADMIN",
+        canEdit: true,
+        canView: true,
+      },
+    ]);
+
+    render(<TaskBoard />);
+
+    await screen.findByText("This board has no groups yet");
+    await userEvent.click(screen.getByRole("button", { name: "Add Member" }));
+
+    expect(
+      screen.queryByRole("button", { name: organizationMember.email }),
+    ).not.toBeInTheDocument();
   });
 
   it("shows an error when board data cannot be loaded", async () => {

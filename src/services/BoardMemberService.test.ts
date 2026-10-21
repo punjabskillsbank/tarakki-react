@@ -41,6 +41,18 @@ describe("BoardMemberService", () => {
     });
   });
 
+  describe("getBoardMembers", () => {
+    it("fetches existing members for a board", async () => {
+      const members = [{ boardId: 42, memberId: "member-id" }];
+      mockedAPI.get.mockResolvedValueOnce({ data: members });
+
+      await expect(BoardMemberService.getBoardMembers(42)).resolves.toEqual(members);
+      expect(mockedAPI.get).toHaveBeenCalledWith(
+        `${config.baseURLs.boardTaskService}${config.endpoints.boardMembersForBoard(42)}`,
+      );
+    });
+  });
+
   describe("addOrgMemberToBoard", () => {
     it("posts an organization member to the board path", async () => {
       mockedAPI.post.mockResolvedValueOnce({ data: undefined });

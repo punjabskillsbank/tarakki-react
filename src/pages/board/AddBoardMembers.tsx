@@ -38,11 +38,19 @@ export function AddBoardMembers() {
     const loadMembers = async () => {
       try {
         const board = await BoardService.getBoard(parsedBoardId);
-        const organizationMembers = await OrganizationService.getOrganizationMembers(
-          board.orgId,
-        );
+        const [organizationMembers, boardMembers] = await Promise.all([
+          OrganizationService.getOrganizationMembers(board.orgId),
+          BoardMemberService.getBoardMembers(parsedBoardId),
+        ]);
         if (!cancelled) {
-          setMembers(organizationMembers);
+          const existingMemberIds = new Set(
+            boardMembers.map((member) => member.memberId),
+          );
+          setMembers(
+            organizationMembers.filter(
+              (member) => !existingMemberIds.has(member.memberId),
+            ),
+          );
           setLoadError(false);
         }
       } catch (error) {

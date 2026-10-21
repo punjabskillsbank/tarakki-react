@@ -69,6 +69,7 @@ describe('AddBoardMembers', () => {
       firstMember,
       secondMember,
     ]);
+    (BoardMemberService.getBoardMembers as jest.Mock).mockResolvedValue([]);
   });
 
   it('shows an error and skips API calls when the board ID is invalid', async () => {
@@ -98,6 +99,29 @@ describe('AddBoardMembers', () => {
 
     expect(screen.getByText('1 selected')).toBeInTheDocument();
     expect(addMembersButton).not.toBeDisabled();
+  });
+
+  it('does not offer organization members already on the board', async () => {
+    const existingMember = organizationMemberResponseFactory({
+      orgMemberId: MOCK_ORG_MEMBER_ID,
+      email: MOCK_EMAIL,
+    });
+    (OrganizationService.getOrganizationMembers as jest.Mock).mockResolvedValue([
+      existingMember,
+      organizationMemberResponseFactory({
+        orgMemberId: MOCK_ORG_MEMBER_ID_2,
+        memberId: "member-2",
+        email: MOCK_EMAIL2,
+      }),
+    ]);
+    (BoardMemberService.getBoardMembers as jest.Mock).mockResolvedValue([
+      { boardId: MOCK_BOARD_ID, memberId: existingMember.memberId },
+    ]);
+
+    render(<AddBoardMembers />);
+
+    expect(await screen.findByText(MOCK_EMAIL2)).toBeInTheDocument();
+    expect(screen.queryByText(MOCK_EMAIL)).not.toBeInTheDocument();
   });
 
   it('navigates to the board when skipping member selection', async () => {

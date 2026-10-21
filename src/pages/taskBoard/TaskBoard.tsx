@@ -26,6 +26,7 @@ export default function TaskBoard() {
   const [sections, setSections] = useState<Section[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
+  const [boardMemberIds, setBoardMemberIds] = useState<Set<string>>(new Set());
   const [organizationMembers, setOrganizationMembers] = useState<
     OrganizationMemberResponse[]
   >([]);
@@ -58,14 +59,27 @@ export default function TaskBoard() {
           TaskService.getTasks(parsedBoardId),
           BoardService.getBoard(parsedBoardId),
         ]);
-        const loadedMembers = await OrganizationService.getOrganizationMembers(
-          board.orgId,
-        );
+        const [loadedMembers, boardMembers] = await Promise.all([
+          OrganizationService.getOrganizationMembers(board.orgId),
+          BoardMemberService.getBoardMembers(parsedBoardId),
+        ]);
         if (cancelled) return;
 
         setTasks(loadedTasks.map(toBoardTask));
         setTicketCounter(loadedTasks.length);
         setOrganizationMembers(loadedMembers);
+        const loadedBoardMemberIds = new Set(
+          boardMembers.map((member) => member.memberId),
+        );
+        setBoardMemberIds(loadedBoardMemberIds);
+        setMembers(
+          loadedMembers
+            .filter((member) => loadedBoardMemberIds.has(member.memberId))
+            .map((member, index) => ({
+              ...toBoardMember(member),
+              color: MEMBER_COLORS[index % MEMBER_COLORS.length],
+            })),
+        );
       } catch (error) {
         if (cancelled) return;
         console.error("Failed to load tasks:", error);
@@ -157,6 +171,7 @@ export default function TaskBoard() {
         organizationMember.orgMemberId,
         { email: organizationMember.email, canEdit, canView: true },
       );
+      setBoardMemberIds((current) => new Set(current).add(member.id));
       setMembers((current) => [
         ...current,
         {
@@ -304,6 +319,7 @@ export default function TaskBoard() {
           onAdd={addMember}
           availableMembers={organizationMembers.filter(
             (candidate) =>
+              !boardMemberIds.has(candidate.memberId) &&
               !members.some((member) => member.id === candidate.memberId),
           ).map(toBoardMember)}
         />

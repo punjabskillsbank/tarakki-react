@@ -20,6 +20,8 @@ const commonConfig = {
   endpoints: {
     boards: "/boards",
     boardMembers: "/board-members",
+    boardMembersForBoard: (boardId: string | number) =>
+      `/boards/${boardId}/members`,
     boardMember: (boardId: string | number, orgMemberId: string | number) =>
       `/boards/${boardId}/members/${orgMemberId}`,
     members: "/members",
@@ -31,4 +33,3 @@ const commonConfig = {
 };
 
 export default commonConfig;
-
