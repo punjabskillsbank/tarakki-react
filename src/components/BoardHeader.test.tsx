@@ -2,7 +2,11 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { BoardHeader } from "./BoardHeader";
-import { boardMemberFactory } from "../test-utils/factories";
+import {
+  TASK_BOARD_ADD_MEMBER_LABEL,
+  TASK_BOARD_WORKSPACE_LABEL,
+  taskBoardHeaderDataFactory,
+} from "../test-utils/factories";
 
 describe("BoardHeader", () => {
   it("calls onAddMember when the add member button is clicked", async () => {
@@ -11,30 +15,27 @@ describe("BoardHeader", () => {
 
     render(
       <BoardHeader
-        members={[boardMemberFactory()]}
+        {...taskBoardHeaderDataFactory()}
         onAddMember={onAddMember}
-        orgName="Acme"
-        boardName="Product"
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: /add member/i }));
+    await user.click(screen.getByRole("button", { name: TASK_BOARD_ADD_MEMBER_LABEL }));
 
     expect(onAddMember).toHaveBeenCalledTimes(1);
   });
 
   it("shows the organization, workspace, and board names", () => {
+    const headerData = taskBoardHeaderDataFactory({ members: [] });
     render(
       <BoardHeader
-        members={[]}
+        {...headerData}
         onAddMember={jest.fn()}
-        orgName="Acme"
-        boardName="Product"
       />,
     );
 
-    expect(screen.getByText("Acme")).toBeInTheDocument();
-    expect(screen.getByText("Workspace")).toBeInTheDocument();
-    expect(screen.getByText("Product")).toBeInTheDocument();
+    expect(screen.getByText(headerData.orgName)).toBeInTheDocument();
+    expect(screen.getByText(TASK_BOARD_WORKSPACE_LABEL)).toBeInTheDocument();
+    expect(screen.getByText(headerData.boardName)).toBeInTheDocument();
   });
 });

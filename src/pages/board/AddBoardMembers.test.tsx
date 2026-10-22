@@ -24,8 +24,29 @@ import {
   MOCK_ORG_MEMBER_ID,
   MOCK_ORG_MEMBER_ID_2,
   MOCK_ORG_MEMBER_ID_3,
+  MOCK_MEMBER_ID_2,
   organizationMembersLoadErrorFactory,
   organizationMemberResponseFactory,
+  BOARD_INFORMATION_MISSING_MESSAGE,
+  BOARD_MEMBERS_EDIT_ACCESS_LABEL,
+  BOARD_MEMBERS_HEADING,
+  BOARD_MEMBERS_LOAD_ALERT_MESSAGE,
+  BOARD_MEMBERS_LOAD_FAILURE_MESSAGE,
+  BOARD_MEMBERS_LOADING_LABEL,
+  BOARD_MEMBERS_NONE_AVAILABLE_MESSAGE,
+  BOARD_MEMBERS_RETRY_LABEL,
+  BOARD_MEMBERS_SKIP_LABEL,
+  BOARD_MEMBERS_SUBMIT_LABEL,
+  BOARD_MEMBERS_SUCCESS_MESSAGE,
+  boardMemberAccessFactory,
+  boardMemberResponseFactory,
+  boardRouteFactory,
+  boardSelectedCountLabel,
+  BOARD_MEMBER_ARIA_PRESSED_ATTRIBUTE,
+  BOARD_MEMBER_SELECTED_VALUE,
+  BOARD_MEMBER_UNSELECTED_VALUE,
+  boardMembersAddedCountMessage,
+  caseInsensitiveRegexFactory,
 } from '../../test-utils/factories';
 
 const mockNavigate = jest.fn();
@@ -77,7 +98,7 @@ describe('AddBoardMembers', () => {
 
     render(<AddBoardMembers />);
 
-    expect(toast.error).toHaveBeenCalledWith('Board information is missing.');
+    expect(toast.error).toHaveBeenCalledWith(BOARD_INFORMATION_MISSING_MESSAGE);
     expect(BoardService.getBoard).not.toHaveBeenCalled();
     expect(OrganizationService.getOrganizationMembers).not.toHaveBeenCalled();
   });
@@ -85,19 +106,19 @@ describe('AddBoardMembers', () => {
   it('renders the organization members and allows selection', async () => {
     render(<AddBoardMembers />);
 
-    expect(screen.getByText('Loading members...')).toBeInTheDocument();
+    expect(screen.getByText(BOARD_MEMBERS_LOADING_LABEL)).toBeInTheDocument();
 
     expect(await screen.findByText(MOCK_EMAIL)).toBeInTheDocument();
     expect(screen.getByText(MOCK_EMAIL2)).toBeInTheDocument();
-    expect(screen.getByText('Organization members')).toBeInTheDocument();
-    expect(screen.getByText('0 selected')).toBeInTheDocument();
-    const addMembersButton = screen.getByRole('button', { name: /add members/i });
+    expect(screen.getByText(BOARD_MEMBERS_HEADING)).toBeInTheDocument();
+    expect(screen.getByText(boardSelectedCountLabel(0))).toBeInTheDocument();
+    const addMembersButton = screen.getByRole('button', { name: BOARD_MEMBERS_SUBMIT_LABEL });
     expect(addMembersButton).toBeDisabled();
 
-    const firstMemberButton = screen.getByRole('button', { name: new RegExp(MOCK_EMAIL, 'i') });
+    const firstMemberButton = screen.getByRole('button', { name: caseInsensitiveRegexFactory(MOCK_EMAIL) });
     await userEvent.click(firstMemberButton);
 
-    expect(screen.getByText('1 selected')).toBeInTheDocument();
+    expect(screen.getByText(boardSelectedCountLabel(1))).toBeInTheDocument();
     expect(addMembersButton).not.toBeDisabled();
   });
 
@@ -110,12 +131,12 @@ describe('AddBoardMembers', () => {
       existingMember,
       organizationMemberResponseFactory({
         orgMemberId: MOCK_ORG_MEMBER_ID_2,
-        memberId: "member-2",
+        memberId: MOCK_MEMBER_ID_2,
         email: MOCK_EMAIL2,
       }),
     ]);
     (BoardMemberService.getBoardMembers as jest.Mock).mockResolvedValue([
-      { boardId: MOCK_BOARD_ID, memberId: existingMember.memberId },
+      boardMemberResponseFactory({ memberId: existingMember.memberId }),
     ]);
 
     render(<AddBoardMembers />);
@@ -129,9 +150,9 @@ describe('AddBoardMembers', () => {
 
     render(<AddBoardMembers />);
 
-    await user.click(screen.getByRole('button', { name: /skip for now/i }));
+    await user.click(screen.getByRole('button', { name: BOARD_MEMBERS_SKIP_LABEL }));
 
-    expect(mockNavigate).toHaveBeenCalledWith(`/task-board/${MOCK_BOARD_ID}`);
+    expect(mockNavigate).toHaveBeenCalledWith(boardRouteFactory(MOCK_BOARD_ID));
     expect(BoardMemberService.addOrgMemberToBoard).not.toHaveBeenCalled();
   });
 
@@ -145,23 +166,19 @@ describe('AddBoardMembers', () => {
     render(<AddBoardMembers />);
 
     await screen.findByText(MOCK_EMAIL);
-    await user.click(screen.getByRole('button', { name: new RegExp(MOCK_EMAIL, 'i') }));
+    await user.click(screen.getByRole('button', { name: caseInsensitiveRegexFactory(MOCK_EMAIL) }));
 
-    const addMembersButton = screen.getByRole('button', { name: /add members/i });
+    const addMembersButton = screen.getByRole('button', { name: BOARD_MEMBERS_SUBMIT_LABEL });
     await user.click(addMembersButton);
 
     await waitFor(() => {
       expect(BoardMemberService.addOrgMemberToBoard).toHaveBeenCalledWith(
         MOCK_BOARD_ID,
         firstMember.orgMemberId,
-        {
-          email: firstMember.email,
-          canEdit: false,
-          canView: true,
-        },
+        boardMemberAccessFactory(firstMember.email),
       );
-      expect(toast.success).toHaveBeenCalledWith('Board members added successfully!');
-      expect(mockNavigate).toHaveBeenCalledWith(`/task-board/${MOCK_BOARD_ID}`);
+      expect(toast.success).toHaveBeenCalledWith(BOARD_MEMBERS_SUCCESS_MESSAGE);
+      expect(mockNavigate).toHaveBeenCalledWith(boardRouteFactory(MOCK_BOARD_ID));
     });
   });
 
@@ -172,7 +189,7 @@ describe('AddBoardMembers', () => {
 
     await user.click(await screen.findByText(MOCK_EMAIL));
     await user.click(screen.getByText(MOCK_EMAIL2));
-    await user.click(screen.getByRole('button', { name: /add members/i }));
+    await user.click(screen.getByRole('button', { name: BOARD_MEMBERS_SUBMIT_LABEL }));
 
     await waitFor(() => {
       expect(BoardMemberService.addOrgMemberToBoard).toHaveBeenCalledTimes(2);
@@ -180,13 +197,13 @@ describe('AddBoardMembers', () => {
         1,
         MOCK_BOARD_ID,
         MOCK_ORG_MEMBER_ID,
-        { email: MOCK_EMAIL, canEdit: false, canView: true },
+        boardMemberAccessFactory(MOCK_EMAIL),
       );
       expect(BoardMemberService.addOrgMemberToBoard).toHaveBeenNthCalledWith(
         2,
         MOCK_BOARD_ID,
         MOCK_ORG_MEMBER_ID_2,
-        { email: MOCK_EMAIL2, canEdit: false, canView: true },
+        boardMemberAccessFactory(MOCK_EMAIL2),
       );
     });
   });
@@ -200,15 +217,15 @@ describe('AddBoardMembers', () => {
 
     render(<AddBoardMembers />);
 
-    await user.click(await screen.findByRole('checkbox', { name: /added members can edit this board/i }));
-    await user.click(screen.getByRole('button', { name: new RegExp(MOCK_EMAIL, 'i') }));
-    await user.click(screen.getByRole('button', { name: /add members/i }));
+    await user.click(await screen.findByRole('checkbox', { name: BOARD_MEMBERS_EDIT_ACCESS_LABEL }));
+    await user.click(screen.getByRole('button', { name: caseInsensitiveRegexFactory(MOCK_EMAIL) }));
+    await user.click(screen.getByRole('button', { name: BOARD_MEMBERS_SUBMIT_LABEL }));
 
     await waitFor(() => {
       expect(BoardMemberService.addOrgMemberToBoard).toHaveBeenCalledWith(
         MOCK_BOARD_ID,
         firstMember.orgMemberId,
-        { email: firstMember.email, canEdit: true, canView: true },
+        boardMemberAccessFactory(firstMember.email, true),
       );
     });
   });
@@ -236,38 +253,38 @@ describe('AddBoardMembers', () => {
     await user.click(await screen.findByText(MOCK_EMAIL));
     await user.click(screen.getByText(MOCK_EMAIL2));
     await user.click(screen.getByText(thirdMember.email));
-    await user.click(screen.getByRole('button', { name: /add members/i }));
+    await user.click(screen.getByRole('button', { name: BOARD_MEMBERS_SUBMIT_LABEL }));
 
     await waitFor(() => {
-      expect(screen.getByText('1 selected')).toBeInTheDocument();
+      expect(screen.getByText(boardSelectedCountLabel(1))).toBeInTheDocument();
       expect(
-        screen.getByRole('button', { name: new RegExp(MOCK_EMAIL, 'i') }),
-      ).toHaveAttribute('aria-pressed', 'false');
+        screen.getByRole('button', { name: caseInsensitiveRegexFactory(MOCK_EMAIL) }),
+      ).toHaveAttribute(BOARD_MEMBER_ARIA_PRESSED_ATTRIBUTE, BOARD_MEMBER_UNSELECTED_VALUE);
       expect(
-        screen.getByRole('button', { name: new RegExp(MOCK_EMAIL2, 'i') }),
-      ).toHaveAttribute('aria-pressed', 'false');
+        screen.getByRole('button', { name: caseInsensitiveRegexFactory(MOCK_EMAIL2) }),
+      ).toHaveAttribute(BOARD_MEMBER_ARIA_PRESSED_ATTRIBUTE, BOARD_MEMBER_UNSELECTED_VALUE);
       expect(
-        screen.getByRole('button', { name: new RegExp(thirdMember.email, 'i') }),
-      ).toHaveAttribute('aria-pressed', 'true');
-      expect(toast.success).toHaveBeenCalledWith('2 member(s) added successfully.');
+        screen.getByRole('button', { name: caseInsensitiveRegexFactory(thirdMember.email) }),
+      ).toHaveAttribute(BOARD_MEMBER_ARIA_PRESSED_ATTRIBUTE, BOARD_MEMBER_SELECTED_VALUE);
+      expect(toast.success).toHaveBeenCalledWith(boardMembersAddedCountMessage(2));
       expect(toast.error).toHaveBeenCalledWith(MOCK_BOARD_MEMBER_NETWORK_ERROR);
       expect(BoardMemberService.addOrgMemberToBoard).toHaveBeenNthCalledWith(
         1,
         MOCK_BOARD_ID,
         MOCK_ORG_MEMBER_ID,
-        { email: MOCK_EMAIL, canEdit: false, canView: true },
+        boardMemberAccessFactory(MOCK_EMAIL),
       );
       expect(BoardMemberService.addOrgMemberToBoard).toHaveBeenNthCalledWith(
         2,
         MOCK_BOARD_ID,
         MOCK_ORG_MEMBER_ID_2,
-        { email: MOCK_EMAIL2, canEdit: false, canView: true },
+        boardMemberAccessFactory(MOCK_EMAIL2),
       );
       expect(BoardMemberService.addOrgMemberToBoard).toHaveBeenNthCalledWith(
         3,
         MOCK_BOARD_ID,
         thirdMember.orgMemberId,
-        { email: thirdMember.email, canEdit: false, canView: true },
+        boardMemberAccessFactory(thirdMember.email),
       );
     });
   });
@@ -282,12 +299,12 @@ describe('AddBoardMembers', () => {
     render(<AddBoardMembers />);
 
     await user.click(await screen.findByText(MOCK_EMAIL));
-    await user.click(screen.getByRole('button', { name: /add members/i }));
+    await user.click(screen.getByRole('button', { name: BOARD_MEMBERS_SUBMIT_LABEL }));
 
     await waitFor(() => {
       expect(BoardMemberService.addOrgMemberToBoard).toHaveBeenCalledTimes(1);
-      expect(toast.success).toHaveBeenCalledWith('Board members added successfully!');
-      expect(mockNavigate).toHaveBeenCalledWith(`/task-board/${MOCK_BOARD_ID}`);
+      expect(toast.success).toHaveBeenCalledWith(BOARD_MEMBERS_SUCCESS_MESSAGE);
+      expect(mockNavigate).toHaveBeenCalledWith(boardRouteFactory(MOCK_BOARD_ID));
     });
   });
 
@@ -301,13 +318,13 @@ describe('AddBoardMembers', () => {
     render(<AddBoardMembers />);
 
     await user.click(await screen.findByText(MOCK_EMAIL));
-    await user.click(screen.getByRole('button', { name: /add members/i }));
+    await user.click(screen.getByRole('button', { name: BOARD_MEMBERS_SUBMIT_LABEL }));
 
     await waitFor(() => {
-      expect(screen.getByText('1 selected')).toBeInTheDocument();
+      expect(screen.getByText(boardSelectedCountLabel(1))).toBeInTheDocument();
       expect(
-        screen.getByRole('button', { name: new RegExp(MOCK_EMAIL, 'i') }),
-      ).toHaveAttribute('aria-pressed', 'true');
+        screen.getByRole('button', { name: caseInsensitiveRegexFactory(MOCK_EMAIL) }),
+      ).toHaveAttribute(BOARD_MEMBER_ARIA_PRESSED_ATTRIBUTE, BOARD_MEMBER_SELECTED_VALUE);
       expect(toast.error).toHaveBeenCalledWith(MOCK_ALREADY_TIMED_OUT_ERROR);
       expect(toast.success).not.toHaveBeenCalled();
       expect(mockNavigate).not.toHaveBeenCalled();
@@ -326,7 +343,7 @@ describe('AddBoardMembers', () => {
       render(<AddBoardMembers />);
 
       await user.click(await screen.findByText(MOCK_EMAIL));
-      await user.click(screen.getByRole('button', { name: /add members/i }));
+      await user.click(screen.getByRole('button', { name: BOARD_MEMBERS_SUBMIT_LABEL }));
 
       await waitFor(() => {
         expect(toast.error).toHaveBeenCalledWith(expectedMessage);
@@ -344,16 +361,16 @@ describe('AddBoardMembers', () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
-        "Members couldn't be loaded. Please try again.",
+        BOARD_MEMBERS_LOAD_FAILURE_MESSAGE,
       );
     });
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Unable to load organization members.',
+      BOARD_MEMBERS_LOAD_ALERT_MESSAGE,
     );
-    expect(screen.queryByText('No organization members are available yet.')).not.toBeInTheDocument();
+    expect(screen.queryByText(BOARD_MEMBERS_NONE_AVAILABLE_MESSAGE)).not.toBeInTheDocument();
     expect(OrganizationService.getOrganizationMembers).not.toHaveBeenCalled();
 
-    await user.click(screen.getByRole('button', { name: /try again/i }));
+    await user.click(screen.getByRole('button', { name: BOARD_MEMBERS_RETRY_LABEL }));
     expect(await screen.findByText(MOCK_EMAIL)).toBeInTheDocument();
   });
 
@@ -367,15 +384,15 @@ describe('AddBoardMembers', () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
-        "Members couldn't be loaded. Please try again.",
+        BOARD_MEMBERS_LOAD_FAILURE_MESSAGE,
       );
     });
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Unable to load organization members.',
+      BOARD_MEMBERS_LOAD_ALERT_MESSAGE,
     );
-    expect(screen.queryByText('No organization members are available yet.')).not.toBeInTheDocument();
+    expect(screen.queryByText(BOARD_MEMBERS_NONE_AVAILABLE_MESSAGE)).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /try again/i }));
+    await user.click(screen.getByRole('button', { name: BOARD_MEMBERS_RETRY_LABEL }));
     expect(await screen.findByText(MOCK_EMAIL)).toBeInTheDocument();
   });
 
@@ -384,7 +401,7 @@ describe('AddBoardMembers', () => {
 
     render(<AddBoardMembers />);
 
-    expect(await screen.findByText('No organization members are available yet.')).toBeInTheDocument();
-    expect(screen.getByText('0 selected')).toBeInTheDocument();
+    expect(await screen.findByText(BOARD_MEMBERS_NONE_AVAILABLE_MESSAGE)).toBeInTheDocument();
+    expect(screen.getByText(boardSelectedCountLabel(0))).toBeInTheDocument();
   });
 });

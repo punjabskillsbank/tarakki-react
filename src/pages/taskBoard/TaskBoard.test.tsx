@@ -18,6 +18,18 @@ import {
   mappedTechOrganization,
   organizationMemberResponseFactory,
   taskResponseFactory,
+  boardMemberAccessFactory,
+  boardMemberResponseFactory,
+  TASK_BOARD_ADD_GROUP_LABEL,
+  TASK_BOARD_ADD_MEMBER_LABEL,
+  TASK_BOARD_ADD_SELECTED_MEMBER_LABEL,
+  TASK_BOARD_CREATE_FIRST_GROUP_LABEL,
+  TASK_BOARD_EMPTY_MESSAGE,
+  TASK_BOARD_GROUP_BY_LABEL,
+  TASK_BOARD_GROUP_NAME_PLACEHOLDER,
+  TASK_BOARD_NO_PRIORITY_LABEL,
+  TASK_BOARD_PRIORITY_LABEL,
+  TASK_BOARD_TASK_LOAD_FAILURE_MESSAGE,
 } from "../../test-utils/factories";
 
 jest.mock("../../services/BoardMemberService");
@@ -77,7 +89,7 @@ describe("TaskBoard", () => {
     render(<TaskBoard />);
 
     expect(
-      await screen.findByText("This board has no groups yet"),
+      await screen.findByText(TASK_BOARD_EMPTY_MESSAGE),
     ).toBeInTheDocument();
     expect(mockedTaskService.getTasks).toHaveBeenCalledWith(MOCK_BOARD_ID);
     expect(mockedBoardService.getBoard).toHaveBeenCalledWith(MOCK_BOARD_ID);
@@ -100,15 +112,16 @@ describe("TaskBoard", () => {
     render(<TaskBoard />);
 
     await user.click(
-      await screen.findByRole("button", { name: "Create first group" }),
+      await screen.findByRole("button", { name: TASK_BOARD_CREATE_FIRST_GROUP_LABEL }),
     );
-    await user.type(screen.getByPlaceholderText("Group name..."), "Backlog");
-    await user.click(screen.getByRole("button", { name: "Add" }));
-    await user.click(screen.getByRole("button", { name: /group by/i }));
-    await user.click(screen.getByRole("menuitem", { name: "Priority" }));
+    const payload = groupPayloadFactory();
+    await user.type(screen.getByPlaceholderText(TASK_BOARD_GROUP_NAME_PLACEHOLDER), payload.groupName);
+    await user.click(screen.getByRole("button", { name: TASK_BOARD_ADD_GROUP_LABEL }));
+    await user.click(screen.getByRole("button", { name: TASK_BOARD_GROUP_BY_LABEL }));
+    await user.click(screen.getByRole("menuitem", { name: TASK_BOARD_PRIORITY_LABEL }));
 
-    expect(await screen.findByText("No priority")).toBeInTheDocument();
-    expect(screen.getByText("Write tests")).toBeInTheDocument();
+    expect(await screen.findByText(TASK_BOARD_NO_PRIORITY_LABEL)).toBeInTheDocument();
+    expect(screen.getByText(taskResponseFactory().title)).toBeInTheDocument();
   });
 
   it("creates a group from the empty-board action", async () => {
@@ -120,10 +133,10 @@ describe("TaskBoard", () => {
     render(<TaskBoard />);
 
     await user.click(
-      await screen.findByRole("button", { name: "Create first group" }),
+      await screen.findByRole("button", { name: TASK_BOARD_CREATE_FIRST_GROUP_LABEL }),
     );
-    await user.type(screen.getByPlaceholderText("Group name..."), payload.groupName);
-    await user.click(screen.getByRole("button", { name: "Add" }));
+    await user.type(screen.getByPlaceholderText(TASK_BOARD_GROUP_NAME_PLACEHOLDER), payload.groupName);
+    await user.click(screen.getByRole("button", { name: TASK_BOARD_ADD_GROUP_LABEL }));
 
     await waitFor(() => {
       expect(mockedGroupService.createGroup).toHaveBeenCalledWith(
@@ -141,38 +154,31 @@ describe("TaskBoard", () => {
     render(<TaskBoard />);
 
     await user.click(
-      await screen.findByRole("button", { name: "Add Member" }),
+      await screen.findByRole("button", { name: TASK_BOARD_ADD_MEMBER_LABEL }),
     );
     await user.click(
       await screen.findByRole("button", { name: organizationMember.email }),
     );
-    await user.click(screen.getByRole("button", { name: /add selected member/i }));
+    await user.click(screen.getByRole("button", { name: TASK_BOARD_ADD_SELECTED_MEMBER_LABEL }));
 
     await waitFor(() => {
       expect(mockedBoardMemberService.addOrgMemberToBoard).toHaveBeenCalledWith(
         MOCK_BOARD_ID,
         organizationMember.orgMemberId,
-        { email: organizationMember.email, canEdit: false, canView: true },
+        boardMemberAccessFactory(organizationMember.email),
       );
     });
   });
 
   it("does not offer a member who is already on the board", async () => {
     mockedBoardMemberService.getBoardMembers.mockResolvedValue([
-      {
-        boardMemberId: 1,
-        boardId: MOCK_BOARD_ID,
-        memberId: organizationMember.memberId,
-        role: "BOARD_ADMIN",
-        canEdit: true,
-        canView: true,
-      },
+      boardMemberResponseFactory({ memberId: organizationMember.memberId }),
     ]);
 
     render(<TaskBoard />);
 
-    await screen.findByText("This board has no groups yet");
-    await userEvent.click(screen.getByRole("button", { name: "Add Member" }));
+    await screen.findByText(TASK_BOARD_EMPTY_MESSAGE);
+    await userEvent.click(screen.getByRole("button", { name: TASK_BOARD_ADD_MEMBER_LABEL }));
 
     expect(
       screen.queryByRole("button", { name: organizationMember.email }),
@@ -188,7 +194,7 @@ describe("TaskBoard", () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
-        "Tasks couldn't be loaded. Please try again.",
+        TASK_BOARD_TASK_LOAD_FAILURE_MESSAGE,
       );
     });
   });
