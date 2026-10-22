@@ -11,6 +11,7 @@ import {
   addBoardMembersSubmissionErrorCases,
   alreadyAddedConflictErrorFactory,
   alreadyTimedOutErrorFactory,
+  unrelatedConflictErrorFactory,
   boardLoadErrorFactory,
   boardMemberNetworkErrorFactory,
   boardResponseFactory,
@@ -21,6 +22,7 @@ import {
   MOCK_ALREADY_TIMED_OUT_ERROR,
   MOCK_BOARD_MEMBER_NETWORK_ERROR,
   MOCK_INVALID_BOARD_ID,
+  MOCK_UNRELATED_CONFLICT_ERROR,
   MOCK_ORG_MEMBER_ID,
   MOCK_ORG_MEMBER_ID_2,
   MOCK_ORG_MEMBER_ID_3,
@@ -34,6 +36,8 @@ import {
   BOARD_MEMBERS_LOAD_FAILURE_MESSAGE,
   BOARD_MEMBERS_LOADING_LABEL,
   BOARD_MEMBERS_NONE_AVAILABLE_MESSAGE,
+  BOARD_MEMBERS_ALL_ADDED_MESSAGE,
+  BOARD_MEMBERS_NO_ORGANIZATION_MEMBERS_MESSAGE,
   BOARD_MEMBERS_RETRY_LABEL,
   BOARD_MEMBERS_SKIP_LABEL,
   BOARD_MEMBERS_SUBMIT_LABEL,
@@ -143,6 +147,18 @@ describe('AddBoardMembers', () => {
 
     expect(await screen.findByText(MOCK_EMAIL2)).toBeInTheDocument();
     expect(screen.queryByText(MOCK_EMAIL)).not.toBeInTheDocument();
+  });
+
+  it('explains when every organization member is already on the board', async () => {
+    const member = organizationMemberResponseFactory();
+    (OrganizationService.getOrganizationMembers as jest.Mock).mockResolvedValueOnce([member]);
+    (BoardMemberService.getBoardMembers as jest.Mock).mockResolvedValueOnce([
+      boardMemberResponseFactory({ memberId: member.memberId }),
+    ]);
+
+    render(<AddBoardMembers />);
+
+    expect(await screen.findByText(BOARD_MEMBERS_ALL_ADDED_MESSAGE)).toBeInTheDocument();
   });
 
   it('navigates to the board when skipping member selection', async () => {
@@ -258,11 +274,11 @@ describe('AddBoardMembers', () => {
     await waitFor(() => {
       expect(screen.getByText(boardSelectedCountLabel(1))).toBeInTheDocument();
       expect(
-        screen.getByRole('button', { name: caseInsensitiveRegexFactory(MOCK_EMAIL) }),
-      ).toHaveAttribute(BOARD_MEMBER_ARIA_PRESSED_ATTRIBUTE, BOARD_MEMBER_UNSELECTED_VALUE);
+        screen.queryByRole('button', { name: caseInsensitiveRegexFactory(MOCK_EMAIL) }),
+      ).not.toBeInTheDocument();
       expect(
-        screen.getByRole('button', { name: caseInsensitiveRegexFactory(MOCK_EMAIL2) }),
-      ).toHaveAttribute(BOARD_MEMBER_ARIA_PRESSED_ATTRIBUTE, BOARD_MEMBER_UNSELECTED_VALUE);
+        screen.queryByRole('button', { name: caseInsensitiveRegexFactory(MOCK_EMAIL2) }),
+      ).not.toBeInTheDocument();
       expect(
         screen.getByRole('button', { name: caseInsensitiveRegexFactory(thirdMember.email) }),
       ).toHaveAttribute(BOARD_MEMBER_ARIA_PRESSED_ATTRIBUTE, BOARD_MEMBER_SELECTED_VALUE);
@@ -331,6 +347,24 @@ describe('AddBoardMembers', () => {
     });
   });
 
+  it('treats an unrelated HTTP 409 response as a failure', async () => {
+    const user = userEvent.setup();
+    (BoardMemberService.addOrgMemberToBoard as jest.Mock).mockRejectedValueOnce(
+      unrelatedConflictErrorFactory(),
+    );
+
+    render(<AddBoardMembers />);
+
+    await user.click(await screen.findByText(MOCK_EMAIL));
+    await user.click(screen.getByRole('button', { name: BOARD_MEMBERS_SUBMIT_LABEL }));
+
+    await waitFor(() => {
+      expect(screen.getByText(boardSelectedCountLabel(1))).toBeInTheDocument();
+      expect(toast.error).toHaveBeenCalledWith(MOCK_UNRELATED_CONFLICT_ERROR);
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+  });
+
   it.each(addBoardMembersSubmissionErrorCases())(
     'shows the expected message for a %s',
     async (_description, error, expectedMessage) => {
@@ -367,7 +401,7 @@ describe('AddBoardMembers', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       BOARD_MEMBERS_LOAD_ALERT_MESSAGE,
     );
-    expect(screen.queryByText(BOARD_MEMBERS_NONE_AVAILABLE_MESSAGE)).not.toBeInTheDocument();
+    expect(screen.queryByText(BOARD_MEMBERS_NO_ORGANIZATION_MEMBERS_MESSAGE)).not.toBeInTheDocument();
     expect(OrganizationService.getOrganizationMembers).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole('button', { name: BOARD_MEMBERS_RETRY_LABEL }));
@@ -390,7 +424,7 @@ describe('AddBoardMembers', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       BOARD_MEMBERS_LOAD_ALERT_MESSAGE,
     );
-    expect(screen.queryByText(BOARD_MEMBERS_NONE_AVAILABLE_MESSAGE)).not.toBeInTheDocument();
+    expect(screen.queryByText(BOARD_MEMBERS_NO_ORGANIZATION_MEMBERS_MESSAGE)).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: BOARD_MEMBERS_RETRY_LABEL }));
     expect(await screen.findByText(MOCK_EMAIL)).toBeInTheDocument();
@@ -401,7 +435,7 @@ describe('AddBoardMembers', () => {
 
     render(<AddBoardMembers />);
 
-    expect(await screen.findByText(BOARD_MEMBERS_NONE_AVAILABLE_MESSAGE)).toBeInTheDocument();
+    expect(await screen.findByText(BOARD_MEMBERS_NO_ORGANIZATION_MEMBERS_MESSAGE)).toBeInTheDocument();
     expect(screen.getByText(boardSelectedCountLabel(0))).toBeInTheDocument();
   });
 });

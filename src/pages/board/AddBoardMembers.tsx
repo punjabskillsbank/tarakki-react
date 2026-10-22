@@ -15,6 +15,7 @@ export function AddBoardMembers() {
   const navigate = useNavigate();
   const { boardId } = useParams<{ boardId: string }>();
   const [members, setMembers] = useState<OrganizationMemberResponse[]>([]);
+  const [organizationMemberCount, setOrganizationMemberCount] = useState(0);
   const [selectedMemberIds, setSelectedMemberIds] = useState<Set<number>>(
     new Set(),
   );
@@ -43,6 +44,9 @@ export function AddBoardMembers() {
           BoardMemberService.getBoardMembers(parsedBoardId),
         ]);
         if (!cancelled) {
+          setOrganizationMemberCount(organizationMembers.length);
+          // Board memberships store the underlying member UUID. The POST endpoint,
+          // however, receives the organization-membership ID (`orgMemberId`).
           const existingMemberIds = new Set(
             boardMembers.map((member) => member.memberId),
           );
@@ -124,10 +128,18 @@ export function AddBoardMembers() {
     if (!error || typeof error !== "object") return false;
 
     const maybeError = error as {
-      response?: { status?: number };
+      response?: { status?: number; data?: { message?: string } | string };
     };
 
-    return maybeError.response?.status === 409;
+    if (maybeError.response?.status !== 409) return false;
+
+    const responseData = maybeError.response.data;
+    const message =
+      typeof responseData === "string"
+        ? responseData
+        : responseData?.message;
+
+    return typeof message === "string" && /already a member of board/i.test(message);
   };
 
   const handleSubmit = async () => {
@@ -178,6 +190,12 @@ export function AddBoardMembers() {
         }
         return next;
       });
+
+      // Remove members whose request succeeded (including the confirmed
+      // already-on-board conflict) so they cannot be selected again.
+      setMembers((current) =>
+        current.filter((member) => !successfulIds.includes(member.orgMemberId)),
+      );
 
       if (failedIds.length === 0) {
         toast.success("Board members added successfully!");
@@ -254,7 +272,9 @@ export function AddBoardMembers() {
             </div>
           ) : availableMembers.length === 0 ? (
             <p className="py-10 text-center text-gray-500">
-              No organization members are available yet.
+              {organizationMemberCount === 0
+                ? "This organization has no members yet."
+                : "All organization members have already been added to this board."}
             </p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">

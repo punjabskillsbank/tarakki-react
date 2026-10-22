@@ -164,6 +164,8 @@ export const MOCK_EMAIL3 = "member3@example.com";
 export const MOCK_INVALID_BOARD_ID = "invalid-board-id";
 export const MOCK_BOARD_MEMBER_NETWORK_ERROR = "network failure";
 export const MOCK_ALREADY_TIMED_OUT_ERROR = "Already timed out";
+export const MOCK_ALREADY_BOARD_MEMBER_ERROR = "Member is already a member of board";
+export const MOCK_UNRELATED_CONFLICT_ERROR = "A different conflict occurred";
 
 export const boardLoadErrorFactory = () => new Error("board failure");
 export const organizationMembersLoadErrorFactory = () =>
@@ -173,7 +175,10 @@ export const boardMemberNetworkErrorFactory = () =>
 export const alreadyTimedOutErrorFactory = () =>
   new Error(MOCK_ALREADY_TIMED_OUT_ERROR);
 export const alreadyAddedConflictErrorFactory = () => ({
-  response: { status: 409 },
+  response: { status: 409, data: MOCK_ALREADY_BOARD_MEMBER_ERROR },
+});
+export const unrelatedConflictErrorFactory = () => ({
+  response: { status: 409, data: MOCK_UNRELATED_CONFLICT_ERROR },
 });
 
 export const addBoardMembersSubmissionErrorCases = (): [string, unknown, string][] => [
@@ -273,6 +278,10 @@ export const BOARD_MEMBERS_LOADING_LABEL = "Loading members...";
 export const BOARD_MEMBERS_HEADING = "Organization members";
 export const BOARD_MEMBERS_NONE_AVAILABLE_MESSAGE =
   "No organization members are available yet.";
+export const BOARD_MEMBERS_NO_ORGANIZATION_MEMBERS_MESSAGE =
+  "This organization has no members yet.";
+export const BOARD_MEMBERS_ALL_ADDED_MESSAGE =
+  "All organization members have already been added to this board.";
 export const BOARD_MEMBERS_LOAD_FAILURE_MESSAGE =
   "Members couldn't be loaded. Please try again.";
 export const BOARD_MEMBERS_LOAD_ALERT_MESSAGE =
