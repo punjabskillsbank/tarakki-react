@@ -8,20 +8,35 @@ import BoardService from "../../services/BoardService";
 import GroupService from "../../services/GroupService";
 import OrganizationService from "../../services/OrganizationServices";
 import TaskService from "../../services/TaskService";
+import { adminOrganizationService } from "../../services/AdminOrganizationService";
 import {
   boardResponseFactory,
   groupPayloadFactory,
   groupResponseFactory,
   MOCK_BOARD_ID,
   MOCK_NETWORK_ERROR,
+  mappedTechOrganization,
   organizationMemberResponseFactory,
   taskResponseFactory,
+  boardMemberAccessFactory,
+  boardMemberResponseFactory,
+  TASK_BOARD_ADD_GROUP_LABEL,
+  TASK_BOARD_ADD_MEMBER_LABEL,
+  TASK_BOARD_ADD_SELECTED_MEMBER_LABEL,
+  TASK_BOARD_CREATE_FIRST_GROUP_LABEL,
+  TASK_BOARD_EMPTY_MESSAGE,
+  TASK_BOARD_GROUP_BY_LABEL,
+  TASK_BOARD_GROUP_NAME_PLACEHOLDER,
+  TASK_BOARD_NO_PRIORITY_LABEL,
+  TASK_BOARD_PRIORITY_LABEL,
+  TASK_BOARD_TASK_LOAD_FAILURE_MESSAGE,
 } from "../../test-utils/factories";
 
 jest.mock("../../services/BoardMemberService");
 jest.mock("../../services/BoardService");
 jest.mock("../../services/GroupService");
 jest.mock("../../services/OrganizationServices");
+jest.mock("../../services/AdminOrganizationService");
 jest.mock("../../services/TaskService");
 jest.mock("react-hot-toast", () => ({ error: jest.fn() }));
 jest.mock("react-router-dom", () => ({
@@ -37,6 +52,9 @@ const mockedGroupService = GroupService as jest.Mocked<typeof GroupService>;
 const mockedOrganizationService = OrganizationService as jest.Mocked<
   typeof OrganizationService
 >;
+const mockedAdminOrganizationService = adminOrganizationService as jest.Mocked<
+  typeof adminOrganizationService
+>;
 const mockedTaskService = TaskService as jest.Mocked<typeof TaskService>;
 
 const board = boardResponseFactory();
@@ -45,9 +63,13 @@ const organizationMember = organizationMemberResponseFactory();
 const configureLoadedBoard = () => {
   mockedTaskService.getTasks.mockResolvedValue([taskResponseFactory()]);
   mockedBoardService.getBoard.mockResolvedValue(board);
+  mockedBoardMemberService.getBoardMembers.mockResolvedValue([]);
   mockedOrganizationService.getOrganizationMembers.mockResolvedValue([
     organizationMember,
   ]);
+  mockedAdminOrganizationService.getOrganization.mockResolvedValue(
+    mappedTechOrganization,
+  );
 };
 
 describe("TaskBoard", () => {
@@ -67,13 +89,39 @@ describe("TaskBoard", () => {
     render(<TaskBoard />);
 
     expect(
-      await screen.findByText("This board has no groups yet"),
+      await screen.findByText(TASK_BOARD_EMPTY_MESSAGE),
     ).toBeInTheDocument();
     expect(mockedTaskService.getTasks).toHaveBeenCalledWith(MOCK_BOARD_ID);
     expect(mockedBoardService.getBoard).toHaveBeenCalledWith(MOCK_BOARD_ID);
     expect(mockedOrganizationService.getOrganizationMembers).toHaveBeenCalledWith(
       board.orgId,
     );
+    expect(mockedAdminOrganizationService.getOrganization).toHaveBeenCalledWith(
+      String(board.orgId),
+    );
+    expect(
+      await screen.findByText(mappedTechOrganization.name),
+    ).toBeInTheDocument();
+    expect(screen.getByText(board.boardName)).toBeInTheDocument();
+  });
+
+  it("groups task cards by priority", async () => {
+    const user = userEvent.setup();
+    mockedGroupService.createGroup.mockResolvedValue(groupResponseFactory());
+
+    render(<TaskBoard />);
+
+    await user.click(
+      await screen.findByRole("button", { name: TASK_BOARD_CREATE_FIRST_GROUP_LABEL }),
+    );
+    const payload = groupPayloadFactory();
+    await user.type(screen.getByPlaceholderText(TASK_BOARD_GROUP_NAME_PLACEHOLDER), payload.groupName);
+    await user.click(screen.getByRole("button", { name: TASK_BOARD_ADD_GROUP_LABEL }));
+    await user.click(screen.getByRole("button", { name: TASK_BOARD_GROUP_BY_LABEL }));
+    await user.click(screen.getByRole("menuitem", { name: TASK_BOARD_PRIORITY_LABEL }));
+
+    expect(await screen.findByText(TASK_BOARD_NO_PRIORITY_LABEL)).toBeInTheDocument();
+    expect(screen.getByText(taskResponseFactory().title)).toBeInTheDocument();
   });
 
   it("creates a group from the empty-board action", async () => {
@@ -85,10 +133,10 @@ describe("TaskBoard", () => {
     render(<TaskBoard />);
 
     await user.click(
-      await screen.findByRole("button", { name: "Create first group" }),
+      await screen.findByRole("button", { name: TASK_BOARD_CREATE_FIRST_GROUP_LABEL }),
     );
-    await user.type(screen.getByPlaceholderText("Group name..."), payload.groupName);
-    await user.click(screen.getByRole("button", { name: "Add" }));
+    await user.type(screen.getByPlaceholderText(TASK_BOARD_GROUP_NAME_PLACEHOLDER), payload.groupName);
+    await user.click(screen.getByRole("button", { name: TASK_BOARD_ADD_GROUP_LABEL }));
 
     await waitFor(() => {
       expect(mockedGroupService.createGroup).toHaveBeenCalledWith(
@@ -101,23 +149,40 @@ describe("TaskBoard", () => {
 
   it("adds an organization member to the board", async () => {
     const user = userEvent.setup();
-    mockedBoardMemberService.addMember.mockResolvedValue();
+    mockedBoardMemberService.addOrgMemberToBoard.mockResolvedValue();
 
     render(<TaskBoard />);
 
     await user.click(
-      await screen.findByRole("button", { name: "Add Member" }),
+      await screen.findByRole("button", { name: TASK_BOARD_ADD_MEMBER_LABEL }),
     );
     await user.click(
       await screen.findByRole("button", { name: organizationMember.email }),
     );
+    await user.click(screen.getByRole("button", { name: TASK_BOARD_ADD_SELECTED_MEMBER_LABEL }));
 
     await waitFor(() => {
-      expect(mockedBoardMemberService.addMember).toHaveBeenCalledWith(
+      expect(mockedBoardMemberService.addOrgMemberToBoard).toHaveBeenCalledWith(
         MOCK_BOARD_ID,
-        organizationMember.memberId,
+        organizationMember.orgMemberId,
+        boardMemberAccessFactory(organizationMember.email),
       );
     });
+  });
+
+  it("does not offer a member who is already on the board", async () => {
+    mockedBoardMemberService.getBoardMembers.mockResolvedValue([
+      boardMemberResponseFactory({ memberId: organizationMember.memberId }),
+    ]);
+
+    render(<TaskBoard />);
+
+    await screen.findByText(TASK_BOARD_EMPTY_MESSAGE);
+    await userEvent.click(screen.getByRole("button", { name: TASK_BOARD_ADD_MEMBER_LABEL }));
+
+    expect(
+      screen.queryByRole("button", { name: organizationMember.email }),
+    ).not.toBeInTheDocument();
   });
 
   it("shows an error when board data cannot be loaded", async () => {
@@ -129,7 +194,7 @@ describe("TaskBoard", () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
-        "Tasks couldn't be loaded. Please try again.",
+        TASK_BOARD_TASK_LOAD_FAILURE_MESSAGE,
       );
     });
   });
