@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { Check, Users } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import { isAxiosError } from "axios";
 import { PageBackground } from "../../components/PageBackground";
 import { PageHeader } from "../../components/PageHeader";
 import { PrimaryButton } from "../../components/PrimaryButton";
@@ -10,6 +11,7 @@ import BoardMemberService from "../../services/BoardMemberService";
 import BoardService from "../../services/BoardService";
 import OrganizationService from "../../services/OrganizationServices";
 import type { OrganizationMemberResponse } from "../../services/OrganizationServices";
+import { getErrorMessage } from "../../utils/errorUtils";
 
 export function AddBoardMembers() {
   const navigate = useNavigate();
@@ -95,51 +97,8 @@ export function AddBoardMembers() {
 
   const availableMembers = members;
 
-  const getErrorMessage = (error: unknown): string => {
-    if (typeof error === "string" && error.trim()) return error.trim();
-
-    if (error && typeof error === "object") {
-      const maybeError = error as {
-        response?: { data?: { message?: string } | string; status?: number };
-        message?: string;
-      };
-
-      const responseData = maybeError.response?.data;
-      if (typeof responseData === "string" && responseData.trim()) {
-        return responseData.trim();
-      }
-
-      if (responseData && typeof responseData === "object") {
-        const dataMessage = responseData.message;
-        if (typeof dataMessage === "string" && dataMessage.trim()) {
-          return dataMessage.trim();
-        }
-      }
-
-      if (typeof maybeError.message === "string" && maybeError.message.trim()) {
-        return maybeError.message.trim();
-      }
-    }
-
-    return "Some members couldn't be added. Please try again.";
-  };
-
   const isAlreadyAddedError = (error: unknown) => {
-    if (!error || typeof error !== "object") return false;
-
-    const maybeError = error as {
-      response?: { status?: number; data?: { message?: string } | string };
-    };
-
-    if (maybeError.response?.status !== 409) return false;
-
-    const responseData = maybeError.response.data;
-    const message =
-      typeof responseData === "string"
-        ? responseData
-        : responseData?.message;
-
-    return typeof message === "string" && /already a member of board/i.test(message);
+    return isAxiosError(error) && error.response?.status === 409;
   };
 
   const handleSubmit = async () => {
@@ -191,8 +150,8 @@ export function AddBoardMembers() {
         return next;
       });
 
-      // Remove members whose request succeeded (including the confirmed
-      // already-on-board conflict) so they cannot be selected again.
+      // Remove members whose request succeeded or returned the endpoint's 409
+      // conflict so they cannot be selected again.
       setMembers((current) =>
         current.filter((member) => !successfulIds.includes(member.orgMemberId)),
       );
@@ -212,11 +171,19 @@ export function AddBoardMembers() {
         toast.success(`${successfulIds.length} member(s) added successfully.`);
       }
       toast.error(
-        getErrorMessage(failedReason ?? "Some members couldn't be added. Please try again."),
+        getErrorMessage(
+          failedReason ?? "Some members couldn't be added. Please try again.",
+          "Some members couldn't be added. Please try again.",
+        ),
       );
     } catch (error) {
       console.error("Failed to add board members:", error);
-      toast.error(getErrorMessage(error));
+      toast.error(
+        getErrorMessage(
+          error,
+          "Some members couldn't be added. Please try again.",
+        ),
+      );
     } finally {
       setIsSubmitting(false);
     }

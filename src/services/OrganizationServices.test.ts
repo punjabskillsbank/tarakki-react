@@ -153,6 +153,22 @@ describe("OrganizationService", () => {
       ).rejects.toThrow(MOCK_INVITATION_ERROR);
     });
 
+    it("joins field validation messages when member loading fails", async () => {
+      mockedIsAxiosError.mockReturnValueOnce(true);
+      mockedAPI.get.mockRejectedValueOnce({
+        response: {
+          data: {
+            email: "Email is invalid",
+            role: "Role is required",
+          },
+        },
+      });
+
+      await expect(
+        OrganizationService.getOrganizationMembers(MOCK_ORGANIZATION_ID),
+      ).rejects.toThrow("Email is invalid, Role is required");
+    });
+
     it("uses the default error message when member loading fails without one", async () => {
       mockedIsAxiosError.mockReturnValueOnce(true);
       mockedAPI.get.mockRejectedValueOnce(axiosErrorResponseFactory());

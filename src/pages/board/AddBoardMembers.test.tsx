@@ -22,7 +22,6 @@ import {
   MOCK_ALREADY_TIMED_OUT_ERROR,
   MOCK_BOARD_MEMBER_NETWORK_ERROR,
   MOCK_INVALID_BOARD_ID,
-  MOCK_UNRELATED_CONFLICT_ERROR,
   MOCK_ORG_MEMBER_ID,
   MOCK_ORG_MEMBER_ID_2,
   MOCK_ORG_MEMBER_ID_3,
@@ -35,7 +34,6 @@ import {
   BOARD_MEMBERS_LOAD_ALERT_MESSAGE,
   BOARD_MEMBERS_LOAD_FAILURE_MESSAGE,
   BOARD_MEMBERS_LOADING_LABEL,
-  BOARD_MEMBERS_NONE_AVAILABLE_MESSAGE,
   BOARD_MEMBERS_ALL_ADDED_MESSAGE,
   BOARD_MEMBERS_NO_ORGANIZATION_MEMBERS_MESSAGE,
   BOARD_MEMBERS_RETRY_LABEL,
@@ -48,7 +46,6 @@ import {
   boardSelectedCountLabel,
   BOARD_MEMBER_ARIA_PRESSED_ATTRIBUTE,
   BOARD_MEMBER_SELECTED_VALUE,
-  BOARD_MEMBER_UNSELECTED_VALUE,
   boardMembersAddedCountMessage,
   caseInsensitiveRegexFactory,
 } from '../../test-utils/factories';
@@ -347,7 +344,7 @@ describe('AddBoardMembers', () => {
     });
   });
 
-  it('treats an unrelated HTTP 409 response as a failure', async () => {
+  it('treats any HTTP 409 response as an already-added member', async () => {
     const user = userEvent.setup();
     (BoardMemberService.addOrgMemberToBoard as jest.Mock).mockRejectedValueOnce(
       unrelatedConflictErrorFactory(),
@@ -359,9 +356,9 @@ describe('AddBoardMembers', () => {
     await user.click(screen.getByRole('button', { name: BOARD_MEMBERS_SUBMIT_LABEL }));
 
     await waitFor(() => {
-      expect(screen.getByText(boardSelectedCountLabel(1))).toBeInTheDocument();
-      expect(toast.error).toHaveBeenCalledWith(MOCK_UNRELATED_CONFLICT_ERROR);
-      expect(mockNavigate).not.toHaveBeenCalled();
+      expect(toast.success).toHaveBeenCalledWith(BOARD_MEMBERS_SUCCESS_MESSAGE);
+      expect(toast.error).not.toHaveBeenCalled();
+      expect(mockNavigate).toHaveBeenCalledWith(boardRouteFactory(MOCK_BOARD_ID));
     });
   });
 

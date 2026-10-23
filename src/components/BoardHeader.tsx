@@ -25,7 +25,7 @@ export function BoardHeader({
       </div>
       <div className="h-4 w-px bg-[#E6E9EF]" />
       <div className="flex items-center gap-1.5 text-[12px] text-[#9CA3AF]">
-        <span>Workspace</span>
+        <span>Tarakki</span>
         <ChevronRight size={12} className="text-[#C4C4C4]" />
         <span className="font-semibold text-[#1F2937]">{boardName}</span>
       </div>

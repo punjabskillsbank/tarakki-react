@@ -175,19 +175,36 @@ export const boardMemberNetworkErrorFactory = () =>
 export const alreadyTimedOutErrorFactory = () =>
   new Error(MOCK_ALREADY_TIMED_OUT_ERROR);
 export const alreadyAddedConflictErrorFactory = () => ({
+  isAxiosError: true,
   response: { status: 409, data: MOCK_ALREADY_BOARD_MEMBER_ERROR },
 });
 export const unrelatedConflictErrorFactory = () => ({
+  isAxiosError: true,
   response: { status: 409, data: MOCK_UNRELATED_CONFLICT_ERROR },
 });
 
 export const addBoardMembersSubmissionErrorCases = (): [string, unknown, string][] => [
   ["string rejection", "  Permission denied  ", "Permission denied"],
-  ["response string", { response: { data: "  Request failed  " } }, "Request failed"],
+  [
+    "response string",
+    { isAxiosError: true, response: { data: "  Request failed  " } },
+    "Request failed",
+  ],
   [
     "response message",
-    { response: { data: { message: "  Access denied  " } } },
+    {
+      isAxiosError: true,
+      response: { data: { message: "  Access denied  " } },
+    },
     "Access denied",
+  ],
+  [
+    "validation error map",
+    {
+      isAxiosError: true,
+      response: { data: { email: "Invalid email", role: "Role is required" } },
+    },
+    "Invalid email, Role is required",
   ],
   ["Error instance", new Error("Network unavailable"), "Network unavailable"],
   [
@@ -248,7 +265,7 @@ export const TASK_BOARD_ADD_MEMBER_LABEL = "Add Member";
 export const TASK_BOARD_ADD_SELECTED_MEMBER_LABEL = "Add Selected Member";
 export const TASK_BOARD_EDIT_ACCESS_LABEL =
   "Allow this member to edit the board";
-export const TASK_BOARD_WORKSPACE_LABEL = "Workspace";
+export const TASK_BOARD_WORKSPACE_LABEL = "Tarakki";
 export const TASK_BOARD_RENAME_LABEL = "Rename";
 export const TASK_BOARD_DELETE_GROUP_LABEL = "Delete group";
 export const TASK_BOARD_PRIORITY_LABEL = "Priority";
@@ -606,4 +623,3 @@ export const topbarPropsFactory = (overrides = {}) => {
     ...overrides,
   };
 };
-
