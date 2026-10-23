@@ -104,6 +104,37 @@ describe('AddBoardMembers', () => {
     expect(OrganizationService.getOrganizationMembers).not.toHaveBeenCalled();
   });
 
+  it.each(['', '0', '01', '9007199254740992'])(
+    'rejects invalid board ID "%s"',
+    async (boardId) => {
+      mockBoardId = boardId;
+
+      render(<AddBoardMembers />);
+
+      expect(toast.error).toHaveBeenCalledWith(BOARD_INFORMATION_MISSING_MESSAGE);
+      expect(BoardService.getBoard).not.toHaveBeenCalled();
+      expect(OrganizationService.getOrganizationMembers).not.toHaveBeenCalled();
+    },
+  );
+
+  it('clears previous members and selection while loading a different board', async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<AddBoardMembers />);
+
+    await user.click(await screen.findByRole('button', { name: caseInsensitiveRegexFactory(MOCK_EMAIL) }));
+    expect(screen.getByText(boardSelectedCountLabel(1))).toBeInTheDocument();
+
+    mockBoardId = '20';
+    (BoardService.getBoard as jest.Mock).mockReturnValueOnce(
+      new Promise(() => {}),
+    );
+    rerender(<AddBoardMembers />);
+
+    expect(screen.getByText(BOARD_MEMBERS_LOADING_LABEL)).toBeInTheDocument();
+    expect(screen.queryByText(MOCK_EMAIL)).not.toBeInTheDocument();
+    expect(screen.getByText(boardSelectedCountLabel(0))).toBeInTheDocument();
+  });
+
   it('renders the organization members and allows selection', async () => {
     render(<AddBoardMembers />);
 
@@ -195,6 +226,32 @@ describe('AddBoardMembers', () => {
     });
   });
 
+  it('disables the add button while a submission is in progress', async () => {
+    const user = userEvent.setup();
+    let resolveRequest: (() => void) | undefined;
+    (BoardMemberService.addOrgMemberToBoard as jest.Mock).mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        resolveRequest = resolve;
+      }),
+    );
+
+    render(<AddBoardMembers />);
+
+    await user.click(await screen.findByText(MOCK_EMAIL));
+    const addMembersButton = screen.getByRole('button', {
+      name: BOARD_MEMBERS_SUBMIT_LABEL,
+    });
+    await user.click(addMembersButton);
+
+    expect(addMembersButton).toBeDisabled();
+    expect(BoardMemberService.addOrgMemberToBoard).toHaveBeenCalledTimes(1);
+
+    resolveRequest?.();
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith(boardRouteFactory(MOCK_BOARD_ID));
+    });
+  });
+
   it('adds every selected organization member to the board', async () => {
     const user = userEvent.setup();
 
@@ -280,7 +337,9 @@ describe('AddBoardMembers', () => {
         screen.getByRole('button', { name: caseInsensitiveRegexFactory(thirdMember.email) }),
       ).toHaveAttribute(BOARD_MEMBER_ARIA_PRESSED_ATTRIBUTE, BOARD_MEMBER_SELECTED_VALUE);
       expect(toast.success).toHaveBeenCalledWith(boardMembersAddedCountMessage(2));
-      expect(toast.error).toHaveBeenCalledWith(MOCK_BOARD_MEMBER_NETWORK_ERROR);
+      expect(toast.error).toHaveBeenCalledWith(
+        `Couldn't add: ${thirdMember.email}. ${MOCK_BOARD_MEMBER_NETWORK_ERROR}`,
+      );
       expect(BoardMemberService.addOrgMemberToBoard).toHaveBeenNthCalledWith(
         1,
         MOCK_BOARD_ID,
@@ -338,7 +397,9 @@ describe('AddBoardMembers', () => {
       expect(
         screen.getByRole('button', { name: caseInsensitiveRegexFactory(MOCK_EMAIL) }),
       ).toHaveAttribute(BOARD_MEMBER_ARIA_PRESSED_ATTRIBUTE, BOARD_MEMBER_SELECTED_VALUE);
-      expect(toast.error).toHaveBeenCalledWith(MOCK_ALREADY_TIMED_OUT_ERROR);
+      expect(toast.error).toHaveBeenCalledWith(
+        `Couldn't add: ${MOCK_EMAIL}. ${MOCK_ALREADY_TIMED_OUT_ERROR}`,
+      );
       expect(toast.success).not.toHaveBeenCalled();
       expect(mockNavigate).not.toHaveBeenCalled();
     });
@@ -377,7 +438,9 @@ describe('AddBoardMembers', () => {
       await user.click(screen.getByRole('button', { name: BOARD_MEMBERS_SUBMIT_LABEL }));
 
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith(expectedMessage);
+        expect(toast.error).toHaveBeenCalledWith(
+          `Couldn't add: ${MOCK_EMAIL}. ${expectedMessage}`,
+        );
       });
     },
   );

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { Check, Users } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -13,6 +13,13 @@ import OrganizationService from "../../services/OrganizationServices";
 import type { OrganizationMemberResponse } from "../../services/OrganizationServices";
 import { getErrorMessage } from "../../utils/errorUtils";
 
+const getValidBoardId = (id: string | undefined): number | null => {
+  if (!id || !/^[1-9]\d*$/.test(id)) return null;
+
+  const parsed = Number(id);
+  return Number.isSafeInteger(parsed) ? parsed : null;
+};
+
 export function AddBoardMembers() {
   const navigate = useNavigate();
   const { boardId } = useParams<{ boardId: string }>();
@@ -26,13 +33,20 @@ export function AddBoardMembers() {
   const [loadError, setLoadError] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submissionInProgress = useRef(false);
 
   useEffect(() => {
-    const parsedBoardId = Number(boardId);
-    if (!Number.isInteger(parsedBoardId)) {
+    setIsLoading(true);
+    setLoadError(false);
+    setMembers([]);
+    setSelectedMemberIds(new Set());
+    setOrganizationMemberCount(0);
+
+    const parsedBoardId = getValidBoardId(boardId);
+    if (parsedBoardId === null) {
       setIsLoading(false);
       setLoadError(true);
-      toast.error("Board information is missing.");
+      toast.error("Invalid board information.");
       return;
     }
 
@@ -102,9 +116,11 @@ export function AddBoardMembers() {
   };
 
   const handleSubmit = async () => {
-    const parsedBoardId = Number(boardId);
-    if (!Number.isInteger(parsedBoardId)) {
-      toast.error("Board information is missing.");
+    if (isSubmitting || submissionInProgress.current) return;
+
+    const parsedBoardId = getValidBoardId(boardId);
+    if (parsedBoardId === null) {
+      toast.error("Invalid board information.");
       return;
     }
 
@@ -116,6 +132,7 @@ export function AddBoardMembers() {
       return;
     }
 
+    submissionInProgress.current = true;
     setIsSubmitting(true);
     try {
       const results = await Promise.allSettled(
@@ -170,11 +187,15 @@ export function AddBoardMembers() {
       if (successfulIds.length > 0) {
         toast.success(`${successfulIds.length} member(s) added successfully.`);
       }
+      const failedEmails = selectedMembers
+        .filter((member) => failedIds.includes(member.orgMemberId))
+        .map((member) => member.email);
+      const errorMessage = getErrorMessage(
+        failedReason ?? "Some members couldn't be added. Please try again.",
+        "Some members couldn't be added. Please try again.",
+      );
       toast.error(
-        getErrorMessage(
-          failedReason ?? "Some members couldn't be added. Please try again.",
-          "Some members couldn't be added. Please try again.",
-        ),
+        `Couldn't add: ${failedEmails.join(", ")}. ${errorMessage}`,
       );
     } catch (error) {
       console.error("Failed to add board members:", error);
@@ -185,6 +206,7 @@ export function AddBoardMembers() {
         ),
       );
     } finally {
+      submissionInProgress.current = false;
       setIsSubmitting(false);
     }
   };
@@ -288,7 +310,12 @@ export function AddBoardMembers() {
             </button>
             <PrimaryButton
               onClick={handleSubmit}
-              disabled={selectedMemberIds.size === 0 || isLoading || loadError}
+              disabled={
+                selectedMemberIds.size === 0 ||
+                isLoading ||
+                loadError ||
+                isSubmitting
+              }
               isLoading={isSubmitting}
             >
               Add Members

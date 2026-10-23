@@ -290,7 +290,7 @@ export const CREATE_BOARD_NAME_MAX_LENGTH = "100";
 export const CREATE_BOARD_DESCRIPTION_MAX_LENGTH = "500";
 export const createBoardApiErrorFactory = () => new Error("API Error");
 
-export const BOARD_INFORMATION_MISSING_MESSAGE = "Board information is missing.";
+export const BOARD_INFORMATION_MISSING_MESSAGE = "Invalid board information.";
 export const BOARD_MEMBERS_LOADING_LABEL = "Loading members...";
 export const BOARD_MEMBERS_HEADING = "Organization members";
 export const BOARD_MEMBERS_NONE_AVAILABLE_MESSAGE =
