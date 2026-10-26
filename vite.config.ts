@@ -12,6 +12,8 @@ export default defineConfig(({ mode }) => {
     process.env.VITE_ORGANIZATION_SERVICE_URL;
   const boardService =
     env.VITE_BOARD_TASK_SERVICE_URL || process.env.VITE_BOARD_TASK_SERVICE_URL;
+  const supportService =
+    env.VITE_SUPPORT_SERVICE_URL || process.env.VITE_SUPPORT_SERVICE_URL;
   const apiRoot = env.VITE_API_ROOT || process.env.VITE_API_ROOT;
 
   const defineVars: Record<string, string> = {};
@@ -31,6 +33,11 @@ export default defineConfig(({ mode }) => {
       JSON.stringify(boardService);
   }
 
+  if (supportService && supportService.trim() !== "") {
+    defineVars["process.env.VITE_SUPPORT_SERVICE_URL"] =
+      JSON.stringify(supportService);
+  }
+
   if (apiRoot && apiRoot.trim() !== "") {
     defineVars["process.env.VITE_API_ROOT"] = JSON.stringify(apiRoot);
   }
@@ -40,6 +47,7 @@ export default defineConfig(({ mode }) => {
     VITE_MEMBER_SERVICE_URL: memberService,
     VITE_ORGANIZATION_SERVICE_URL: orgService,
     VITE_BOARD_TASK_SERVICE_URL: boardService,
+    VITE_SUPPORT_SERVICE_URL: supportService,
   });
 
   return {
@@ -76,6 +84,11 @@ export default defineConfig(({ mode }) => {
 
         "/api/boards": {
           target: boardService || "http://localhost:8081",
+          changeOrigin: true,
+        },
+
+        "/api/support": {
+          target: supportService || "http://localhost:8083",
           changeOrigin: true,
         },
       },

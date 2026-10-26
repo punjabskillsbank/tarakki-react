@@ -31,7 +31,7 @@ const issueTypesByCategory = {
     },
   ],
 
-  BOARD: [
+  BOARDS: [
     {
       value: "FILE_UPLOAD_ERROR",
       label: "File Upload Error",
@@ -247,7 +247,7 @@ export function UserSupportPageForm() {
           options={[
             { value: "", label: "Select a Category" },
             { value: "ACCOUNT", label: "ACCOUNT" },
-            { value: "BOARD", label: "BOARD" },
+            { value: "BOARDS", label: "BOARDS" },
             { value: "TEAM", label: "TEAM" },
             { value: "GENERAL", label: "GENERAL" },
           ]}

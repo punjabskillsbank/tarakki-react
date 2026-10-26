@@ -16,10 +16,8 @@ export type SupportTicketData = {
 export default class SupportServices {
   static async createTicket(data: SupportTicketData) {
     try {
-      const baseURL = config.baseURLs.apiRoot || "";
-
       const response = await API.post(
-        `${baseURL}${config.endpoints.supportTickets}`,
+        config.endpoints.supportTickets,
         data
       );
 
