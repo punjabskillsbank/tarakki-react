@@ -24,6 +24,7 @@ const commonConfig = {
     organizationMember: (orgId: string | number) =>
       `/organizations/${orgId}/members`,
     supportTickets: "/support/tickets",
+    supportTicketMessages: "/support/tickets/messages",
   },
 };
 
