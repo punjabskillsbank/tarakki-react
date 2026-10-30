@@ -31,8 +31,6 @@ import {
   BOARD_INFORMATION_MISSING_MESSAGE,
   BOARD_MEMBERS_EDIT_ACCESS_LABEL,
   BOARD_MEMBERS_HEADING,
-  BOARD_MEMBERS_LOAD_ALERT_MESSAGE,
-  BOARD_MEMBERS_LOAD_FAILURE_MESSAGE,
   BOARD_MEMBERS_LOADING_LABEL,
   BOARD_MEMBERS_ALL_ADDED_MESSAGE,
   BOARD_MEMBERS_NO_ORGANIZATION_MEMBERS_MESSAGE,
@@ -455,11 +453,11 @@ describe('AddBoardMembers', () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
-        BOARD_MEMBERS_LOAD_FAILURE_MESSAGE,
+        'board failure',
       );
     });
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      BOARD_MEMBERS_LOAD_ALERT_MESSAGE,
+      'board failure',
     );
     expect(screen.queryByText(BOARD_MEMBERS_NO_ORGANIZATION_MEMBERS_MESSAGE)).not.toBeInTheDocument();
     expect(OrganizationService.getOrganizationMembers).not.toHaveBeenCalled();
@@ -468,7 +466,7 @@ describe('AddBoardMembers', () => {
     expect(await screen.findByText(MOCK_EMAIL)).toBeInTheDocument();
   });
 
-  it('shows an error when organization member loading fails', async () => {
+  it('preserves the organization member loading error', async () => {
     const user = userEvent.setup();
     (OrganizationService.getOrganizationMembers as jest.Mock).mockRejectedValueOnce(
       organizationMembersLoadErrorFactory(),
@@ -478,11 +476,11 @@ describe('AddBoardMembers', () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
-        BOARD_MEMBERS_LOAD_FAILURE_MESSAGE,
+        'organization members failure',
       );
     });
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      BOARD_MEMBERS_LOAD_ALERT_MESSAGE,
+      'organization members failure',
     );
     expect(screen.queryByText(BOARD_MEMBERS_NO_ORGANIZATION_MEMBERS_MESSAGE)).not.toBeInTheDocument();
 

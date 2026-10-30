@@ -30,14 +30,14 @@ export function AddBoardMembers() {
   );
   const [canEditMembers, setCanEditMembers] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submissionInProgress = useRef(false);
 
   useEffect(() => {
     setIsLoading(true);
-    setLoadError(false);
+    setLoadError(null);
     setMembers([]);
     setSelectedMemberIds(new Set());
     setOrganizationMemberCount(0);
@@ -45,7 +45,7 @@ export function AddBoardMembers() {
     const parsedBoardId = getValidBoardId(boardId);
     if (parsedBoardId === null) {
       setIsLoading(false);
-      setLoadError(true);
+      setLoadError("Invalid board information.");
       toast.error("Invalid board information.");
       return;
     }
@@ -71,13 +71,17 @@ export function AddBoardMembers() {
               (member) => !existingMemberIds.has(member.memberId),
             ),
           );
-          setLoadError(false);
+          setLoadError(null);
         }
       } catch (error) {
         if (!cancelled) {
-          setLoadError(true);
+          const errorMessage = getErrorMessage(
+            error,
+            "Members couldn't be loaded. Please try again.",
+          );
+          setLoadError(errorMessage);
           console.error("Failed to load organization members:", error);
-          toast.error("Members couldn't be loaded. Please try again.");
+          toast.error(errorMessage);
         }
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -92,7 +96,7 @@ export function AddBoardMembers() {
 
   const retryLoadingMembers = () => {
     setIsLoading(true);
-    setLoadError(false);
+    setLoadError(null);
     setLoadAttempt((attempt) => attempt + 1);
   };
 
@@ -250,7 +254,7 @@ export function AddBoardMembers() {
             <p className="py-10 text-center text-gray-500">Loading members...</p>
           ) : loadError ? (
             <div className="flex flex-col items-center gap-4 py-10 text-center" role="alert">
-              <p className="text-gray-700">Unable to load organization members.</p>
+              <p className="text-gray-700">{loadError}</p>
               <button
                 type="button"
                 onClick={retryLoadingMembers}
@@ -313,7 +317,7 @@ export function AddBoardMembers() {
               disabled={
                 selectedMemberIds.size === 0 ||
                 isLoading ||
-                loadError ||
+                Boolean(loadError) ||
                 isSubmitting
               }
               isLoading={isSubmitting}
