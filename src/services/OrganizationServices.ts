@@ -1,6 +1,6 @@
 import API from "./axios";
-import { isAxiosError } from "axios";
 import config from "../config/indexConfig";
+import { getAxiosErrorMessage } from "../utils/errorUtils";
 
 type CreateOrganizationData = {
   orgName: string;
@@ -20,6 +20,7 @@ type OrganizationMember = {
 };
 
 export type OrganizationMemberResponse = {
+  orgMemberId: number;
   memberId: string;
   email: string;
 };
@@ -34,13 +35,8 @@ export default class OrganizationService {
       );
       return response.data;
     } catch (error: unknown) {
-      const message = isAxiosError(error)
-        ? error.response?.data?.message ||
-          error.response?.data ||
-          "Failed to create organization"
-        : "Failed to create organization";
       throw new Error(
-        typeof message === "string" ? message : "Failed to create organization"
+        getAxiosErrorMessage(error, "Failed to create organization"),
       );
     }
   }
@@ -52,13 +48,8 @@ export default class OrganizationService {
       );
       return response.data;
     } catch (error: unknown) {
-      const message = isAxiosError(error)
-        ? error.response?.data?.message ||
-          error.response?.data ||
-          "Failed to invite members"
-        : "Failed to invite members";
       throw new Error(
-        typeof message === "string" ? message : "Failed to invite members"
+        getAxiosErrorMessage(error, "Failed to invite members"),
       );
     }
   }
@@ -73,15 +64,8 @@ export default class OrganizationService {
       );
       return response.data;
     } catch (error: unknown) {
-      const message = isAxiosError(error)
-        ? error.response?.data?.message ||
-          error.response?.data ||
-          "Failed to fetch organization members"
-        : "Failed to fetch organization members";
       throw new Error(
-        typeof message === "string"
-          ? message
-          : "Failed to fetch organization members",
+        getAxiosErrorMessage(error, "Failed to fetch organization members"),
       );
     }
   }

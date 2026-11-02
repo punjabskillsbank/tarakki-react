@@ -28,4 +28,5 @@ export type Task = {
   comments: number;
   attachments: number;
   sectionId: string;
+  createdById?: string;
 };

@@ -13,6 +13,7 @@ import type { Section, Task } from "../types/taskBoardtypes";
 type Props = {
   section: Section;
   tasks: Task[];
+  taskGroups?: { label: string; tasks: Task[] }[];
   draggingTaskId: string | null;
   dragTarget: string | null;
   onRename: (sectionId: string, name: string) => void;
@@ -29,6 +30,7 @@ type Props = {
 export function SectionColumn({
   section,
   tasks,
+  taskGroups,
   draggingTaskId,
   dragTarget,
   onRename,
@@ -141,15 +143,24 @@ export function SectionColumn({
         <div
           className={`flex min-h-[80px] flex-col gap-2 rounded-b-xl border border-t-0 border-[#E6E9EF] p-2 transition-colors ${dragTarget === section.id ? "bg-[#E6F0FF]/40" : "bg-[#F6F7FB]"}`}
         >
-          {tasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              onDragStart={() => onDragStart(task.id)}
-              onDragEnd={onDragEnd}
-              onClick={() => onSelectTask(task)}
-              isDragging={draggingTaskId === task.id}
-            />
+          {(taskGroups ?? [{ label: "", tasks }]).map((taskGroup) => (
+            <div key={taskGroup.label || "all-tasks"} className="flex flex-col gap-2">
+              {taskGroup.label && (
+                <h3 className="px-1 pt-1 text-[10px] font-bold uppercase tracking-wider text-[#9CA3AF]">
+                  {taskGroup.label}
+                </h3>
+              )}
+              {taskGroup.tasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onDragStart={() => onDragStart(task.id)}
+                  onDragEnd={onDragEnd}
+                  onClick={() => onSelectTask(task)}
+                  isDragging={draggingTaskId === task.id}
+                />
+              ))}
+            </div>
           ))}
           {dragTarget === section.id && draggingTaskId && (
             <div className="flex h-12 items-center justify-center rounded-lg border-2 border-dashed border-[#0073EA]/40 bg-[#0073EA]/5">

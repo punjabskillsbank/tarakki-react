@@ -9,6 +9,7 @@ import { FormTextarea } from '../../components/FormTextarea';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from "react-router-dom";
+import config from '../../config/indexConfig';
 
 export function CreateBoard() {
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ if (!orgId) {
 });
 
       toast.success('Board created successfully!');
-      navigate(`/task-board/${createdBoard.boardId}`);
+      navigate(config.routes.addBoardMembersWithBoardId(createdBoard.boardId));
 
       // Clear form on success
       setBoardName('');

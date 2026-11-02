@@ -5,6 +5,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { AddMemberModal } from "../../components/AddMemberModal";
 import { BoardHeader } from "../../components/BoardHeader";
 import { BoardToolbar } from "../../components/BoardToolbar";
+import type { TaskGroupBy } from "../../components/BoardToolbar";
 import { MEMBER_COLORS, SECTION_COLORS } from "../../constants/taskBoardConstant";
 import { QuickAddModal } from "../../components/QuickAddModal";
 import { SectionColumn } from "../../components/SectionColumn";
@@ -18,6 +19,7 @@ import BoardMemberService from "../../services/BoardMemberService";
 import OrganizationService, {
   type OrganizationMemberResponse,
 } from "../../services/OrganizationServices";
+import { adminOrganizationService } from "../../services/AdminOrganizationService";
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 
@@ -26,10 +28,16 @@ export default function TaskBoard() {
   const [sections, setSections] = useState<Section[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
-  const [organizationMembers, setOrganizationMembers] = useState<Member[]>([]);
+  const [boardName, setBoardName] = useState("");
+  const [orgName, setOrgName] = useState("");
+  const [boardMemberIds, setBoardMemberIds] = useState<Set<string>>(new Set());
+  const [organizationMembers, setOrganizationMembers] = useState<
+    OrganizationMemberResponse[]
+  >([]);
   const [search, setSearch] = useState("");
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null);
   const [priorityFilter, setPriorityFilter] = useState<Priority | null>(null);
+  const [groupBy, setGroupBy] = useState<TaskGroupBy>("none");
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
   const [dragTarget, setDragTarget] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -56,14 +64,47 @@ export default function TaskBoard() {
           TaskService.getTasks(parsedBoardId),
           BoardService.getBoard(parsedBoardId),
         ]);
-        const loadedMembers = await OrganizationService.getOrganizationMembers(
-          board.orgId,
-        );
+        if (cancelled) return;
+
+        setBoardName(board.boardName);
+        void adminOrganizationService
+          .getOrganization(String(board.orgId))
+          .then((organization) => {
+            if (cancelled) return;
+            if (!organization) {
+              console.error("Organization was not found:", board.orgId);
+              toast.error("Organization name couldn't be loaded. Please try again.");
+              return;
+            }
+            setOrgName(organization.name);
+          })
+          .catch((error) => {
+            if (cancelled) return;
+            console.error("Failed to load organization name:", error);
+            toast.error("Organization name couldn't be loaded. Please try again.");
+          });
+
+        const [loadedMembers, boardMembers] = await Promise.all([
+          OrganizationService.getOrganizationMembers(board.orgId),
+          BoardMemberService.getBoardMembers(parsedBoardId),
+        ]);
         if (cancelled) return;
 
         setTasks(loadedTasks.map(toBoardTask));
         setTicketCounter(loadedTasks.length);
-        setOrganizationMembers(loadedMembers.map(toBoardMember));
+        setOrganizationMembers(loadedMembers);
+        const loadedBoardMemberIds = new Set(
+          boardMembers.map((member) => member.memberId),
+        );
+        setBoardMemberIds(loadedBoardMemberIds);
+        setMembers(
+          loadedMembers
+            .filter((member) => loadedBoardMemberIds.has(member.memberId))
+            .map((member, index) => ({
+              ...toBoardMember(member),
+              color: MEMBER_COLORS[index % MEMBER_COLORS.length],
+            })),
+        );
       } catch (error) {
         if (cancelled) return;
         console.error("Failed to load tasks:", error);
@@ -86,6 +127,35 @@ export default function TaskBoard() {
       (!assigneeFilter || task.assignee?.id === assigneeFilter) &&
       (!priorityFilter || task.priority === priorityFilter),
   );
+  const getTaskGroups = (sectionTasks: Task[]): { label: string; tasks: Task[] }[] => {
+    if (groupBy === "none") return [{ label: "", tasks: sectionTasks }];
+
+    const grouped = new Map<string, Task[]>();
+    for (const task of sectionTasks) {
+      let label: string;
+      if (groupBy === "assignee") {
+        label = task.assignee?.name ?? "Unassigned";
+      } else if (groupBy === "creator") {
+        const creator = organizationMembers.find(
+          (member) => member.memberId === task.createdById,
+        );
+        label = creator?.email ?? "Unknown";
+      } else {
+        label =
+          task.priority === "none"
+            ? "No priority"
+            : task.priority.charAt(0).toUpperCase() + task.priority.slice(1);
+      }
+      const currentTasks = grouped.get(label) ?? [];
+      currentTasks.push(task);
+      grouped.set(label, currentTasks);
+    }
+
+    return [...grouped].map(([label, groupedTasks]) => ({
+      label,
+      tasks: groupedTasks,
+    }));
+  };
 
   const addSection = async () => {
     const memberId = localStorage.getItem("memberId");
@@ -134,7 +204,7 @@ export default function TaskBoard() {
       { ...task, id: uid(), ticketNum: `T-${next}` },
     ]);
   };
-  const addMember = async (member: Member) => {
+  const addMember = async (member: Member, canEdit: boolean) => {
     const parsedBoardId = Number(boardId);
     if (!Number.isInteger(parsedBoardId)) {
       toast.error("Board information is missing.");
@@ -142,7 +212,20 @@ export default function TaskBoard() {
     }
 
     try {
-      await BoardMemberService.addMember(parsedBoardId, member.id);
+      const organizationMember = organizationMembers.find(
+        (candidate) => candidate.memberId === member.id,
+      );
+      if (!organizationMember) {
+        toast.error("This organization member is no longer available.");
+        return;
+      }
+
+      await BoardMemberService.addOrgMemberToBoard(
+        parsedBoardId,
+        organizationMember.orgMemberId,
+        { email: organizationMember.email, canEdit, canView: true },
+      );
+      setBoardMemberIds((current) => new Set(current).add(member.id));
       setMembers((current) => [
         ...current,
         {
@@ -195,15 +278,19 @@ export default function TaskBoard() {
         <BoardHeader
           members={members}
           onAddMember={() => setShowAddMember(true)}
+          orgName={orgName}
+          boardName={boardName}
         />
         <BoardToolbar
           members={members}
           search={search}
           assigneeFilter={assigneeFilter}
           priorityFilter={priorityFilter}
+          groupBy={groupBy}
           onSearchChange={setSearch}
           onAssigneeFilter={setAssigneeFilter}
           onPriorityFilter={setPriorityFilter}
+          onGroupByChange={setGroupBy}
           onCreate={() => openQuickAdd(null)}
         />
         {sections.length === 0 && !addingSection ? (
@@ -220,6 +307,9 @@ export default function TaskBoard() {
                   section={section}
                   tasks={filteredTasks.filter(
                     (task) => task.sectionId === section.id,
+                  )}
+                  taskGroups={getTaskGroups(
+                    filteredTasks.filter((task) => task.sectionId === section.id),
                   )}
                   draggingTaskId={draggingTaskId}
                   dragTarget={dragTarget}
@@ -290,8 +380,9 @@ export default function TaskBoard() {
           onAdd={addMember}
           availableMembers={organizationMembers.filter(
             (candidate) =>
-              !members.some((member) => member.id === candidate.id),
-          )}
+              !boardMemberIds.has(candidate.memberId) &&
+              !members.some((member) => member.id === candidate.memberId),
+          ).map(toBoardMember)}
         />
       )}
     </div>
@@ -312,6 +403,7 @@ function toBoardTask(task: BoardTaskResponse): Task {
     comments: 0,
     attachments: 0,
     sectionId: String(task.groupId),
+    createdById: task.createdBy,
   };
 }
 

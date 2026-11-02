@@ -1,16 +1,21 @@
 import { Filter, Plus, Search, SlidersHorizontal, X } from "lucide-react";
+import { useState } from "react";
 import { Avatar } from "./Avatar";
 import { PRIORITY_CFG } from "../constants/taskBoardConstant";
 import type { Member, Priority } from "../types/taskBoardtypes";
+
+export type TaskGroupBy = "none" | "assignee" | "creator" | "priority";
 
 type Props = {
   members: Member[];
   search: string;
   assigneeFilter: string | null;
   priorityFilter: Priority | null;
+  groupBy: TaskGroupBy;
   onSearchChange: (value: string) => void;
   onAssigneeFilter: (id: string | null) => void;
   onPriorityFilter: (priority: Priority | null) => void;
+  onGroupByChange: (groupBy: TaskGroupBy) => void;
   onCreate: () => void;
 };
 
@@ -19,11 +24,15 @@ export function BoardToolbar({
   search,
   assigneeFilter,
   priorityFilter,
+  groupBy,
   onSearchChange,
   onAssigneeFilter,
   onPriorityFilter,
+  onGroupByChange,
   onCreate,
 }: Props) {
+  const [showGroupMenu, setShowGroupMenu] = useState(false);
+
   return (
     <div className="flex flex-shrink-0 items-center gap-2 border-b border-[#E6E9EF] bg-white px-5 py-2.5">
       <button
@@ -100,9 +109,43 @@ export function BoardToolbar({
           )}
         </div>
       </div>
-      <button className="flex items-center gap-1.5 rounded-md border border-[#E6E9EF] bg-white px-2.5 py-1.5 text-[12px] text-[#6B7280] transition-colors hover:bg-[#F3F4F6]">
-        <SlidersHorizontal size={12} /> Group by
-      </button>
+      <div className="relative">
+        <button
+          aria-expanded={showGroupMenu}
+          aria-haspopup="menu"
+          onClick={() => setShowGroupMenu((visible) => !visible)}
+          className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[12px] transition-colors ${groupBy !== "none" ? "border-[#0073EA]/30 bg-[#E6F0FF] font-semibold text-[#0073EA]" : "border-[#E6E9EF] bg-white text-[#6B7280] hover:bg-[#F3F4F6]"}`}
+        >
+          <SlidersHorizontal size={12} /> Group by
+        </button>
+        {showGroupMenu && (
+          <div
+            role="menu"
+            className="absolute right-0 top-9 z-30 w-40 rounded-lg border border-[#E6E9EF] bg-white py-1 shadow-lg"
+          >
+            {(
+              [
+                ["none", "No grouping"],
+                ["assignee", "Assignee"],
+                ["creator", "Created by"],
+                ["priority", "Priority"],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                role="menuitem"
+                onClick={() => {
+                  onGroupByChange(value);
+                  setShowGroupMenu(false);
+                }}
+                className={`w-full px-3 py-1.5 text-left text-[12px] transition-colors hover:bg-[#F3F4F6] ${groupBy === value ? "font-semibold text-[#0073EA]" : "text-[#1F2937]"}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
