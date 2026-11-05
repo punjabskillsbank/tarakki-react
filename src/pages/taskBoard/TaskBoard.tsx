@@ -11,7 +11,7 @@ import { QuickAddModal } from "../../components/QuickAddModal";
 import { SectionColumn } from "../../components/SectionColumn";
 import { TaskDetailsModal } from "../../components/TaskDetailsModal";
 import type { Member, Priority, Section, Task } from "../../types/taskBoardtypes";
-import { getInitials, uid } from "../../utils/taskBoardUtils";
+import { getInitials } from "../../utils/taskBoardUtils";
 import GroupService from "../../services/GroupService";
 import TaskService, { type BoardTaskResponse } from "../../services/TaskService";
 import BoardService from "../../services/BoardService";
@@ -48,7 +48,6 @@ export default function TaskBoard() {
   const [showAddMember, setShowAddMember] = useState(false);
   const [addingSection, setAddingSection] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
-  const [ticketCounter, setTicketCounter] = useState(0);
 
   useEffect(() => {
     const parsedBoardId = Number(boardId);
@@ -91,7 +90,6 @@ export default function TaskBoard() {
         if (cancelled) return;
 
         setTasks(loadedTasks.map(toBoardTask));
-        setTicketCounter(loadedTasks.length);
         setOrganizationMembers(loadedMembers);
         const loadedBoardMemberIds = new Set(
           boardMembers.map((member) => member.memberId),
@@ -196,13 +194,41 @@ export default function TaskBoard() {
       );
     }
   };
-  const addTask = (task: Omit<Task, "id" | "ticketNum">) => {
-    const next = ticketCounter + 1;
-    setTicketCounter(next);
-    setTasks((current) => [
-      ...current,
-      { ...task, id: uid(), ticketNum: `T-${next}` },
-    ]);
+  const addTask = async (task: Omit<Task, "id" | "ticketNum">) => {
+    const parsedBoardId = Number(boardId);
+    const memberId = localStorage.getItem("memberId");
+    const groupId = Number(task.sectionId);
+    if (
+      !Number.isInteger(parsedBoardId) ||
+      !memberId ||
+      !Number.isInteger(groupId)
+    ) {
+      toast.error("Board, group, or member information is missing.");
+      throw new Error("Missing task creation context");
+    }
+
+    try {
+      const createdTask = await TaskService.createTask(parsedBoardId, {
+        boardId: parsedBoardId,
+        groupId,
+        title: task.title,
+        position: tasks.filter((item) => item.sectionId === task.sectionId)
+          .length,
+        createdBy: memberId,
+      });
+      const boardTask = {
+        ...toBoardTask(createdTask),
+        ...task,
+        id: String(createdTask.taskId),
+        ticketNum: `T-${createdTask.taskId}`,
+      };
+      setTasks((current) => [...current, boardTask]);
+      toast.success("Task created.");
+    } catch (error) {
+      console.error("Failed to create task:", error);
+      toast.error("Task couldn't be created. Please try again.");
+      throw error;
+    }
   };
   const addMember = async (member: Member, canEdit: boolean) => {
     const parsedBoardId = Number(boardId);
@@ -239,11 +265,37 @@ export default function TaskBoard() {
       throw error;
     }
   };
-  const updateTask = (updated: Task) => {
-    setTasks((current) =>
-      current.map((task) => (task.id === updated.id ? updated : task)),
-    );
-    if (selectedTask?.id === updated.id) setSelectedTask(updated);
+  const updateTask = async (updated: Task) => {
+    const parsedBoardId = Number(boardId);
+    const existing = tasks.find((task) => task.id === updated.id);
+    if (!existing) return;
+
+    const patch = {
+      ...(existing.title !== updated.title ? { title: updated.title } : {}),
+      ...(existing.sectionId !== updated.sectionId
+        ? { groupId: Number(updated.sectionId) }
+        : {}),
+    };
+
+    try {
+      if (Object.keys(patch).length > 0) {
+        if (
+          !Number.isInteger(parsedBoardId) ||
+          !Number.isInteger(Number(updated.id))
+        ) {
+          toast.error("Board or task information is missing.");
+          return;
+        }
+        await TaskService.updateTask(parsedBoardId, Number(updated.id), patch);
+      }
+      setTasks((current) =>
+        current.map((task) => (task.id === updated.id ? updated : task)),
+      );
+      if (selectedTask?.id === updated.id) setSelectedTask(updated);
+    } catch (error) {
+      console.error("Failed to update task:", error);
+      toast.error("Task couldn't be updated. Please try again.");
+    }
   };
   const openQuickAdd = (sectionId: string | null) => {
     setQuickAddSectionId(sectionId);
@@ -259,11 +311,10 @@ export default function TaskBoard() {
   };
   const moveTask = (sectionId: string) => {
     if (!draggingTaskId) return;
-    setTasks((current) =>
-      current.map((task) =>
-        task.id === draggingTaskId ? { ...task, sectionId } : task,
-      ),
-    );
+    const task = tasks.find((current) => current.id === draggingTaskId);
+    if (task && task.sectionId !== sectionId) {
+      void updateTask({ ...task, sectionId });
+    }
     setDraggingTaskId(null);
     setDragTarget(null);
   };
