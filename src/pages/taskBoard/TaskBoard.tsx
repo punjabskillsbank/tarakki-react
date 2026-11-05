@@ -12,7 +12,9 @@ import { SectionColumn } from "../../components/SectionColumn";
 import { TaskDetailsModal } from "../../components/TaskDetailsModal";
 import type { Member, Priority, Section, Task } from "../../types/taskBoardtypes";
 import { getInitials } from "../../utils/taskBoardUtils";
-import GroupService from "../../services/GroupService";
+import GroupService, {
+  type BoardGroupResponse,
+} from "../../services/GroupService";
 import TaskService, { type BoardTaskResponse } from "../../services/TaskService";
 import BoardService from "../../services/BoardService";
 import BoardMemberService from "../../services/BoardMemberService";
@@ -59,8 +61,9 @@ export default function TaskBoard() {
 
     const loadTasks = async () => {
       try {
-        const [loadedTasks, board] = await Promise.all([
+        const [loadedTasks, loadedGroups, board] = await Promise.all([
           TaskService.getTasks(parsedBoardId),
+          GroupService.getGroups(parsedBoardId),
           BoardService.getBoard(parsedBoardId),
         ]);
         if (cancelled) return;
@@ -90,6 +93,7 @@ export default function TaskBoard() {
         if (cancelled) return;
 
         setTasks(loadedTasks.map(toBoardTask));
+        setSections(loadedGroups.map(toBoardSection));
         setOrganizationMembers(loadedMembers);
         const loadedBoardMemberIds = new Set(
           boardMembers.map((member) => member.memberId),
@@ -455,6 +459,16 @@ function toBoardTask(task: BoardTaskResponse): Task {
     attachments: 0,
     sectionId: String(task.groupId),
     createdById: task.createdBy,
+  };
+}
+
+function toBoardSection(group: BoardGroupResponse): Section {
+  return {
+    id: String(group.groupId),
+    name: group.groupName.toUpperCase(),
+    color: SECTION_COLORS[group.position % SECTION_COLORS.length],
+    collapsed: false,
+    position: group.position,
   };
 }
 

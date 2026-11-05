@@ -15,10 +15,10 @@ jest.mock("./axios");
 jest.mock("axios", () => ({
   __esModule: true,
   default: {
-    create: jest.fn(() => ({ post: jest.fn() })),
+    create: jest.fn(() => ({ get: jest.fn(), post: jest.fn() })),
   },
   isAxiosError: jest.fn(),
-  create: jest.fn(() => ({ post: jest.fn() })),
+  create: jest.fn(() => ({ get: jest.fn(), post: jest.fn() })),
 }));
 
 const mockedAPI = API as jest.Mocked<typeof API>;
@@ -70,6 +70,19 @@ describe("GroupService", () => {
 
       await expect(GroupService.createGroup(boardId, groupPayload)).rejects.toThrow(
         FAILED_TO_CREATE_GROUP,
+      );
+    });
+  });
+
+  describe("getGroups", () => {
+    it("fetches groups for a board", async () => {
+      const groups = [groupResponseFactory()];
+      mockedAPI.get.mockResolvedValueOnce({ data: groups });
+
+      await expect(GroupService.getGroups(MOCK_BOARD_ID)).resolves.toEqual(groups);
+
+      expect(mockedAPI.get).toHaveBeenCalledWith(
+        `${config.baseURLs.boardTaskService}${config.endpoints.boards}/${MOCK_BOARD_ID}/groups`,
       );
     });
   });

@@ -72,6 +72,14 @@ export default defineConfig(({ mode }) => {
           target: boardService || "http://localhost:8081",
           changeOrigin: true,
         },
+
+        // Task routes include a numeric board id (for example /api/23/task/1).
+        // Proxy them in development so POST and PATCH do not require CORS access
+        // from localhost:5173 to the board-task service.
+        "^/api/\\d+/task": {
+          target: boardService || "http://localhost:8081",
+          changeOrigin: true,
+        },
       },
     },
   };

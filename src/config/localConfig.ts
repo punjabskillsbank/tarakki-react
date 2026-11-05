@@ -25,7 +25,9 @@ const localConfig = {
     apiRoot: getEnv(process.env.VITE_API_ROOT, '/api'),
     memberService: formatServiceURL(process.env.VITE_MEMBER_SERVICE_URL, 'http://localhost:8080'),
     organizationService: formatServiceURL(process.env.VITE_ORGANIZATION_SERVICE_URL, 'http://localhost:8082'),
-    boardTaskService: formatServiceURL(process.env.VITE_BOARD_TASK_SERVICE_URL, 'http://localhost:8081'),
+    // In local development this stays same-origin and is forwarded by Vite.
+    // This avoids browser CORS preflight failures for PATCH task updates.
+    boardTaskService: formatServiceURL(process.env.VITE_BOARD_TASK_SERVICE_URL, '/api'),
   },
 };
 

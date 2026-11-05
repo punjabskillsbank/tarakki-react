@@ -62,6 +62,7 @@ const organizationMember = organizationMemberResponseFactory();
 
 const configureLoadedBoard = () => {
   mockedTaskService.getTasks.mockResolvedValue([taskResponseFactory()]);
+  mockedGroupService.getGroups.mockResolvedValue([]);
   mockedBoardService.getBoard.mockResolvedValue(board);
   mockedBoardMemberService.getBoardMembers.mockResolvedValue([]);
   mockedOrganizationService.getOrganizationMembers.mockResolvedValue([
@@ -92,6 +93,7 @@ describe("TaskBoard", () => {
       await screen.findByText(TASK_BOARD_EMPTY_MESSAGE),
     ).toBeInTheDocument();
     expect(mockedTaskService.getTasks).toHaveBeenCalledWith(MOCK_BOARD_ID);
+    expect(mockedGroupService.getGroups).toHaveBeenCalledWith(MOCK_BOARD_ID);
     expect(mockedBoardService.getBoard).toHaveBeenCalledWith(MOCK_BOARD_ID);
     expect(mockedOrganizationService.getOrganizationMembers).toHaveBeenCalledWith(
       board.orgId,

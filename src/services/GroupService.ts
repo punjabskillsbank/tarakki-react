@@ -15,7 +15,30 @@ export interface CreateGroupResponse extends CreateGroupPayload {
   updatedAt: string;
 }
 
+export type BoardGroupResponse = CreateGroupResponse;
+
 export default class GroupService {
+  static async getGroups(boardId: number): Promise<BoardGroupResponse[]> {
+    try {
+      const baseURL = config.baseURLs.boardTaskService || "";
+      const response = await API.get<BoardGroupResponse[]>(
+        `${baseURL}${config.endpoints.boards}/${boardId}/groups`,
+      );
+      return response.data;
+    } catch (error: unknown) {
+      const message = isAxiosError(error)
+        ? error.response?.data?.message ||
+          error.response?.data ||
+          "Failed to load groups"
+        : "Failed to load groups";
+      const wrappedError = new Error(
+        typeof message === "string" ? message : "Failed to load groups",
+      );
+      (wrappedError as Error & { cause?: unknown }).cause = error;
+      throw wrappedError;
+    }
+  }
+
   static async createGroup(
     boardId: number,
     payload: CreateGroupPayload,
