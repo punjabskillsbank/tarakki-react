@@ -56,6 +56,9 @@ export default class TaskService {
     const response = await API.patch<BoardTaskResponse>(
       `${baseURL}/${boardId}/task/${taskId}`,
       task,
+      // Updates trigger backend auditing and can take longer than the shared
+      // 10-second API timeout. Do not abort a valid in-progress update early.
+      { timeout: 30_000 },
     );
     return response.data;
   }

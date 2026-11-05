@@ -73,6 +73,7 @@ describe("TaskService", () => {
       expect(mockedAPI.patch).toHaveBeenCalledWith(
         `${config.baseURLs.boardTaskService}/${MOCK_BOARD_ID}/task/${task.taskId}`,
         patch,
+        { timeout: 30_000 },
       );
     });
   });
