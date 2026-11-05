@@ -8,7 +8,7 @@ type Props = {
   sections: Section[];
   members: Member[];
   onClose: () => void;
-  onCreate: (task: Omit<Task, "id" | "ticketNum">) => void;
+  onCreate: (task: Omit<Task, "id" | "ticketNum">) => Promise<void>;
 };
 
 export function QuickAddModal({
@@ -25,21 +25,27 @@ export function QuickAddModal({
   const [assigneeId, setAssigneeId] = useState<string | null>(null);
   const [priority, setPriority] = useState<Priority>("medium");
   const [dueDate, setDueDate] = useState("");
-  const create = () => {
+  const [isCreating, setIsCreating] = useState(false);
+  const create = async () => {
     if (!title.trim()) return;
-    onCreate({
-      title: title.trim(),
-      description: "",
-      assignee: members.find((member) => member.id === assigneeId) ?? null,
-      dueDate: dueDate || null,
-      priority,
-      status: "open",
-      labels: [],
-      comments: 0,
-      attachments: 0,
-      sectionId,
-    });
-    onClose();
+    setIsCreating(true);
+    try {
+      await onCreate({
+        title: title.trim(),
+        description: "",
+        assignee: members.find((member) => member.id === assigneeId) ?? null,
+        dueDate: dueDate || null,
+        priority,
+        status: "open",
+        labels: [],
+        comments: 0,
+        attachments: 0,
+        sectionId,
+      });
+      onClose();
+    } finally {
+      setIsCreating(false);
+    }
   };
   return (
     <div
@@ -62,7 +68,7 @@ export function QuickAddModal({
           autoFocus
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          onKeyDown={(event) => event.key === "Enter" && create()}
+          onKeyDown={(event) => event.key === "Enter" && void create()}
           placeholder="Issue summary..."
           className="mb-3 w-full rounded-lg border border-[#E6E9EF] bg-[#F6F7FB] px-3 py-2.5 text-[13px] text-[#1F2937] outline-none transition-colors placeholder:text-[#C4C4C4] focus:border-[#0073EA]"
         />
@@ -138,10 +144,11 @@ export function QuickAddModal({
             Cancel
           </button>
           <PrimaryButton
-            onClick={create}
+            onClick={() => void create()}
+            disabled={isCreating || !title.trim() || !sectionId}
             className="h-auto px-4 py-1.5 text-[12px]"
           >
-            Create
+            {isCreating ? "Creating..." : "Create"}
           </PrimaryButton>
         </div>
       </div>

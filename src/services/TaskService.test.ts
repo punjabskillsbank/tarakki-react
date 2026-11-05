@@ -36,4 +36,44 @@ describe("TaskService", () => {
       await expect(TaskService.getTasks(MOCK_BOARD_ID)).rejects.toThrow(error);
     });
   });
+
+  describe("createTask", () => {
+    it("posts a task to its board and returns the created task", async () => {
+      const task = taskResponseFactory();
+      const request = {
+        boardId: MOCK_BOARD_ID,
+        groupId: task.groupId,
+        title: task.title,
+        position: task.position,
+        createdBy: task.createdBy,
+      };
+      mockedAPI.post.mockResolvedValueOnce({ data: task });
+
+      await expect(
+        TaskService.createTask(MOCK_BOARD_ID, request),
+      ).resolves.toEqual(task);
+
+      expect(mockedAPI.post).toHaveBeenCalledWith(
+        `${config.baseURLs.boardTaskService}/${MOCK_BOARD_ID}/task`,
+        request,
+      );
+    });
+  });
+
+  describe("updateTask", () => {
+    it("patches only the supplied task fields", async () => {
+      const task = taskResponseFactory();
+      const patch = { title: "Updated task", groupId: task.groupId };
+      mockedAPI.patch.mockResolvedValueOnce({ data: task });
+
+      await expect(
+        TaskService.updateTask(MOCK_BOARD_ID, task.taskId, patch),
+      ).resolves.toEqual(task);
+
+      expect(mockedAPI.patch).toHaveBeenCalledWith(
+        `${config.baseURLs.boardTaskService}/${MOCK_BOARD_ID}/task/${task.taskId}`,
+        patch,
+      );
+    });
+  });
 });
