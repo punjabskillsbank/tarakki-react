@@ -254,6 +254,16 @@ export const TASK_BOARD_ORGANIZATION_NAME = "Acme";
 export const TASK_BOARD_NAME = "Product";
 export const TASK_BOARD_GROUP_BY_CREATOR = "creator" as const;
 export const TASK_BOARD_PRIORITY_HIGH = "high" as const;
+export const QUICK_ADD_MODAL_TITLE = "New issue";
+export const QUICK_ADD_MODAL_WHITESPACE_TITLE = `  ${QUICK_ADD_MODAL_TITLE}  `;
+export const QUICK_ADD_MODAL_BLANK_TITLE = "   ";
+export const QUICK_ADD_MODAL_DUE_DATE = "2026-09-05";
+export const QUICK_ADD_MODAL_TITLE_PLACEHOLDER = "Issue summary...";
+export const QUICK_ADD_MODAL_GROUP_LABEL = "Group";
+export const QUICK_ADD_MODAL_PRIORITY_LABEL = "Priority";
+export const QUICK_ADD_MODAL_ASSIGNEE_LABEL = "Assignee";
+export const QUICK_ADD_MODAL_DUE_DATE_LABEL = "Due date";
+export const QUICK_ADD_MODAL_CANCEL_LABEL = "Cancel";
 export const TASK_BOARD_EMPTY_MEMBERS_MESSAGE =
   "No organization members are available.";
 export const TASK_BOARD_CREATE_ISSUE_LABEL = "Create issue";
@@ -274,6 +284,20 @@ export const TASK_BOARD_HIGH_PRIORITY_LABEL = "High";
 export const TASK_BOARD_ACTION_MENU_BUTTON_INDEX = 2;
 export const TASK_BOARD_COLLAPSE_BUTTON_INDEX = 1;
 export const addMemberModalSubmissionErrorFactory = () => new Error();
+
+export const quickAddModalPayloadFactory = (overrides = {}) => ({
+  title: QUICK_ADD_MODAL_TITLE,
+  description: "",
+  assignee: null,
+  dueDate: null,
+  priority: "medium" as const,
+  status: "open" as const,
+  labels: [],
+  comments: 0,
+  attachments: 0,
+  sectionId: taskBoardSectionFactory().id,
+  ...overrides,
+});
 
 // Board page test data
 export const CREATE_BOARD_HEADING = "Create Board";
