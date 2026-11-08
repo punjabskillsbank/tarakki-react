@@ -3,8 +3,12 @@ import { PageHeader } from "../../components/PageHeader";
 import { UserSupportPageFAQ } from "./UserSupportPageFAQ";
 import { UserSupportPageForm } from "./UserSupportPageForm";
 import { History } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import config from "../../config/indexConfig";
 
 export function UserSupportPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="p-6">
       <PageBackground></PageBackground>
@@ -17,7 +21,10 @@ export function UserSupportPage() {
 
           <button
             type="button"
-            className="absolute right-0 top-0 flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 font-medium hover:bg-gray-50">
+            className="absolute right-0 top-0 flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 font-medium hover:bg-gray-50"
+            onClick={() => {
+              navigate(config.routes.userSupportHistory);
+            }}>
             <History size={18} />
             Support History
           </button>

@@ -1,22 +1,10 @@
 import API from "./axios";
 import { isAxiosError } from "axios";
 import config from "../config/indexConfig";
-
-export type SupportTicketData = {
-  memberId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  subject: string;
-  issueCategory: string;
-  issueType: string;
-  message: string;
-};
-export type SupportTicketMessageData = {
-  ticketId: string;
-  userId: string;
-  messageBody: string;
-};
+import type {
+  SupportTicketData,
+  SupportTicketMessageData,
+} from "../types/support";
 
 export default class SupportServices {
   static async createTicket(data: SupportTicketData) {
@@ -57,6 +45,26 @@ export default class SupportServices {
         typeof message === "string"
           ? message
           : "Failed to create support ticket message"
+      );
+    }
+  }
+  static async getMemberSupportTickets(memberId: string) {
+    try {
+      const response = await API.get(
+        config.endpoints.memberSupportTickets(memberId)
+      );
+      return response.data;
+    } catch (error: unknown) {
+      const message = isAxiosError(error)
+        ? error.response?.data?.message ||
+          error.response?.data ||
+          "Failed to fetch support tickets"
+        : "Failed to fetch support tickets";
+
+      throw new Error(
+        typeof message === "string"
+          ? message
+          : "Failed to fetch support tickets"
       );
     }
   }
