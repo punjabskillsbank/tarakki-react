@@ -12,9 +12,25 @@ const API = axios.create({
 
 API.interceptors.request.use((requestConfig) => {
   const token = getToken();
-  if (token) {
-    requestConfig.headers.Authorization = `Bearer ${token}`;
+  if (!token || typeof window === "undefined") {
+    return requestConfig;
   }
+
+  const requestUrl = new URL(
+    requestConfig.url ?? "",
+    new URL(requestConfig.baseURL ?? config.baseURLs.apiRoot, window.location.origin),
+  );
+  const trustedOrigins = new Set(
+    Object.values(config.baseURLs).map(
+      (baseURL) => new URL(baseURL, window.location.origin).origin,
+    ),
+  );
+  const isLoginRequest = requestUrl.pathname.endsWith(config.endpoints.login);
+
+  if (trustedOrigins.has(requestUrl.origin) && !isLoginRequest) {
+    requestConfig.headers.set("Authorization", `Bearer ${token}`);
+  }
+
   return requestConfig;
 });
 

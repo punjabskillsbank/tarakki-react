@@ -2,6 +2,13 @@ import API from "./axios";
 import config from "../config/indexConfig";
 import { isAxiosError } from "axios";
 
+export interface MemberSignupResponse {
+  memberId: string;
+  token?: string;
+  tokenType?: string;
+  expiresIn?: number;
+}
+
 export default class MemberServices {
   static async createMember(memberData: {
     firstName: string;
@@ -10,10 +17,10 @@ export default class MemberServices {
     passwordHash?: string;
     profilePhotoS3Key: string;
     accountStatus: string;
-  }) {
+  }): Promise<MemberSignupResponse> {
     try {
       const baseURL = config.baseURLs.memberService || "";
-      const response = await API.post(
+      const response = await API.post<MemberSignupResponse>(
         `${baseURL}${config.endpoints.members}`,
         memberData
       );
