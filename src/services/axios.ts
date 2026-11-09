@@ -9,4 +9,21 @@ const API = axios.create({
   },
 });
 
+const trustedOrigins = new Set(
+  Object.values(config.baseURLs).map((baseURL) =>
+    new URL(baseURL, window.location.origin).origin
+  )
+);
+
+API.interceptors.request.use((request) => {
+  const token = localStorage.getItem('token');
+  const requestUrl = new URL(request.url ?? '', window.location.origin);
+
+  if (token && trustedOrigins.has(requestUrl.origin)) {
+    request.headers.set('Authorization', `Bearer ${token}`);
+  }
+
+  return request;
+});
+
 export default API;

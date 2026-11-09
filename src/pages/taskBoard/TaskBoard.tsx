@@ -281,22 +281,56 @@ export default function TaskBoard() {
         : {}),
     };
 
+    if (
+      Object.keys(patch).length > 0 &&
+      (!Number.isInteger(parsedBoardId) || !Number.isInteger(Number(updated.id)))
+    ) {
+      toast.error("Board or task information is missing.");
+      return;
+    }
+
+    setTasks((current) =>
+      current.map((task) => (task.id === updated.id ? updated : task)),
+    );
+    setSelectedTask((current) =>
+      current?.id === updated.id ? updated : current,
+    );
+
     try {
       if (Object.keys(patch).length > 0) {
-        if (
-          !Number.isInteger(parsedBoardId) ||
-          !Number.isInteger(Number(updated.id))
-        ) {
-          toast.error("Board or task information is missing.");
-          return;
-        }
         await TaskService.updateTask(parsedBoardId, Number(updated.id), patch);
       }
-      setTasks((current) =>
-        current.map((task) => (task.id === updated.id ? updated : task)),
-      );
-      if (selectedTask?.id === updated.id) setSelectedTask(updated);
     } catch (error) {
+      setTasks((current) =>
+        current.map((task) =>
+          task.id === updated.id
+            ? {
+                ...task,
+                ...(patch.title !== undefined && task.title === updated.title
+                  ? { title: existing.title }
+                  : {}),
+                ...(patch.groupId !== undefined &&
+                task.sectionId === updated.sectionId
+                  ? { sectionId: existing.sectionId }
+                  : {}),
+              }
+            : task,
+        ),
+      );
+      setSelectedTask((current) =>
+        current?.id === updated.id
+          ? {
+              ...current,
+              ...(patch.title !== undefined && current.title === updated.title
+                ? { title: existing.title }
+                : {}),
+              ...(patch.groupId !== undefined &&
+              current.sectionId === updated.sectionId
+                ? { sectionId: existing.sectionId }
+                : {}),
+            }
+          : current,
+      );
       console.error("Failed to update task:", error);
       toast.error("Task couldn't be updated. Please try again.");
     }
@@ -475,7 +509,7 @@ function toBoardSection(group: BoardGroupResponse): Section {
 function toBoardMember(member: OrganizationMemberResponse): Member {
   return {
     id: member.memberId,
-    name: member.email,
+    name: member.email || "Unknown member",
     initials: getInitials(member.email),
     color: MEMBER_COLORS[0],
   };

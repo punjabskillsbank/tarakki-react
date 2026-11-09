@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import toast from "react-hot-toast";
@@ -107,6 +107,30 @@ describe("TaskBoard", () => {
     expect(screen.getByText(board.boardName)).toBeInTheDocument();
   });
 
+  it("loads tasks when a board member has no email", async () => {
+    const memberWithoutEmail = organizationMemberResponseFactory({
+      email: null,
+    });
+    const task = taskResponseFactory();
+    mockedTaskService.getTasks.mockResolvedValue([task]);
+    mockedGroupService.getGroups.mockResolvedValue([
+      groupResponseFactory({ groupId: task.groupId }),
+    ]);
+    mockedOrganizationService.getOrganizationMembers.mockResolvedValue([
+      memberWithoutEmail,
+    ]);
+    mockedBoardMemberService.getBoardMembers.mockResolvedValue([
+      boardMemberResponseFactory({ memberId: memberWithoutEmail.memberId }),
+    ]);
+
+    render(<TaskBoard />);
+
+    expect(await screen.findByText(task.title)).toBeInTheDocument();
+    expect(toast.error).not.toHaveBeenCalledWith(
+      TASK_BOARD_TASK_LOAD_FAILURE_MESSAGE,
+    );
+  });
+
   it("groups task cards by priority", async () => {
     const user = userEvent.setup();
     mockedGroupService.createGroup.mockResolvedValue(groupResponseFactory());
@@ -124,6 +148,32 @@ describe("TaskBoard", () => {
 
     expect(await screen.findByText(TASK_BOARD_NO_PRIORITY_LABEL)).toBeInTheDocument();
     expect(screen.getByText(taskResponseFactory().title)).toBeInTheDocument();
+  });
+
+  it("shows a renamed task immediately while the save request is pending", async () => {
+    const task = taskResponseFactory();
+    const renamedTitle = "Renamed task";
+    mockedTaskService.getTasks.mockResolvedValue([task]);
+    mockedGroupService.getGroups.mockResolvedValue([
+      groupResponseFactory({ groupId: task.groupId }),
+    ]);
+    mockedTaskService.updateTask.mockReturnValue(new Promise(() => undefined));
+
+    render(<TaskBoard />);
+
+    fireEvent.click(await screen.findByText(task.title));
+    fireEvent.click(screen.getByRole("heading", { name: task.title }));
+    const titleInput = screen.getByDisplayValue(task.title);
+    fireEvent.change(titleInput, { target: { value: renamedTitle } });
+    fireEvent.blur(titleInput);
+    fireEvent.click(document.querySelector(".fixed.inset-0")!);
+
+    expect(await screen.findByText(renamedTitle)).toBeInTheDocument();
+    expect(mockedTaskService.updateTask).toHaveBeenCalledWith(
+      MOCK_BOARD_ID,
+      task.taskId,
+      { title: renamedTitle },
+    );
   });
 
   it("creates a group from the empty-board action", async () => {

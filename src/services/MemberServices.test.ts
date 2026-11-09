@@ -15,7 +15,13 @@ describe("MemberServices", () => {
     const memberData = memberFactory();
 
     it("successfully creates a member", async () => {
-      const responseData = { id: 1, ...memberData };
+      const responseData = {
+        memberId: "member-1",
+        token: "signup-jwt-token",
+        tokenType: "Bearer",
+        expiresIn: 3600,
+        ...memberData,
+      };
       mockedAPI.post.mockResolvedValueOnce({ data: responseData });
 
       const result = await MemberServices.createMember(memberData);

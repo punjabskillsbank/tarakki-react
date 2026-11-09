@@ -38,6 +38,13 @@ export function Step2ProfileInfo({ onNext, onBack, email, password, onErrorBack 
           accountStatus: "ACTIVE"
         });
 
+        if (!memberResponse.token?.trim()) {
+          setApiError("Account created, but the server did not return an authentication token. Please contact support.");
+          return;
+        }
+
+        localStorage.setItem('token', memberResponse.token);
+
         if (memberResponse && memberResponse.memberId) {
           localStorage.setItem('memberId', memberResponse.memberId.toString());
           localStorage.setItem('firstName', formattedFirstName);

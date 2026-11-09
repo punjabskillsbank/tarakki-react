@@ -13,6 +13,7 @@ describe('Step2ProfileInfo', () => {
   const onBack = jest.fn();
   const onErrorBack = jest.fn();
   const email = MOCK_EMAIL;
+  const token = 'signup-jwt-token';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -35,7 +36,12 @@ describe('Step2ProfileInfo', () => {
   });
 
   it('calls MemberServices and onNext when form is complete', async () => {
-    mockedMemberServices.createMember.mockResolvedValueOnce({ memberId: MOCK_MEMBER_ID });
+    mockedMemberServices.createMember.mockResolvedValueOnce({
+      memberId: MOCK_MEMBER_ID,
+      token,
+      tokenType: 'Bearer',
+      expiresIn: 3600,
+    });
     render(<Step2ProfileInfo onNext={onNext} onBack={onBack} email={email} password={MOCK_PASSWORD} onErrorBack={onErrorBack} />);
     
     const user = userEvent.setup();
@@ -55,6 +61,7 @@ describe('Step2ProfileInfo', () => {
         accountStatus: MOCK_ACCOUNT_STATUS
       });
       expect(localStorage.setItem).toHaveBeenCalledWith('memberId', MOCK_MEMBER_ID);
+      expect(localStorage.setItem).toHaveBeenCalledWith('token', token);
       expect(localStorage.setItem).toHaveBeenCalledWith('firstName', MOCK_FIRST_NAME);
       expect(localStorage.setItem).toHaveBeenCalledWith('lastName', MOCK_LAST_NAME);
       expect(onNext).toHaveBeenCalledTimes(1);
@@ -62,7 +69,12 @@ describe('Step2ProfileInfo', () => {
   });
 
   it('trims and formats names before calling MemberServices', async () => {
-    mockedMemberServices.createMember.mockResolvedValueOnce({ memberId: MOCK_MEMBER_ID });
+    mockedMemberServices.createMember.mockResolvedValueOnce({
+      memberId: MOCK_MEMBER_ID,
+      token,
+      tokenType: 'Bearer',
+      expiresIn: 3600,
+    });
     render(<Step2ProfileInfo onNext={onNext} onBack={onBack} email={email} password={MOCK_PASSWORD} onErrorBack={onErrorBack} />);
     
     const user = userEvent.setup();
@@ -77,6 +89,24 @@ describe('Step2ProfileInfo', () => {
         lastName: MOCK_LAST_NAME
       }));
     });
+  });
+
+  it('does not continue signup when the response has no token', async () => {
+    mockedMemberServices.createMember.mockResolvedValueOnce({
+      memberId: MOCK_MEMBER_ID,
+      token: '',
+      tokenType: 'Bearer',
+      expiresIn: 3600,
+    });
+    render(<Step2ProfileInfo onNext={onNext} onBack={onBack} email={email} password={MOCK_PASSWORD} onErrorBack={onErrorBack} />);
+
+    const user = userEvent.setup();
+    await user.type(screen.getByPlaceholderText('e.g. John'), MOCK_FIRST_NAME);
+    await user.type(screen.getByPlaceholderText('e.g. Doe'), MOCK_LAST_NAME);
+    await user.click(screen.getByText('Set up my workspace'));
+
+    expect(await screen.findByText(/did not return an authentication token/i)).toBeInTheDocument();
+    expect(onNext).not.toHaveBeenCalled();
   });
 
   it('calls onErrorBack when duplicate email error occurs', async () => {

@@ -1,10 +1,13 @@
 export const uid = () => crypto.randomUUID();
 
-export function getInitials(name: string) {
-  const words = name.trim().split(/\s+/);
+export function getInitials(name: string | null | undefined) {
+  const normalizedName = name?.trim() ?? "";
+  if (!normalizedName) return "?";
+
+  const words = normalizedName.split(/\s+/);
   return words.length >= 2
     ? (words[0][0] + words[1][0]).toUpperCase()
-    : name.slice(0, 2).toUpperCase();
+    : normalizedName.slice(0, 2).toUpperCase();
 }
 
 export function formatDate(value: string | null) {
