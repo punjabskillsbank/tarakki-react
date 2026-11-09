@@ -82,6 +82,23 @@ describe('Step2ProfileInfo', () => {
     expect(getToken()).toBe(MOCK_TOKEN);
   });
 
+  it('stores the JWT returned directly by signup without logging in again', async () => {
+    mockedMemberServices.createMember.mockResolvedValueOnce({
+      memberId: MOCK_MEMBER_ID,
+      token: MOCK_TOKEN,
+    });
+    render(<Step2ProfileInfo onNext={onNext} onBack={onBack} email={email} password={MOCK_PASSWORD} onErrorBack={onErrorBack} />);
+
+    const user = userEvent.setup();
+    await user.type(screen.getByPlaceholderText('e.g. John'), MOCK_FIRST_NAME);
+    await user.type(screen.getByPlaceholderText('e.g. Doe'), MOCK_LAST_NAME);
+    await user.click(screen.getByText('Set up my workspace'));
+
+    await waitFor(() => expect(onNext).toHaveBeenCalledTimes(1));
+    expect(getToken()).toBe(MOCK_TOKEN);
+    expect(mockedAuthService.login).not.toHaveBeenCalled();
+  });
+
   it('asks the user to log in when the automatic sign-in fails', async () => {
     mockedMemberServices.createMember.mockResolvedValueOnce({ memberId: MOCK_MEMBER_ID });
     mockedAuthService.login.mockRejectedValueOnce(new Error('Failed to log in'));
