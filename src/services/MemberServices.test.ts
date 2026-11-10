@@ -1,6 +1,18 @@
 import MemberServices from "./MemberServices";
 import API from "./axios";
-import { memberFactory, MOCK_MEMBER_ID } from "../test-utils/factories";
+import {
+  FAILED_TO_CREATE_MEMBER,
+  FAILED_TO_FETCH_MEMBER_DETAILS,
+  MOCK_CACHE_CONTROL_HEADER,
+  MOCK_CACHE_CONTROL_VALUE,
+  MOCK_MEMBER_ALREADY_EXISTS_ERROR,
+  MOCK_MEMBER_ID,
+  MOCK_MEMBER_NOT_FOUND_ERROR,
+  MOCK_NETWORK_ERROR,
+  memberFactory,
+  memberServiceResponseErrorFactory,
+  memberSignupResponseFactory,
+} from "../test-utils/factories";
 import config from "../config/indexConfig";
 
 jest.mock("./axios");
@@ -15,7 +27,7 @@ describe("MemberServices", () => {
     const memberData = memberFactory();
 
     it("successfully creates a member", async () => {
-      const responseData = { id: 1, ...memberData };
+      const responseData = memberSignupResponseFactory();
       mockedAPI.post.mockResolvedValueOnce({ data: responseData });
 
       const result = await MemberServices.createMember(memberData);
@@ -28,23 +40,22 @@ describe("MemberServices", () => {
     });
 
     it("throws an error with message from response on failure", async () => {
-      const errorMessage = "Email already exists";
       mockedAPI.post.mockRejectedValueOnce({
         response: {
-          data: { message: errorMessage },
+          data: { message: MOCK_MEMBER_ALREADY_EXISTS_ERROR },
         },
       });
 
       await expect(MemberServices.createMember(memberData)).rejects.toThrow(
-        errorMessage
+        MOCK_MEMBER_ALREADY_EXISTS_ERROR
       );
     });
 
     it("throws a default error message on failure if no message in response", async () => {
-      mockedAPI.post.mockRejectedValueOnce(new Error("Network Error"));
+      mockedAPI.post.mockRejectedValueOnce(new Error(MOCK_NETWORK_ERROR));
 
       await expect(MemberServices.createMember(memberData)).rejects.toThrow(
-        "Failed to create member"
+        FAILED_TO_CREATE_MEMBER
       );
     });
   });
@@ -59,29 +70,36 @@ describe("MemberServices", () => {
       const result = await MemberServices.getMemberById(memberId);
       expect(mockedAPI.get).toHaveBeenCalledWith(
         `${config.baseURLs.memberService}${config.endpoints.members}/${memberId}`,
-        { headers: { "Cache-Control": "no-cache" } }
+        {
+          headers: {
+            [MOCK_CACHE_CONTROL_HEADER]: MOCK_CACHE_CONTROL_VALUE,
+          },
+        }
       );
       expect(result).toEqual(memberData);
     });
 
     it("throws an error with message from response on failure", async () => {
-      const errorMessage = "Member not found";
       mockedAPI.get.mockRejectedValueOnce({
         response: {
           data: {
-            message: errorMessage,
+            message: MOCK_MEMBER_NOT_FOUND_ERROR,
           },
         },
       });
-      await expect(MemberServices.getMemberById("123")).rejects.toThrow(
-        errorMessage
+      await expect(
+        MemberServices.getMemberById(MOCK_MEMBER_ID)
+      ).rejects.toThrow(
+        MOCK_MEMBER_NOT_FOUND_ERROR
       );
     });
 
     it("throws a default error message on failure if no message in response", async () => {
-      mockedAPI.get.mockRejectedValueOnce(new Error("Network Error"));
-      await expect(MemberServices.getMemberById("123")).rejects.toThrow(
-        "Failed to fetch member details"
+      mockedAPI.get.mockRejectedValueOnce(new Error(MOCK_NETWORK_ERROR));
+      await expect(
+        MemberServices.getMemberById(MOCK_MEMBER_ID)
+      ).rejects.toThrow(
+        FAILED_TO_FETCH_MEMBER_DETAILS
       );
     });
   });
@@ -96,24 +114,31 @@ describe("MemberServices", () => {
       const result = await MemberServices.getMemberByEmail(email);
       expect(mockedAPI.get).toHaveBeenCalledWith(
         `${config.baseURLs.memberService}${config.endpoints.members}/email/${email}`,
-        { headers: { "Cache-Control": "no-cache" } }
+        {
+          headers: {
+            [MOCK_CACHE_CONTROL_HEADER]: MOCK_CACHE_CONTROL_VALUE,
+          },
+        }
       );
       expect(result).toEqual(memberData);
     });
 
     it("throws an error with message from response on failure", async () => {
-      const errorMessage = "Failed to fetch member details";
       const member = memberFactory();
-      mockedAPI.get.mockRejectedValueOnce({
-        response: {
-          data: {
-            message: errorMessage,
-          },
-        },
-      });
+      mockedAPI.get.mockRejectedValueOnce(
+        memberServiceResponseErrorFactory(MOCK_MEMBER_NOT_FOUND_ERROR)
+      );
       await expect(
         MemberServices.getMemberByEmail(member.email)
-      ).rejects.toThrow(errorMessage);
+      ).rejects.toThrow(MOCK_MEMBER_NOT_FOUND_ERROR);
+    });
+
+    it("throws a default error message on failure if no response is available", async () => {
+      mockedAPI.get.mockRejectedValueOnce(new Error(MOCK_NETWORK_ERROR));
+
+      await expect(
+        MemberServices.getMemberByEmail(memberFactory().email)
+      ).rejects.toThrow(FAILED_TO_FETCH_MEMBER_DETAILS);
     });
   });
 });
