@@ -6,6 +6,7 @@ import { FormInput } from "../../../components/FormInput";
 import { PasswordInput } from "../../../components/PasswordInput";
 import { PrimaryButton } from "../../../components/PrimaryButton";
 import config from "../../../config/indexConfig";
+import MemberServices from "../../../services/MemberServices";
 
 interface Step1Props {
   onNext: () => void;
@@ -32,6 +33,7 @@ export function Step1Signup({
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
   useEffect(() => {
     setEmailError(externalError || "");
@@ -41,7 +43,7 @@ export function Step1Signup({
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     // Reset all errors before checking
     setEmailError("");
     setPasswordError("");
@@ -72,11 +74,33 @@ export function Step1Signup({
       return;
     }
 
+    setIsCheckingEmail(true);
+    try {
+      await MemberServices.getMemberByEmail(localEmail);
+      setEmailError("An account with this email already exists");
+      return;
+    } catch (error: unknown) {
+      const response =
+        typeof error === "object" && error !== null && "response" in error
+          ? error.response
+          : undefined;
+      const status =
+        typeof response === "object" &&
+        response !== null &&
+        "status" in response
+          ? response.status
+          : undefined;
+
+      if (status !== 404) {
+        setEmailError("Unable to verify this email right now. Please try again.");
+        return;
+      }
+    } finally {
+      setIsCheckingEmail(false);
+    }
+
     setEmail(localEmail);
     setParentPassword?.(password);
-
-    // No email lookup here: member lookups now require a token, which a new user does not have yet.
-    // A duplicate email is rejected when the account is created in the next step.
     onNext();
   };
 
@@ -160,10 +184,10 @@ export function Step1Signup({
         {/* Continue Button */}
         <PrimaryButton
           onClick={handleContinue}
-          disabled={!localEmail}
+          disabled={!localEmail || isCheckingEmail}
           className="w-full"
         >
-          Continue
+          {isCheckingEmail ? "Checking email..." : "Continue"}
         </PrimaryButton>
 
         {/* Footer */}
@@ -177,4 +201,3 @@ export function Step1Signup({
     </OnboardingLayout>
   );
 }
-
