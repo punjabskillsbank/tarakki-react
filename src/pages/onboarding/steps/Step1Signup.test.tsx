@@ -55,9 +55,12 @@ describe("Step1Signup", () => {
     expect(screen.getByLabelText(CONFIRM_PASSWORD_LABEL)).toBeInTheDocument();
   });
 
-  it("calls onNext without looking the email up, because a new user has no token yet", async () => {
+  it("checks the email and calls onNext when the email is not found", async () => {
     renderComponent();
     const member = memberFactory();
+    mockedMemberServices.getMemberByEmail.mockRejectedValueOnce({
+      response: { status: 404 },
+    });
     const input = screen.getByPlaceholderText(STEP1_INPUT_PLACEHOLDER);
     const passwordInput = screen.getByLabelText(PASSWORD_LABEL);
     const confirmPasswordInput = screen.getByLabelText(CONFIRM_PASSWORD_LABEL);
@@ -72,7 +75,55 @@ describe("Step1Signup", () => {
     expect(setEmail).toHaveBeenCalledWith(member.email);
     expect(setPassword).toHaveBeenCalledWith(MOCK_PASSWORD);
     await waitFor(() => expect(onNext).toHaveBeenCalledTimes(1));
-    expect(mockedMemberServices.getMemberByEmail).not.toHaveBeenCalled();
+    expect(mockedMemberServices.getMemberByEmail).toHaveBeenCalledWith(
+      member.email
+    );
+  });
+
+  it("blocks continuing and shows an error when the email already exists", async () => {
+    const member = memberFactory();
+    mockedMemberServices.getMemberByEmail.mockResolvedValueOnce(member);
+    renderComponent();
+    const user = userEvent.setup();
+
+    await user.type(
+      screen.getByPlaceholderText(STEP1_INPUT_PLACEHOLDER),
+      member.email
+    );
+    await user.type(screen.getByLabelText(PASSWORD_LABEL), MOCK_PASSWORD);
+    await user.type(screen.getByLabelText(CONFIRM_PASSWORD_LABEL), MOCK_PASSWORD);
+    await user.click(screen.getByRole("button", { name: /^continue$/i }));
+
+    expect(
+      await screen.findByText("An account with this email already exists")
+    ).toBeInTheDocument();
+    expect(onNext).not.toHaveBeenCalled();
+    expect(setEmail).not.toHaveBeenCalled();
+    expect(setPassword).not.toHaveBeenCalled();
+  });
+
+  it("blocks continuing when the email check fails for a reason other than not found", async () => {
+    const member = memberFactory();
+    mockedMemberServices.getMemberByEmail.mockRejectedValueOnce(
+      new Error("Network Error")
+    );
+    renderComponent();
+    const user = userEvent.setup();
+
+    await user.type(
+      screen.getByPlaceholderText(STEP1_INPUT_PLACEHOLDER),
+      member.email
+    );
+    await user.type(screen.getByLabelText(PASSWORD_LABEL), MOCK_PASSWORD);
+    await user.type(screen.getByLabelText(CONFIRM_PASSWORD_LABEL), MOCK_PASSWORD);
+    await user.click(screen.getByRole("button", { name: /^continue$/i }));
+
+    expect(
+      await screen.findByText(
+        "Unable to verify this email right now. Please try again."
+      )
+    ).toBeInTheDocument();
+    expect(onNext).not.toHaveBeenCalled();
   });
 
   it("shows error for invalid email", async () => {
