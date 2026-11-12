@@ -12,6 +12,12 @@ export const MOCK_SHORT_PASSWORD = "short";
 export const PASSWORD_LABEL = "Password";
 export const CONFIRM_PASSWORD_LABEL = "Confirm Password";
 export const MOCK_NETWORK_ERROR = "Network Error";
+export const MOCK_MEMBER_ALREADY_EXISTS_ERROR = "Email already exists";
+export const MOCK_MEMBER_NOT_FOUND_ERROR = "Member not found";
+export const FAILED_TO_CREATE_MEMBER = "Failed to create member";
+export const FAILED_TO_FETCH_MEMBER_DETAILS = "Failed to fetch member details";
+export const MOCK_CACHE_CONTROL_HEADER = "Cache-Control";
+export const MOCK_CACHE_CONTROL_VALUE = "no-cache";
 export const MOCK_ORGANIZATION_ERROR = "Organization already exists";
 export const MOCK_INVITATION_ERROR = "Member already invited";
 export const FAILED_TO_CREATE_ORGANIZATION = "Failed to create organization";
@@ -38,6 +44,16 @@ export const memberFactory = (overrides = {}) => {
     ...overrides,
   };
 };
+
+export const memberSignupResponseFactory = (overrides = {}) => ({
+  memberId: MOCK_MEMBER_ID,
+  ...overrides,
+});
+
+export const memberServiceResponseErrorFactory = (message: string) => ({
+  isAxiosError: true,
+  response: { data: { message } },
+});
 
 export const boardPayloadFactory = (overrides = {}) => {
   return {

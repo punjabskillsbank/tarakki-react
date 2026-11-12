@@ -3,7 +3,7 @@ import { OnboardingLayout } from '../OnboardingLayout';
 import profileIllustration from '../../../assets/images/onboarding-profile.jpg';
 import MemberServices from '../../../services/MemberServices';
 import AuthService from '../../../services/AuthService';
-import { setToken } from '../../../utils/authStorage';
+import { setMemberIdentity, setToken } from '../../../utils/authStorage';
 import config from '../../../config/indexConfig';
 
 interface Step2Props {
@@ -43,22 +43,37 @@ export function Step2ProfileInfo({ onNext, onBack, email, password, onErrorBack 
           accountStatus: "ACTIVE"
         });
 
-        if (memberResponse && memberResponse.memberId) {
-          localStorage.setItem('memberId', memberResponse.memberId.toString());
-          localStorage.setItem('firstName', formattedFirstName);
-          localStorage.setItem('lastName', formattedLastName);
-        }
-
-        // Every API after signup needs a token, so sign the new member in right away.
-        try {
-          const loginResponse = await AuthService.login({ email, password });
-          setToken(loginResponse.token);
-        } catch (loginError: unknown) {
-          console.log('Error signing in after signup:', loginError);
+        if (!memberResponse?.memberId) {
           setLoginRequired(true);
           setApiError("Your account was created, but we couldn't sign you in automatically.");
           return;
         }
+
+        let token = memberResponse.token?.trim();
+        if (!token) {
+          try {
+            const loginResponse = await AuthService.login({ email, password });
+            token = loginResponse.token?.trim();
+          } catch (loginError: unknown) {
+            console.log('Error signing in after signup:', loginError);
+            setLoginRequired(true);
+            setApiError("Your account was created, but we couldn't sign you in automatically.");
+            return;
+          }
+        }
+
+        if (!token) {
+          setLoginRequired(true);
+          setApiError("Your account was created, but we couldn't sign you in automatically.");
+          return;
+        }
+
+        setToken(token);
+        setMemberIdentity({
+          memberId: memberResponse.memberId.toString(),
+          firstName: formattedFirstName,
+          lastName: formattedLastName,
+        });
         onNext();
       } catch (error: unknown) {
         console.log('Error creating member:', error);
