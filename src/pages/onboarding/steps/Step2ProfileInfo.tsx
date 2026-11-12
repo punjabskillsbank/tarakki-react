@@ -43,6 +43,12 @@ export function Step2ProfileInfo({ onNext, onBack, email, password, onErrorBack 
           accountStatus: "ACTIVE"
         });
 
+        if (!memberResponse?.memberId) {
+          setLoginRequired(true);
+          setApiError("Your account was created, but we couldn't sign you in automatically.");
+          return;
+        }
+
         let token = memberResponse.token?.trim();
         if (!token) {
           try {
