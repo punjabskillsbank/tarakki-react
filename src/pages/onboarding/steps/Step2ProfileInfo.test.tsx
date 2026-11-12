@@ -99,6 +99,24 @@ describe('Step2ProfileInfo', () => {
     expect(mockedAuthService.login).not.toHaveBeenCalled();
   });
 
+  it('asks the user to log in when signup succeeds without returning a memberId', async () => {
+    mockedMemberServices.createMember.mockResolvedValueOnce(
+      {} as Awaited<ReturnType<typeof MemberServices.createMember>>
+    );
+    render(<Step2ProfileInfo onNext={onNext} onBack={onBack} email={email} password={MOCK_PASSWORD} onErrorBack={onErrorBack} />);
+
+    const user = userEvent.setup();
+    await user.type(screen.getByPlaceholderText('e.g. John'), MOCK_FIRST_NAME);
+    await user.type(screen.getByPlaceholderText('e.g. Doe'), MOCK_LAST_NAME);
+    await user.click(screen.getByText('Set up my workspace'));
+
+    expect(await screen.findByText(/your account was created, but we couldn't sign you in automatically/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /log in/i })).toHaveAttribute('href', config.routes.login);
+    expect(mockedAuthService.login).not.toHaveBeenCalled();
+    expect(onNext).not.toHaveBeenCalled();
+    expect(getToken()).toBe('');
+  });
+
   it('asks the user to log in when the automatic sign-in fails', async () => {
     mockedMemberServices.createMember.mockResolvedValueOnce({ memberId: MOCK_MEMBER_ID });
     mockedAuthService.login.mockRejectedValueOnce(new Error('Failed to log in'));
