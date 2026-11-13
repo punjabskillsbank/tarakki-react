@@ -16,6 +16,7 @@ import config from "../../config/indexConfig";
 export function UserSupportHistoryPage() {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("ALL");
   const [selectedCategory, setSelectedCategory] = useState("ALL");
@@ -30,6 +31,8 @@ export function UserSupportHistoryPage() {
 
         if (!memberId) {
           toast.error("Member ID not found.");
+          setFetchError("Member ID not found.");
+          navigate(config.routes.login);
           return;
         }
 
@@ -37,17 +40,22 @@ export function UserSupportHistoryPage() {
           memberId
         );
 
+        if (!Array.isArray(response)) {
+          throw new Error("Invalid support tickets response.");
+        }
+
         setTickets(response);
       } catch (error) {
         console.error("Error fetching support tickets:", error);
         toast.error("Failed to fetch support history.");
+        setFetchError("Failed to load support history. Please try again later.");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchSupportTickets();
-  }, []);
+  }, [navigate]);
 
   // Calculate summary values
   const summary = useMemo(() => {
@@ -55,11 +63,11 @@ export function UserSupportHistoryPage() {
       allRequests: tickets.length,
 
       awaitingResponse: tickets.filter(
-        (ticket) => ticket.ticketStatus === "OPEN"
+        (ticket) => ticket?.ticketStatus === "OPEN"
       ).length,
 
       completed: tickets.filter((ticket) =>
-        ["RESOLVED", "CLOSED"].includes(ticket.ticketStatus)
+        ["RESOLVED", "CLOSED"].includes(ticket?.ticketStatus)
       ).length,
     };
   }, [tickets]);
@@ -71,29 +79,34 @@ export function UserSupportHistoryPage() {
 
       const matchesSearch =
         !query ||
-        ticket.ticketId.toLowerCase().includes(query) ||
-        ticket.subject.toLowerCase().includes(query) ||
-        ticket.message.toLowerCase().includes(query);
+        ticket?.ticketId?.toLowerCase().includes(query) ||
+        ticket?.subject?.toLowerCase().includes(query) ||
+        ticket?.message?.toLowerCase().includes(query);
 
       // Filter by status
       const matchesStatus =
-        selectedStatus === "ALL" || ticket.ticketStatus === selectedStatus;
+        selectedStatus === "ALL" ||
+        ticket?.ticketStatus === selectedStatus;
 
       // Filter by category
       const matchesCategory =
-        selectedCategory === "ALL" || ticket.issueCategory === selectedCategory;
+        selectedCategory === "ALL" ||
+        ticket?.issueCategory === selectedCategory;
 
       // Filter by creation date
       const matchesDate =
         !selectedDate ||
-        new Date(ticket.createdAt).toLocaleDateString("en-CA") === selectedDate;
+        new Date(ticket?.createdAt).toLocaleDateString("en-CA") ===
+        selectedDate;
 
       return matchesSearch && matchesStatus && matchesCategory && matchesDate;
     });
   }, [tickets, searchQuery, selectedStatus, selectedCategory, selectedDate]);
 
   // Format date returned by backend
-  const formatDate = (date: string) => {
+  const formatDate = (date?: string | null) => {
+    if (!date) return "Unknown";
+
     return new Date(date).toLocaleDateString("en-US", {
       month: "short",
       day: "2-digit",
@@ -102,8 +115,8 @@ export function UserSupportHistoryPage() {
   };
 
   // Format category and status for UI
-  const formatLabel = (value: string) =>
-    value
+  const formatLabel = (value?: string | null) =>
+    (value ?? "")
       .replace(/_/g, " ")
       .toLowerCase()
       .replace(/\b\w/g, (char) => char.toUpperCase());
@@ -112,7 +125,7 @@ export function UserSupportHistoryPage() {
     <>
       <Navbar />
 
-      <div className="p-6">
+      <div className="mt-16 p-6">
         <PageBackground />
 
         <div className="relative z-10 p-6">
@@ -177,6 +190,13 @@ export function UserSupportHistoryPage() {
               <div className="py-12 text-center text-gray-500">
                 Loading support history...
               </div>
+            ) : fetchError ? (
+              <div className="rounded-xl bg-white py-12 text-center">
+                <h3 className="text-lg font-semibold text-gray-700">
+                  Unable to load support history
+                </h3>
+                <p className="mt-1 text-sm text-gray-500">{fetchError}</p>
+              </div>
             ) : tickets.length === 0 ? (
               <div className="rounded-xl bg-white py-12 text-center">
                 <Inbox
@@ -200,15 +220,15 @@ export function UserSupportHistoryPage() {
                 </p>
               </div>
             ) : (
-              filteredTickets.map((ticket) => (
+              filteredTickets.map((ticket, index) => (
                 <SupportTicketCard
-                  key={ticket.ticketId}
-                  title={ticket.subject}
-                  description={ticket.message}
-                  category={formatLabel(ticket.issueCategory)}
-                  status={formatLabel(ticket.ticketStatus)}
-                  createdAt={formatDate(ticket.createdAt)}
-                  updatedAt={formatDate(ticket.updatedAt)}
+                  key={ticket?.ticketId ?? index}
+                  title={ticket?.subject ?? "Untitled support request"}
+                  description={ticket?.message ?? "No message provided"}
+                  category={formatLabel(ticket?.issueCategory)}
+                  status={formatLabel(ticket?.ticketStatus)}
+                  createdAt={formatDate(ticket?.createdAt)}
+                  updatedAt={formatDate(ticket?.updatedAt)}
                 />
               ))
             )}

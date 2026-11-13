@@ -2,6 +2,7 @@ import API from "./axios";
 import { isAxiosError } from "axios";
 import config from "../config/indexConfig";
 import type {
+  SupportTicket,
   SupportTicketData,
   SupportTicketMessageData,
 } from "../types/support";
@@ -48,7 +49,9 @@ export default class SupportServices {
       );
     }
   }
-  static async getMemberSupportTickets(memberId: string) {
+  static async getMemberSupportTickets(
+    memberId: string
+  ): Promise<SupportTicket[]> {
     try {
       const response = await API.get(
         config.endpoints.memberSupportTickets(memberId)

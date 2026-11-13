@@ -99,6 +99,10 @@ describe("SupportHistoryFilters", () => {
     ).toBeInTheDocument();
 
     expect(
+      screen.getByRole("option", { name: "Status: In Progress" })
+    ).toBeInTheDocument();
+
+    expect(
       screen.getByRole("option", { name: "Status: Resolved" })
     ).toBeInTheDocument();
 

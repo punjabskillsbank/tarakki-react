@@ -48,6 +48,7 @@ export function SupportHistoryFilters({
           { value: "ALL", label: "Status: All" },
           { value: "OPEN", label: "Status: Open" },
           { value: "PENDING", label: "Status: Pending" },
+          { value: "IN_PROGRESS", label: "Status: In Progress" },
           { value: "RESOLVED", label: "Status: Resolved" },
           { value: "CLOSED", label: "Status: Closed" },
         ]}

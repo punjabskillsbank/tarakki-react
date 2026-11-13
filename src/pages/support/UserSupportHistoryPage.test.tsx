@@ -223,7 +223,7 @@ describe("UserSupportHistoryPage", () => {
   });
 
   // ── 4. Missing memberId ───────────────────────────────────────────────
-  it("shows an error toast when memberId is not available", async () => {
+  it("shows an error and redirects when memberId is not available", async () => {
     localStorage.removeItem("memberId");
 
     renderWithRouter();
@@ -232,13 +232,12 @@ describe("UserSupportHistoryPage", () => {
       expect(toast.error).toHaveBeenCalledWith("Member ID not found.");
     });
 
-    expect(screen.getByText("No support requests yet")).toBeInTheDocument();
-
+    expect(mockNavigate).toHaveBeenCalledWith(config.routes.login);
     expect(mockGetMemberSupportTickets).not.toHaveBeenCalled();
   });
 
   // ── 5. API failure ────────────────────────────────────────────────────
-  it("shows an error toast when fetching support tickets fails", async () => {
+  it("shows an error state when fetching support tickets fails", async () => {
     const consoleErrorSpy = jest
       .spyOn(console, "error")
       .mockImplementation(() => {});
@@ -255,7 +254,26 @@ describe("UserSupportHistoryPage", () => {
       );
     });
 
-    expect(screen.getByText("No support requests yet")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Unable to load support history" })
+    ).toBeInTheDocument();
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("shows an error state when the service returns a non-array response", async () => {
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    mockGetMemberSupportTickets.mockResolvedValueOnce({ tickets: mockTickets });
+
+    renderWithRouter();
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Unable to load support history",
+      })
+    ).toBeInTheDocument();
 
     consoleErrorSpy.mockRestore();
   });
@@ -281,6 +299,12 @@ describe("UserSupportHistoryPage", () => {
 
   // ── 7. Summary card calculations ──────────────────────────────────────
   it("displays the correct support ticket summary values", async () => {
+    mockGetMemberSupportTickets.mockResolvedValueOnce([
+      { ...mockTickets[0], ticketStatus: "OPEN" },
+      { ...mockTickets[1], ticketStatus: "IN_PROGRESS" },
+      { ...mockTickets[1], ticketId: "pending-ticket", ticketStatus: "PENDING" },
+    ]);
+
     renderWithRouter();
 
     await waitFor(() => {
@@ -288,7 +312,7 @@ describe("UserSupportHistoryPage", () => {
     });
 
     expect(screen.getByText("All Requests").parentElement).toHaveTextContent(
-      "2"
+      "3"
     );
 
     expect(
