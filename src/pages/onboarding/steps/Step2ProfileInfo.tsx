@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
 import profileIllustration from '../../../assets/images/onboarding-profile.jpg';
 import MemberServices from '../../../services/MemberServices';
-import AuthService from '../../../services/AuthService';
 import { setMemberIdentity, setToken } from '../../../utils/authStorage';
 import config from '../../../config/indexConfig';
 
@@ -49,19 +48,7 @@ export function Step2ProfileInfo({ onNext, onBack, email, password, onErrorBack 
           return;
         }
 
-        let token = memberResponse.token?.trim();
-        if (!token) {
-          try {
-            const loginResponse = await AuthService.login({ email, password });
-            token = loginResponse.token?.trim();
-          } catch (loginError: unknown) {
-            console.log('Error signing in after signup:', loginError);
-            setLoginRequired(true);
-            setApiError("Your account was created, but we couldn't sign you in automatically.");
-            return;
-          }
-        }
-
+        const token = memberResponse.token?.trim();
         if (!token) {
           setLoginRequired(true);
           setApiError("Your account was created, but we couldn't sign you in automatically.");
