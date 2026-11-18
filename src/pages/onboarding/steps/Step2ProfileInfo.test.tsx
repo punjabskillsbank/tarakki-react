@@ -115,7 +115,7 @@ describe('Step2ProfileInfo', () => {
     await user.type(screen.getByPlaceholderText('e.g. Doe'), MOCK_LAST_NAME);
     await user.click(screen.getByText('Set up my workspace'));
 
-    expect(await screen.findByText(/your account was created, but we couldn't sign you in automatically/i)).toBeInTheDocument();
+    expect(await screen.findByText(/your account was created\. please log in to continue\./i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /log in/i })).toHaveAttribute('href', config.routes.login);
     expect(mockedAuthService.login).not.toHaveBeenCalled();
     expect(onNext).not.toHaveBeenCalled();
@@ -131,7 +131,7 @@ describe('Step2ProfileInfo', () => {
     await user.type(screen.getByPlaceholderText('e.g. Doe'), MOCK_LAST_NAME);
     await user.click(screen.getByText('Set up my workspace'));
 
-    expect(await screen.findByText(/your account was created, but we couldn't sign you in automatically/i)).toBeInTheDocument();
+    expect(await screen.findByText(/your account was created\. please log in to continue\./i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /log in/i })).toHaveAttribute('href', config.routes.login);
     expect(mockedAuthService.login).not.toHaveBeenCalled();
     expect(onNext).not.toHaveBeenCalled();

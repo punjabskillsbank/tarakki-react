@@ -42,16 +42,10 @@ export function Step2ProfileInfo({ onNext, onBack, email, password, onErrorBack 
           accountStatus: "ACTIVE"
         });
 
-        if (!memberResponse?.memberId) {
+        const token = memberResponse?.token?.trim();
+        if (!memberResponse?.memberId || !token) {
           setLoginRequired(true);
-          setApiError("Your account was created, but we couldn't sign you in automatically.");
-          return;
-        }
-
-        const token = memberResponse.token?.trim();
-        if (!token) {
-          setLoginRequired(true);
-          setApiError("Your account was created, but we couldn't sign you in automatically.");
+          setApiError("Your account was created. Please log in to continue.");
           return;
         }
 
