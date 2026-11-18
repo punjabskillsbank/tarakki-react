@@ -2,6 +2,19 @@ import { isAxiosError } from "axios";
 import API from "./axios";
 import SupportServices from "./SupportServices";
 import config from "../config/indexConfig";
+import {
+  FAILED_TO_CREATE_SUPPORT_TICKET,
+  FAILED_TO_CREATE_SUPPORT_TICKET_MESSAGE,
+  FAILED_TO_FETCH_SUPPORT_TICKETS,
+  MOCK_NETWORK_ERROR,
+  MOCK_SUPPORT_MESSAGE_ERROR,
+  MOCK_SUPPORT_TICKET_ERROR,
+  MOCK_SUPPORT_TICKETS_ERROR,
+  MOCK_MEMBER_ID,
+  mockTicketPayload,
+  mockTicketMessagePayload,
+  mockTickets,
+} from "../test-utils/factories";
 
 jest.mock("./axios");
 
@@ -33,31 +46,6 @@ const mockedAPI = API as jest.Mocked<typeof API>;
 const mockedIsAxiosError = isAxiosError as jest.MockedFunction<
   typeof isAxiosError
 >;
-
-const FAILED_TO_CREATE_SUPPORT_TICKET = "Failed to create support ticket";
-const FAILED_TO_CREATE_SUPPORT_TICKET_MESSAGE =
-  "Failed to create support ticket message";
-
-const MOCK_SUPPORT_TICKET_ERROR = "Unable to create support ticket";
-const MOCK_SUPPORT_MESSAGE_ERROR = "Unable to create support ticket message";
-const MOCK_NETWORK_ERROR = "Network Error";
-
-const mockTicketPayload = {
-  memberId: "550e8400-e29b-41d4-a716-446655440000",
-  firstName: "John",
-  lastName: "Doe",
-  email: "john@example.com",
-  subject: "Unable to log in",
-  issueCategory: "ACCOUNT",
-  issueType: "LOGIN_ISSUE",
-  message: "I cannot log in to my account.",
-};
-
-const mockTicketMessagePayload = {
-  ticketId: "ticket-123",
-  userId: "550e8400-e29b-41d4-a716-446655440000",
-  messageBody: "I cannot log in to my account.",
-};
 
 describe("SupportServices", () => {
   beforeEach(() => {
@@ -225,6 +213,94 @@ describe("SupportServices", () => {
       await expect(
         SupportServices.createTicketMessage(mockTicketMessagePayload)
       ).rejects.toThrow(FAILED_TO_CREATE_SUPPORT_TICKET_MESSAGE);
+    });
+  });
+
+  describe("getMemberSupportTickets", () => {
+    it("fetches member support tickets and returns the response data", async () => {
+      mockedAPI.get.mockResolvedValueOnce({ data: mockTickets });
+
+      await expect(
+        SupportServices.getMemberSupportTickets(MOCK_MEMBER_ID)
+      ).resolves.toEqual(mockTickets);
+
+      expect(mockedAPI.get).toHaveBeenCalledWith(
+        config.endpoints.memberSupportTickets(MOCK_MEMBER_ID)
+      );
+
+      expect(mockedAPI.get).toHaveBeenCalledTimes(1);
+    });
+
+    it("returns an empty array when the member has no support tickets", async () => {
+      mockedAPI.get.mockResolvedValueOnce({ data: [] });
+
+      await expect(
+        SupportServices.getMemberSupportTickets(MOCK_MEMBER_ID)
+      ).resolves.toEqual([]);
+
+      expect(mockedAPI.get).toHaveBeenCalledWith(
+        config.endpoints.memberSupportTickets(MOCK_MEMBER_ID)
+      );
+    });
+
+    it("uses the API error message when fetching tickets fails", async () => {
+      mockedIsAxiosError.mockReturnValueOnce(true);
+
+      mockedAPI.get.mockRejectedValueOnce({
+        response: {
+          data: { message: MOCK_SUPPORT_TICKETS_ERROR },
+        },
+      });
+
+      await expect(
+        SupportServices.getMemberSupportTickets(MOCK_MEMBER_ID)
+      ).rejects.toThrow(MOCK_SUPPORT_TICKETS_ERROR);
+    });
+
+    it("uses the API response string when the error data is a string", async () => {
+      mockedIsAxiosError.mockReturnValueOnce(true);
+
+      mockedAPI.get.mockRejectedValueOnce({
+        response: {
+          data: MOCK_SUPPORT_TICKETS_ERROR,
+        },
+      });
+
+      await expect(
+        SupportServices.getMemberSupportTickets(MOCK_MEMBER_ID)
+      ).rejects.toThrow(MOCK_SUPPORT_TICKETS_ERROR);
+    });
+
+    it("uses the default error message when the API provides no error message", async () => {
+      mockedIsAxiosError.mockReturnValueOnce(true);
+
+      mockedAPI.get.mockRejectedValueOnce({
+        response: { data: null },
+      });
+
+      await expect(
+        SupportServices.getMemberSupportTickets(MOCK_MEMBER_ID)
+      ).rejects.toThrow(FAILED_TO_FETCH_SUPPORT_TICKETS);
+    });
+
+    it("uses the default error message when the Axios error has no response", async () => {
+      mockedIsAxiosError.mockReturnValueOnce(true);
+
+      mockedAPI.get.mockRejectedValueOnce({});
+
+      await expect(
+        SupportServices.getMemberSupportTickets(MOCK_MEMBER_ID)
+      ).rejects.toThrow(FAILED_TO_FETCH_SUPPORT_TICKETS);
+    });
+
+    it("uses the default error message for non-Axios failures", async () => {
+      mockedIsAxiosError.mockReturnValueOnce(false);
+
+      mockedAPI.get.mockRejectedValueOnce(new Error(MOCK_NETWORK_ERROR));
+
+      await expect(
+        SupportServices.getMemberSupportTickets(MOCK_MEMBER_ID)
+      ).rejects.toThrow(FAILED_TO_FETCH_SUPPORT_TICKETS);
     });
   });
 });

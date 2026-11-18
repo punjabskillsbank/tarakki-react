@@ -1,7 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
-
 import { UserSupportPage } from "./UserSupportPage";
+import config from "../../config/indexConfig";
+import userEvent from "@testing-library/user-event";
+
+const mockNavigate = jest.fn();
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockNavigate,
+}));
 
 jest.mock("../../components/PageBackground", () => ({
   PageBackground: () => <div data-testid="page-background" />,
@@ -68,4 +75,15 @@ describe("UserSupportPage", () => {
 
     expect(screen.getByTestId("support-faq")).toBeInTheDocument();
   });
+});
+
+// Navigation test for the Support History button
+it("navigates to Support History page when the button is clicked", async () => {
+  const user = userEvent.setup();
+
+  render(<UserSupportPage />);
+  await user.click(screen.getByRole("button", { name: "Support History" }));
+
+  expect(mockNavigate).toHaveBeenCalledWith(config.routes.userSupportHistory);
+  expect(mockNavigate).toHaveBeenCalledTimes(1);
 });

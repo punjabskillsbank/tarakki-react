@@ -11,6 +11,7 @@ import config from "../config/indexConfig";
 import { OrgMembers } from "../pages/organization/organizationMembers/OrgMembers";
 import { AddBoardMembers } from "../pages/board/AddBoardMembers";
 import { UserSupportPage } from "../pages/support/UserSupportPage";
+import { UserSupportHistoryPage } from "../pages/support/UserSupportHistoryPage";
 
 export const Router = createBrowserRouter([
   {
@@ -60,5 +61,9 @@ export const Router = createBrowserRouter([
   {
     path: config.routes.userSupport,
     Component: UserSupportPage,
+  },
+  {
+    path: config.routes.userSupportHistory,
+    Component: UserSupportHistoryPage,
   },
 ]);
