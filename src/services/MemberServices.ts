@@ -2,11 +2,11 @@ import API from "./axios";
 import config from "../config/indexConfig";
 import { isAxiosError } from "axios";
 
-interface MemberSignupResponse {
+export interface MemberSignupResponse {
   memberId: string;
-  token: string;
-  tokenType: string;
-  expiresIn: number;
+  token?: string;
+  tokenType?: string;
+  expiresIn?: number;
 }
 
 export default class MemberServices {

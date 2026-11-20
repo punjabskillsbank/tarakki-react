@@ -1,6 +1,8 @@
-import API from './axios';
+import API from "./axios";
+import config from "../config/indexConfig";
+import { MOCK_TOKEN } from "../test-utils/factories";
 
-describe('API authentication', () => {
+describe("API authentication interceptor", () => {
   const originalAdapter = API.defaults.adapter;
 
   beforeEach(() => {
@@ -11,45 +13,51 @@ describe('API authentication', () => {
     API.defaults.adapter = originalAdapter;
   });
 
-  it('sends the stored JWT as a Bearer token to configured API origins', async () => {
-    localStorage.setItem('token', 'signup-jwt-token');
+  const captureAuthorizationHeader = async (url: string) => {
     let authorizationHeader: string | undefined;
-
     API.defaults.adapter = async (request) => {
-      const header = request.headers.get('Authorization');
-      authorizationHeader = typeof header === 'string' ? header : undefined;
+      const header = request.headers.get("Authorization");
+      authorizationHeader = typeof header === "string" ? header : undefined;
       return {
         data: {},
         status: 200,
-        statusText: 'OK',
+        statusText: "OK",
         headers: {},
         config: request,
       };
     };
 
-    await API.get('/members');
+    await API.get(url);
+    return authorizationHeader;
+  };
 
-    expect(authorizationHeader).toBe('Bearer signup-jwt-token');
+  it("sends the stored JWT as a Bearer token to configured APIs", async () => {
+    localStorage.setItem("token", MOCK_TOKEN);
+
+    const header = await captureAuthorizationHeader(
+      `${config.baseURLs.memberService}${config.endpoints.members}`,
+    );
+
+    expect(header).toBe(`Bearer ${MOCK_TOKEN}`);
   });
 
-  it('does not send the JWT to unconfigured origins', async () => {
-    localStorage.setItem('token', 'signup-jwt-token');
-    let authorizationHeader: string | undefined;
+  it("does not send the JWT to an unconfigured origin", async () => {
+    localStorage.setItem("token", MOCK_TOKEN);
 
-    API.defaults.adapter = async (request) => {
-      const header = request.headers.get('Authorization');
-      authorizationHeader = typeof header === 'string' ? header : undefined;
-      return {
-        data: {},
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: request,
-      };
-    };
+    const header = await captureAuthorizationHeader(
+      "https://example.com/resource",
+    );
 
-    await API.get('https://example.com/resource');
+    expect(header).toBeUndefined();
+  });
 
-    expect(authorizationHeader).toBeUndefined();
+  it("does not send an existing JWT to the login endpoint", async () => {
+    localStorage.setItem("token", MOCK_TOKEN);
+
+    const header = await captureAuthorizationHeader(
+      `${config.baseURLs.memberService}${config.endpoints.login}`,
+    );
+
+    expect(header).toBeUndefined();
   });
 });

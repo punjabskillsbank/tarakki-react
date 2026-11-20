@@ -1,5 +1,6 @@
 import axios from 'axios';
 import config from '../config/indexConfig';
+import { getToken, clearAuth } from '../utils/authStorage';
 
 const API = axios.create({
   baseURL: config.baseURLs.apiRoot,
@@ -9,21 +10,44 @@ const API = axios.create({
   },
 });
 
-const trustedOrigins = new Set(
-  Object.values(config.baseURLs).map((baseURL) =>
-    new URL(baseURL, window.location.origin).origin
-  )
-);
-
-API.interceptors.request.use((request) => {
-  const token = localStorage.getItem('token');
-  const requestUrl = new URL(request.url ?? '', window.location.origin);
-
-  if (token && trustedOrigins.has(requestUrl.origin)) {
-    request.headers.set('Authorization', `Bearer ${token}`);
+API.interceptors.request.use((requestConfig) => {
+  const token = getToken();
+  if (!token || typeof window === "undefined") {
+    return requestConfig;
   }
 
-  return request;
+  const requestUrl = new URL(
+    requestConfig.url ?? "",
+    new URL(requestConfig.baseURL ?? config.baseURLs.apiRoot, window.location.origin),
+  );
+  const trustedOrigins = new Set(
+    Object.values(config.baseURLs).map(
+      (baseURL) => new URL(baseURL, window.location.origin).origin,
+    ),
+  );
+  const isLoginRequest = requestUrl.pathname.endsWith(config.endpoints.login);
+
+  if (trustedOrigins.has(requestUrl.origin) && !isLoginRequest) {
+    requestConfig.headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  return requestConfig;
 });
+
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const isLoginRequest = error.config?.url?.includes(config.endpoints.login);
+    const isOnLoginPage =
+      typeof window !== 'undefined' && window.location.pathname === config.routes.login;
+
+    if (error.response?.status === 401 && !isLoginRequest && !isOnLoginPage) {
+      clearAuth();
+      window.location.assign(config.routes.login);
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 export default API;

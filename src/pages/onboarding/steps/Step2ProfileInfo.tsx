@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { OnboardingLayout } from '../OnboardingLayout';
 import profileIllustration from '../../../assets/images/onboarding-profile.jpg';
 import MemberServices from '../../../services/MemberServices';
+import { setMemberIdentity, setToken } from '../../../utils/authStorage';
+import config from '../../../config/indexConfig';
 
 interface Step2Props {
   onNext: () => void;
@@ -17,11 +19,13 @@ export function Step2ProfileInfo({ onNext, onBack, email, password, onErrorBack 
 
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [loginRequired, setLoginRequired] = useState(false);
 
   const handleContinue = async () => {
     if (firstName && lastName) {
       setLoading(true);
       setApiError(null);
+      setLoginRequired(false);
       try {
         const trimmedFirstName = firstName.trim();
         const trimmedLastName = lastName.trim();
@@ -38,18 +42,19 @@ export function Step2ProfileInfo({ onNext, onBack, email, password, onErrorBack 
           accountStatus: "ACTIVE"
         });
 
-        if (!memberResponse.token?.trim()) {
-          setApiError("Account created, but the server did not return an authentication token. Please contact support.");
+        const token = memberResponse?.token?.trim();
+        if (!memberResponse?.memberId || !token) {
+          setLoginRequired(true);
+          setApiError("Your account was created. Please log in to continue.");
           return;
         }
 
-        localStorage.setItem('token', memberResponse.token);
-
-        if (memberResponse && memberResponse.memberId) {
-          localStorage.setItem('memberId', memberResponse.memberId.toString());
-          localStorage.setItem('firstName', formattedFirstName);
-          localStorage.setItem('lastName', formattedLastName);
-        }
+        setToken(token);
+        setMemberIdentity({
+          memberId: memberResponse.memberId.toString(),
+          firstName: formattedFirstName,
+          lastName: formattedLastName,
+        });
         onNext();
       } catch (error: unknown) {
         console.log('Error creating member:', error);
@@ -119,6 +124,14 @@ export function Step2ProfileInfo({ onNext, onBack, email, password, onErrorBack 
         {apiError && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm font-medium">
             {apiError}
+            {loginRequired && (
+              <>
+                {' '}
+                <a href={config.routes.login} className="underline">
+                  Log in
+                </a>
+              </>
+            )}
           </div>
         )}
 
