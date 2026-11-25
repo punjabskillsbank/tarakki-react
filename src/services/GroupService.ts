@@ -15,6 +15,11 @@ export interface CreateGroupResponse extends CreateGroupPayload {
   updatedAt: string;
 }
 
+export interface UpdateGroupPayload {
+  groupName?: string;
+  position?: number;
+}
+
 export type BoardGroupResponse = CreateGroupResponse;
 
 export default class GroupService {
@@ -62,5 +67,25 @@ export default class GroupService {
       (wrappedError as Error & { cause?: unknown }).cause = error;
       throw wrappedError;
     }
+  }
+
+  static async updateGroup(
+    boardId: number,
+    groupId: number,
+    payload: UpdateGroupPayload,
+  ): Promise<CreateGroupResponse> {
+    const baseURL = config.baseURLs.boardTaskService || "";
+    const response = await API.patch<CreateGroupResponse>(
+      `${baseURL}${config.endpoints.boards}/${boardId}/groups/${groupId}`,
+      payload,
+    );
+    return response.data;
+  }
+
+  static async deleteGroup(boardId: number, groupId: number): Promise<void> {
+    const baseURL = config.baseURLs.boardTaskService || "";
+    await API.delete(
+      `${baseURL}${config.endpoints.boards}/${boardId}/groups/${groupId}`,
+    );
   }
 }

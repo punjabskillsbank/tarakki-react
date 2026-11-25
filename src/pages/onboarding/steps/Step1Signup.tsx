@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { OnboardingLayout } from "../OnboardingLayout";
 import signupIllustration from "../../../assets/images/onboarding-signup.jpg";
-import MemberService from "../../../services/MemberServices";
 import { FormInput } from "../../../components/FormInput";
 import { PasswordInput } from "../../../components/PasswordInput";
 import { PrimaryButton } from "../../../components/PrimaryButton";
+import config from "../../../config/indexConfig";
+import MemberServices from "../../../services/MemberServices";
 
 interface Step1Props {
   onNext: () => void;
@@ -31,8 +33,7 @@ export function Step1Signup({
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
-  const [generalError, setGeneralError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
   useEffect(() => {
     setEmailError(externalError || "");
@@ -47,7 +48,6 @@ export function Step1Signup({
     setEmailError("");
     setPasswordError("");
     setConfirmPasswordError("");
-    setGeneralError("");
     onClearError?.();
 
     if (!isValidEmail(localEmail)) {
@@ -74,26 +74,34 @@ export function Step1Signup({
       return;
     }
 
-    setEmail(localEmail);
-    setParentPassword?.(password);
-    
-    setIsLoading(true);
+    setIsCheckingEmail(true);
     try {
-      await MemberService.getMemberByEmail(localEmail);
-      setEmailError("Member with this email already exist");
+      await MemberServices.getMemberByEmail(localEmail);
+      setEmailError("An account with this email already exists");
+      return;
     } catch (error: unknown) {
-      const status = (error as any)?.response?.status;
-      if (status === 404) {
-        // Member not found, proceed to next step
-        onNext();
-      } else {
-        setGeneralError(
-          "Something went wrong while checking your email. Please try again."
-        );
+      const response =
+        typeof error === "object" && error !== null && "response" in error
+          ? error.response
+          : undefined;
+      const status =
+        typeof response === "object" &&
+        response !== null &&
+        "status" in response
+          ? response.status
+          : undefined;
+
+      if (status !== 404) {
+        setEmailError("Unable to verify this email right now. Please try again.");
+        return;
       }
     } finally {
-      setIsLoading(false);
+      setIsCheckingEmail(false);
     }
+
+    setEmail(localEmail);
+    setParentPassword?.(password);
+    onNext();
   };
 
   return (
@@ -171,29 +179,25 @@ export function Step1Signup({
             }}
             onKeyPress={(e) => e.key === "Enter" && handleContinue()}
           />
-
-          {generalError && <p className="text-red-500 text-xs mt-1">{generalError}</p>}
         </div>
 
         {/* Continue Button */}
         <PrimaryButton
           onClick={handleContinue}
-          disabled={!localEmail || isLoading}
-          isLoading={isLoading}
+          disabled={!localEmail || isCheckingEmail}
           className="w-full"
         >
-          Continue
+          {isCheckingEmail ? "Checking email..." : "Continue"}
         </PrimaryButton>
 
         {/* Footer */}
         <p className="text-center text-[14px] text-[#6B7280]">
           Already have an account?{" "}
-          <span className="text-[#0073EA] cursor-pointer hover:underline">
+          <Link to={config.routes.login} className="text-[#0073EA] cursor-pointer hover:underline">
             Log in
-          </span>
+          </Link>
         </p>
       </div>
     </OnboardingLayout>
   );
 }
-

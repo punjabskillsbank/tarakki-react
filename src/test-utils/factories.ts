@@ -12,6 +12,12 @@ export const MOCK_SHORT_PASSWORD = "short";
 export const PASSWORD_LABEL = "Password";
 export const CONFIRM_PASSWORD_LABEL = "Confirm Password";
 export const MOCK_NETWORK_ERROR = "Network Error";
+export const MOCK_MEMBER_ALREADY_EXISTS_ERROR = "Email already exists";
+export const MOCK_MEMBER_NOT_FOUND_ERROR = "Member not found";
+export const FAILED_TO_CREATE_MEMBER = "Failed to create member";
+export const FAILED_TO_FETCH_MEMBER_DETAILS = "Failed to fetch member details";
+export const MOCK_CACHE_CONTROL_HEADER = "Cache-Control";
+export const MOCK_CACHE_CONTROL_VALUE = "no-cache";
 export const MOCK_ORGANIZATION_ERROR = "Organization already exists";
 export const MOCK_INVITATION_ERROR = "Member already invited";
 export const FAILED_TO_CREATE_ORGANIZATION = "Failed to create organization";
@@ -38,6 +44,16 @@ export const memberFactory = (overrides = {}) => {
     ...overrides,
   };
 };
+
+export const memberSignupResponseFactory = (overrides = {}) => ({
+  memberId: MOCK_MEMBER_ID,
+  ...overrides,
+});
+
+export const memberServiceResponseErrorFactory = (message: string) => ({
+  isAxiosError: true,
+  response: { data: { message } },
+});
 
 export const boardPayloadFactory = (overrides = {}) => {
   return {
@@ -164,7 +180,8 @@ export const MOCK_EMAIL3 = "member3@example.com";
 export const MOCK_INVALID_BOARD_ID = "invalid-board-id";
 export const MOCK_BOARD_MEMBER_NETWORK_ERROR = "network failure";
 export const MOCK_ALREADY_TIMED_OUT_ERROR = "Already timed out";
-export const MOCK_ALREADY_BOARD_MEMBER_ERROR = "Member is already a member of board";
+export const MOCK_ALREADY_BOARD_MEMBER_ERROR =
+  "Member is already a member of board";
 export const MOCK_UNRELATED_CONFLICT_ERROR = "A different conflict occurred";
 
 export const boardLoadErrorFactory = () => new Error("board failure");
@@ -183,7 +200,11 @@ export const unrelatedConflictErrorFactory = () => ({
   response: { status: 409, data: MOCK_UNRELATED_CONFLICT_ERROR },
 });
 
-export const addBoardMembersSubmissionErrorCases = (): [string, unknown, string][] => [
+export const addBoardMembersSubmissionErrorCases = (): [
+  string,
+  unknown,
+  string
+][] => [
   ["string rejection", "  Permission denied  ", "Permission denied"],
   [
     "response string",
@@ -207,11 +228,7 @@ export const addBoardMembersSubmissionErrorCases = (): [string, unknown, string]
     "Invalid email, Role is required",
   ],
   ["Error instance", new Error("Network unavailable"), "Network unavailable"],
-  [
-    "unknown reason",
-    42,
-    "Some members couldn't be added. Please try again.",
-  ],
+  ["unknown reason", 42, "Some members couldn't be added. Please try again."],
 ];
 
 export const boardMemberFactory = (overrides = {}) => ({
@@ -304,10 +321,13 @@ export const CREATE_BOARD_HEADING = "Create Board";
 export const CREATE_BOARD_NAME_LABEL = "Board Name";
 export const CREATE_BOARD_DESCRIPTION_LABEL = "Board Description";
 export const CREATE_BOARD_NAME_REQUIRED_ERROR = "Board name is required";
-export const CREATE_BOARD_DESCRIPTION_REQUIRED_ERROR = "Board description is required";
+export const CREATE_BOARD_DESCRIPTION_REQUIRED_ERROR =
+  "Board description is required";
 export const CREATE_BOARD_SUCCESS_MESSAGE = "Board created successfully!";
-export const CREATE_BOARD_FAILURE_MESSAGE = "Board couldn't be created. Please try again.";
-export const CREATE_BOARD_ORGANIZATION_MISSING_MESSAGE = "Organization ID not found.";
+export const CREATE_BOARD_FAILURE_MESSAGE =
+  "Board couldn't be created. Please try again.";
+export const CREATE_BOARD_ORGANIZATION_MISSING_MESSAGE =
+  "Organization ID not found.";
 export const CREATE_BOARD_NAME_CHARACTER_COUNT = "0 / 100";
 export const CREATE_BOARD_DESCRIPTION_CHARACTER_COUNT = "0 / 500";
 export const CREATE_BOARD_NAME_MAX_LENGTH = "100";
@@ -329,19 +349,23 @@ export const BOARD_MEMBERS_LOAD_ALERT_MESSAGE =
   "Unable to load organization members.";
 export const BOARD_MEMBERS_SKIP_LABEL = "Skip for now";
 export const BOARD_MEMBERS_SUBMIT_LABEL = "Add Members";
-export const BOARD_MEMBERS_EDIT_ACCESS_LABEL = "Added members can edit this board";
+export const BOARD_MEMBERS_EDIT_ACCESS_LABEL =
+  "Added members can edit this board";
 export const BOARD_MEMBERS_RETRY_LABEL = "Try again";
-export const BOARD_MEMBERS_SUCCESS_MESSAGE = "Board members added successfully!";
+export const BOARD_MEMBERS_SUCCESS_MESSAGE =
+  "Board members added successfully!";
 export const BOARD_MEMBER_ARIA_PRESSED_ATTRIBUTE = "aria-pressed";
 export const BOARD_MEMBER_SELECTED_VALUE = "true";
 export const BOARD_MEMBER_UNSELECTED_VALUE = "false";
 export const boardSelectedCountLabel = (count: number) => `${count} selected`;
 export const boardMembersAddedCountMessage = (count: number) =>
   `${count} member(s) added successfully.`;
-export const boardRouteFactory = (boardId: string | number) => `/task-board/${boardId}`;
+export const boardRouteFactory = (boardId: string | number) =>
+  `/task-board/${boardId}`;
 export const addBoardMembersRouteFactory = (boardId: string | number) =>
   `/add-board-members/${boardId}`;
-export const caseInsensitiveRegexFactory = (value: string) => new RegExp(value, "i");
+export const caseInsensitiveRegexFactory = (value: string) =>
+  new RegExp(value, "i");
 export const boardMemberAccessFactory = (email: string, canEdit = false) => ({
   email,
   canEdit,
@@ -399,7 +423,6 @@ export const mockOrgValidationError = {
   },
 };
 
-
 // ─── Admin Organization ───────────────────────────────────────────────────────
 
 export const mockApiOrganizations = [
@@ -436,7 +459,6 @@ export const mockApiOrganizations = [
     totalMemberCount: 12,
   },
 ];
-
 
 export const mockOrganizationWithoutOwner = {
   orgId: 3,
@@ -625,10 +647,39 @@ export const adminMembersByOrganizationFactory = (overrides = {}) => {
 
 // ─── Admin Dashboard Layout Test Data ───────────────────────────────────────
 
+// ─── Auth ─────────────────────────────────────────────────────────────────
+
+export const MOCK_TOKEN = "mock.jwt.token";
+
+export const loginCredentialsFactory = (overrides = {}) => {
+  return {
+    email: MOCK_EMAIL,
+    password: MOCK_PASSWORD,
+    ...overrides,
+  };
+};
+
+export const loginResponseFactory = (overrides = {}) => {
+  return {
+    token: MOCK_TOKEN,
+    tokenType: "Bearer",
+    expiresIn: 3600,
+    member: {
+      memberId: MOCK_MEMBER_ID,
+      firstName: MOCK_FIRST_NAME,
+      lastName: MOCK_LAST_NAME,
+      email: MOCK_EMAIL,
+      profilePhotoS3Key: "",
+      accountStatus: MOCK_ACCOUNT_STATUS,
+    },
+    ...overrides,
+  };
+};
+
 export const appShellPropsFactory = (overrides = {}) => {
   return {
-    activeItem: 'dashboard' as const,
-    children: 'Dashboard content',
+    activeItem: "dashboard" as const,
+    children: "Dashboard content",
     onNavigate: () => undefined,
     ...overrides,
   };
@@ -636,7 +687,7 @@ export const appShellPropsFactory = (overrides = {}) => {
 
 export const sidebarPropsFactory = (overrides = {}) => {
   return {
-    activeItem: 'dashboard' as const,
+    activeItem: "dashboard" as const,
     onNavigate: () => undefined,
     ...overrides,
   };
@@ -647,3 +698,64 @@ export const topbarPropsFactory = (overrides = {}) => {
     ...overrides,
   };
 };
+
+//support
+export const FAILED_TO_CREATE_SUPPORT_TICKET =
+  "Failed to create support ticket";
+export const FAILED_TO_CREATE_SUPPORT_TICKET_MESSAGE =
+  "Failed to create support ticket message";
+export const MOCK_SUPPORT_TICKET_ERROR = "Unable to create support ticket";
+export const MOCK_SUPPORT_MESSAGE_ERROR =
+  "Unable to create support ticket message";
+export const FAILED_TO_FETCH_SUPPORT_TICKETS =
+  "Failed to fetch support tickets";
+
+export const MOCK_SUPPORT_TICKETS_ERROR = "Unable to fetch support tickets";
+
+export const mockTicketPayload = {
+  memberId: MOCK_MEMBER_ID,
+  firstName: "John",
+  lastName: "Doe",
+  email: "john@example.com",
+  subject: "Unable to log in",
+  issueCategory: "ACCOUNT",
+  issueType: "LOGIN_ISSUE",
+  message: "I cannot log in to my account.",
+};
+
+export const mockTicketMessagePayload = {
+  ticketId: "ticket-123",
+  userId: MOCK_MEMBER_ID,
+  messageBody: "I cannot log in to my account.",
+};
+
+export const mockTickets = [
+  {
+    ticketId: "ticket-123",
+    memberId: MOCK_MEMBER_ID,
+    firstName: "John",
+    lastName: "Doe",
+    email: "john@example.com",
+    subject: "Unable to log in",
+    issueCategory: "ACCOUNT",
+    issueType: "LOGIN_ISSUE",
+    message: "I cannot log in to my account.",
+    ticketStatus: "OPEN",
+    createdAt: "2026-10-13T00:45:02.205Z",
+    updatedAt: "2026-10-13T00:45:02.205Z",
+  },
+  {
+    ticketId: "ticket-456",
+    memberId: MOCK_MEMBER_ID,
+    firstName: "John",
+    lastName: "Doe",
+    email: "john@example.com",
+    subject: "Unable to upload a file",
+    issueCategory: "BOARDS",
+    issueType: "OTHER",
+    message: "I cannot upload files to my board.",
+    ticketStatus: "IN_PROGRESS",
+    createdAt: "2026-10-14T00:45:02.205Z",
+    updatedAt: "2026-10-15T00:45:02.205Z",
+  },
+];

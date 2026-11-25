@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AdminDashboard } from "../pages/admin/AdminDashboard";
 import { OnboardingFlow } from "../pages/onboarding/OnboardingFlow";
 import { OrganizationDecision } from "../pages/organization/organizationDecision/OrganizationDecision";
@@ -9,11 +9,16 @@ import TaskBoard from "../pages/taskBoard/TaskBoard";
 import config from "../config/indexConfig";
 import { OrgMembers } from "../pages/organization/organizationMembers/OrgMembers";
 import { AddBoardMembers } from "../pages/board/AddBoardMembers";
+import { Login } from "../pages/onboarding/Login";
 
 export const Router = createBrowserRouter([
   {
     path: config.routes.onboarding,
     Component: OnboardingFlow,
+  },
+  {
+    path: config.routes.login,
+    Component: Login,
   },
   {
     path: config.routes.organizationDecision,
@@ -50,5 +55,9 @@ export const Router = createBrowserRouter([
   {
     path: config.routes.organizationMembers,
     Component: OrgMembers,
+  },
+  {
+    path: "*",
+    element: <Navigate to={config.routes.onboarding} replace />,
   },
 ]);

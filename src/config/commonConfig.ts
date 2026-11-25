@@ -4,6 +4,7 @@ const commonConfig = {
   },
   routes: {
     onboarding: "/",
+    login: "/login",
     organizationDecision: "/organization-decision",
     createOrganization: "/create-organization",
     createBoard: "/create-board/:orgId",
@@ -18,6 +19,7 @@ const commonConfig = {
       `/organization-members/${orgId}`,
   },
   endpoints: {
+    login: "/auth/login",
     boards: "/boards",
     boardMembers: "/board-members",
     boardMembersForBoard: (boardId: string | number) =>

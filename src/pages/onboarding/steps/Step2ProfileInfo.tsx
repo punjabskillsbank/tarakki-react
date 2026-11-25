@@ -155,7 +155,6 @@ export function Step2ProfileInfo({ onNext, onBack, email, password, onErrorBack 
             </>
           ) : 'Set up my workspace'}
         </button>
-
         {/* Footer info */}
         <p className="text-center text-[12px] text-[#9CA3AF]">
           By continuing, you agree to our Terms of Service and Privacy Policy.

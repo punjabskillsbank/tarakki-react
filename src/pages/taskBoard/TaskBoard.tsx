@@ -339,13 +339,49 @@ export default function TaskBoard() {
     setQuickAddSectionId(sectionId);
     setShowQuickAdd(true);
   };
-  const deleteSection = (sectionId: string) => {
+  const renameSection = async (sectionId: string, name: string) => {
+    const parsedBoardId = Number(boardId);
+    const parsedGroupId = Number(sectionId);
+    const previousSection = sections.find((section) => section.id === sectionId);
+    if (!previousSection || !Number.isInteger(parsedBoardId) || !Number.isInteger(parsedGroupId)) {
+      toast.error("Board or group information is missing.");
+      return;
+    }
+
+    setSections((current) =>
+      current.map((section) => (section.id === sectionId ? { ...section, name } : section)),
+    );
+    try {
+      await GroupService.updateGroup(parsedBoardId, parsedGroupId, { groupName: name });
+    } catch (error) {
+      setSections((current) =>
+        current.map((section) =>
+          section.id === sectionId ? previousSection : section,
+        ),
+      );
+      console.error("Failed to rename group:", error);
+      toast.error("Group couldn't be renamed. Please try again.");
+    }
+  };
+  const deleteSection = async (sectionId: string) => {
+    const parsedBoardId = Number(boardId);
+    const parsedGroupId = Number(sectionId);
+    if (!Number.isInteger(parsedBoardId) || !Number.isInteger(parsedGroupId)) {
+      toast.error("Board or group information is missing.");
+      return;
+    }
+    try {
+      await GroupService.deleteGroup(parsedBoardId, parsedGroupId);
     setSections((current) =>
       current.filter((section) => section.id !== sectionId),
     );
     setTasks((current) =>
       current.filter((task) => task.sectionId !== sectionId),
     );
+    } catch (error) {
+      console.error("Failed to delete group:", error);
+      toast.error("Group couldn't be deleted. Please try again.");
+    }
   };
   const moveTask = (sectionId: string) => {
     if (!draggingTaskId) return;
@@ -402,13 +438,7 @@ export default function TaskBoard() {
                   )}
                   draggingTaskId={draggingTaskId}
                   dragTarget={dragTarget}
-                  onRename={(id, name) =>
-                    setSections((current) =>
-                      current.map((item) =>
-                        item.id === id ? { ...item, name } : item,
-                      ),
-                    )
-                  }
+                  onRename={renameSection}
                   onToggleCollapse={(id) =>
                     setSections((current) =>
                       current.map((item) =>

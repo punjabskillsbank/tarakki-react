@@ -9,6 +9,13 @@ export interface MemberSignupResponse {
   expiresIn?: number;
 }
 
+export interface MemberUpdateRequest {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  profilePhotoS3Key?: string;
+}
+
 export default class MemberServices {
   static async createMember(memberData: {
     firstName: string;
@@ -65,7 +72,7 @@ export default class MemberServices {
     try {
       const baseURL = config.baseURLs.memberService || "";
       const response = await API.get(
-        `${baseURL}${config.endpoints.members}/email/${email}`,
+        `${baseURL}${config.endpoints.members}/email/${encodeURIComponent(email)}`,
         { headers: { "Cache-Control": "no-cache" } }
       );
       return response.data;
@@ -82,5 +89,17 @@ export default class MemberServices {
       customError.response = axiosError?.response;
       throw customError;
     }
+  }
+
+  static async updateMember(
+    memberId: string,
+    member: MemberUpdateRequest,
+  ): Promise<MemberUpdateRequest> {
+    const baseURL = config.baseURLs.memberService || "";
+    const response = await API.patch<MemberUpdateRequest>(
+      `${baseURL}${config.endpoints.members}/${memberId}`,
+      member,
+    );
+    return response.data;
   }
 }

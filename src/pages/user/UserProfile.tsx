@@ -38,7 +38,7 @@ export function UserProfile() {
         const data = await MemberServices.getMemberById(memberId);
         setMember(data);
         setFormData(data);
-      } catch (err) {
+      } catch {
         setError("Failed to load member profile");
       } finally {
         setLoading(false);
@@ -136,11 +136,29 @@ export function UserProfile() {
               </button>
               <button
                 className="px-4 py-2 rounded-xl  bg-blue-500 text-white border-blue-500 border"
-                onClick={() => {
-                  setMember(formData);
-                  setIsEditing(false);
-                  alert("Profile updated successfully!");
-                  // API call to update member profile
+                onClick={async () => {
+                  if (!formData) return;
+                  try {
+                    const updatedMember = await MemberServices.updateMember(
+                      formData.memberId,
+                      {
+                        firstName: formData.firstName,
+                        lastName: formData.lastName,
+                        email: formData.email,
+                        profilePhotoS3Key: formData.profilePhotoS3Key,
+                      },
+                    );
+                    setMember((current) =>
+                      current ? { ...current, ...updatedMember } : current,
+                    );
+                    setFormData((current) =>
+                      current ? { ...current, ...updatedMember } : current,
+                    );
+                    setIsEditing(false);
+                    alert("Profile updated successfully!");
+                  } catch {
+                    setError("Failed to update member profile");
+                  }
                 }}>
                 Save changes
               </button>
