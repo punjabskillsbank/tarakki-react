@@ -17,6 +17,7 @@ const commonConfig = {
     organizationMembers: "/organization-members/:orgId",
     organizationMembersWithOrgId: (orgId: string | number) =>
       `/organization-members/${orgId}`,
+    userSupport: "/user-support",
   },
   endpoints: {
     login: "/auth/login",
@@ -31,6 +32,10 @@ const commonConfig = {
     all_organizations: "/admin/organizations/",
     organizationMember: (orgId: string | number) =>
       `/organizations/${orgId}/members`,
+    login: "/auth/login",
+    me: "/auth/me",
+    supportTickets: "/support/tickets",
+    supportTicketMessages: "/support/tickets/messages",
   },
 };
 

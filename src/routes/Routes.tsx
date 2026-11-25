@@ -1,6 +1,7 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import { AdminDashboard } from "../pages/admin/AdminDashboard";
 import { OnboardingFlow } from "../pages/onboarding/OnboardingFlow";
+import { LoginPage } from "../pages/auth/LoginPage";
 import { OrganizationDecision } from "../pages/organization/organizationDecision/OrganizationDecision";
 import CreateOrganizationForm from "../pages/organization/createOrganisation/CreateOrganizationForm";
 import { UserProfile } from "../pages/user/UserProfile";
@@ -9,7 +10,7 @@ import TaskBoard from "../pages/taskBoard/TaskBoard";
 import config from "../config/indexConfig";
 import { OrgMembers } from "../pages/organization/organizationMembers/OrgMembers";
 import { AddBoardMembers } from "../pages/board/AddBoardMembers";
-import { Login } from "../pages/onboarding/Login";
+import { UserSupportPage } from "../pages/support/UserSupportPage";
 
 export const Router = createBrowserRouter([
   {
@@ -18,7 +19,7 @@ export const Router = createBrowserRouter([
   },
   {
     path: config.routes.login,
-    Component: Login,
+    Component: LoginPage,
   },
   {
     path: config.routes.organizationDecision,
@@ -57,7 +58,7 @@ export const Router = createBrowserRouter([
     Component: OrgMembers,
   },
   {
-    path: "*",
-    element: <Navigate to={config.routes.onboarding} replace />,
+    path: config.routes.userSupport,
+    Component: UserSupportPage,
   },
 ]);

@@ -11,8 +11,9 @@ export default defineConfig(({ mode }) => {
     env.VITE_ORGANIZATION_SERVICE_URL ||
     process.env.VITE_ORGANIZATION_SERVICE_URL;
   const boardService =
-    env.VITE_BOARD_TASK_SERVICE_URL ||
-    process.env.VITE_BOARD_TASK_SERVICE_URL;
+    env.VITE_BOARD_TASK_SERVICE_URL || process.env.VITE_BOARD_TASK_SERVICE_URL;
+  const supportService =
+    env.VITE_SUPPORT_SERVICE_URL || process.env.VITE_SUPPORT_SERVICE_URL;
   const apiRoot = env.VITE_API_ROOT || process.env.VITE_API_ROOT;
 
   const defineVars: Record<string, string> = {};
@@ -32,9 +33,22 @@ export default defineConfig(({ mode }) => {
       JSON.stringify(boardService);
   }
 
+  if (supportService && supportService.trim() !== "") {
+    defineVars["process.env.VITE_SUPPORT_SERVICE_URL"] =
+      JSON.stringify(supportService);
+  }
+
   if (apiRoot && apiRoot.trim() !== "") {
     defineVars["process.env.VITE_API_ROOT"] = JSON.stringify(apiRoot);
   }
+
+  defineVars["process.env"] = JSON.stringify({
+    VITE_API_ROOT: apiRoot,
+    VITE_MEMBER_SERVICE_URL: memberService,
+    VITE_ORGANIZATION_SERVICE_URL: orgService,
+    VITE_BOARD_TASK_SERVICE_URL: boardService,
+    VITE_SUPPORT_SERVICE_URL: supportService,
+  });
 
   return {
     plugins: [react(), tailwindcss()],
@@ -73,11 +87,8 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
         },
 
-        // Task routes include a numeric board id (for example /api/23/task/1).
-        // Proxy them in development so POST and PATCH do not require CORS access
-        // from localhost:5173 to the board-task service.
-        "^/api/\\d+/task": {
-          target: boardService || "http://localhost:8081",
+        "/api/support": {
+          target: supportService || "http://localhost:8083",
           changeOrigin: true,
         },
       },
