@@ -30,12 +30,4 @@ export default class BoardMemberService {
       payload,
     );
   }
-
-  static async addMember(boardId: number, memberId: string): Promise<void> {
-    const baseURL = config.baseURLs.boardTaskService || "";
-    await API.post(`${baseURL}${config.endpoints.boardMembers}`, {
-      boardId,
-      memberId,
-    });
-  }
 }

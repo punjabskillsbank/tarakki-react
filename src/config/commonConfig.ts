@@ -22,17 +22,18 @@ const commonConfig = {
   endpoints: {
     login: "/auth/login",
     boards: "/boards",
-    boardMembers: "/board-members",
     boardMembersForBoard: (boardId: string | number) =>
       `/boards/${boardId}/members`,
     boardMember: (boardId: string | number, orgMemberId: string | number) =>
       `/boards/${boardId}/members/${orgMemberId}`,
+    boardTasks: (boardId: string | number) => `/${boardId}/task`,
+    boardTask: (boardId: string | number, taskId: string | number) =>
+      `/${boardId}/task/${taskId}`,
     members: "/members",
     organizations: "/organizations",
     all_organizations: "/admin/organizations/",
     organizationMember: (orgId: string | number) =>
       `/organizations/${orgId}/members`,
-    login: "/auth/login",
     me: "/auth/me",
     supportTickets: "/support/tickets",
     supportTicketMessages: "/support/tickets/messages",

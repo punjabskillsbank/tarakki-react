@@ -20,32 +20,6 @@ describe("BoardMemberService", () => {
     jest.clearAllMocks();
   });
 
-  describe("addMember", () => {
-    it("adds a member to a board", async () => {
-      const payload = boardMemberPayloadFactory();
-      mockedAPI.post.mockResolvedValueOnce({ data: undefined });
-
-      await expect(
-        BoardMemberService.addMember(payload.boardId, payload.memberId),
-      ).resolves.toBeUndefined();
-
-      expect(mockedAPI.post).toHaveBeenCalledWith(
-        `${config.baseURLs.boardTaskService}${config.endpoints.boardMembers}`,
-        payload,
-      );
-    });
-
-    it("propagates request failures", async () => {
-      const payload = boardMemberPayloadFactory();
-      const error = boardMemberNetworkErrorFactory();
-      mockedAPI.post.mockRejectedValueOnce(error);
-
-      await expect(
-        BoardMemberService.addMember(payload.boardId, payload.memberId),
-      ).rejects.toThrow(error);
-    });
-  });
-
   describe("getBoardMembers", () => {
     it("fetches existing members for a board", async () => {
       const payload = boardMemberPayloadFactory();

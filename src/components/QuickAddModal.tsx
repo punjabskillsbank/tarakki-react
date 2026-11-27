@@ -19,6 +19,7 @@ export function QuickAddModal({
   onCreate,
 }: Props) {
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [sectionId, setSectionId] = useState(
     initialSectionId ?? sections[0]?.id ?? "",
   );
@@ -27,12 +28,12 @@ export function QuickAddModal({
   const [dueDate, setDueDate] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const create = async () => {
-    if (!title.trim()) return;
+    if (!title.trim() || !description.trim()) return;
     setIsCreating(true);
     try {
       await onCreate({
         title: title.trim(),
-        description: "",
+        description: description.trim(),
         assignee: members.find((member) => member.id === assigneeId) ?? null,
         dueDate: dueDate || null,
         priority,
@@ -71,6 +72,13 @@ export function QuickAddModal({
           onKeyDown={(event) => event.key === "Enter" && void create()}
           placeholder="Issue summary..."
           className="mb-3 w-full rounded-lg border border-[#E6E9EF] bg-[#F6F7FB] px-3 py-2.5 text-[13px] text-[#1F2937] outline-none transition-colors placeholder:text-[#C4C4C4] focus:border-[#0073EA]"
+        />
+        <textarea
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+          placeholder="Describe this issue..."
+          rows={3}
+          className="mb-3 w-full resize-none rounded-lg border border-[#E6E9EF] bg-[#F6F7FB] px-3 py-2.5 text-[13px] text-[#1F2937] outline-none transition-colors placeholder:text-[#C4C4C4] focus:border-[#0073EA]"
         />
         <div className="mb-5 grid grid-cols-2 gap-2.5">
           <label className="space-y-1">
@@ -145,7 +153,7 @@ export function QuickAddModal({
           </button>
           <PrimaryButton
             onClick={() => void create()}
-            disabled={isCreating || !title.trim() || !sectionId}
+            disabled={isCreating || !title.trim() || !description.trim() || !sectionId}
             className="h-auto px-4 py-1.5 text-[12px]"
           >
             {isCreating ? "Creating..." : "Create"}

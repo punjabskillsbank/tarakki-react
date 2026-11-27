@@ -6,6 +6,7 @@ export interface BoardTaskResponse {
   boardId: number;
   groupId: number;
   title: string;
+  description: string;
   position: number;
   createdBy: string;
   createdAt: string;
@@ -16,12 +17,14 @@ export interface CreateBoardTaskRequest {
   boardId: number;
   groupId: number;
   title: string;
+  description: string;
   position: number;
   createdBy: string;
 }
 
 export interface UpdateBoardTaskRequest {
   title?: string;
+  description?: string;
   groupId?: number;
   position?: number;
 }
@@ -30,7 +33,7 @@ export default class TaskService {
   static async getTasks(boardId: number): Promise<BoardTaskResponse[]> {
     const baseURL = config.baseURLs.boardTaskService || "";
     const response = await API.get<BoardTaskResponse[]>(
-      `${baseURL}/${boardId}/task`,
+      `${baseURL}${config.endpoints.boardTasks(boardId)}`,
     );
     return response.data;
   }
@@ -41,7 +44,7 @@ export default class TaskService {
   ): Promise<BoardTaskResponse> {
     const baseURL = config.baseURLs.boardTaskService || "";
     const response = await API.post<BoardTaskResponse>(
-      `${baseURL}/${boardId}/task`,
+      `${baseURL}${config.endpoints.boardTasks(boardId)}`,
       task,
     );
     return response.data;
@@ -54,7 +57,7 @@ export default class TaskService {
   ): Promise<BoardTaskResponse> {
     const baseURL = config.baseURLs.boardTaskService || "";
     const response = await API.patch<BoardTaskResponse>(
-      `${baseURL}/${boardId}/task/${taskId}`,
+      `${baseURL}${config.endpoints.boardTask(boardId, taskId)}`,
       task,
       // Updates trigger backend auditing and can take longer than the shared
       // 10-second API timeout. Do not abort a valid in-progress update early.

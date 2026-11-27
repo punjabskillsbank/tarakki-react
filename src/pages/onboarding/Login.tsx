@@ -17,10 +17,14 @@ export function Login() {
     setError("");
     setIsSubmitting(true);
     try {
-      const response = await AuthService.login(email.trim(), password);
+      const response = await AuthService.login({ email: email.trim(), password });
       setToken(response.token);
-      setMemberIdentity(response.member);
-      navigate(config.routes.organizationDecision, { replace: true });
+      setMemberIdentity({
+        memberId: response.member.memberId,
+        firstName: response.member.firstName,
+        lastName: response.member.lastName,
+      });
+      navigate(config.routes.organizationDecision);
     } catch {
       setError("Invalid email or password. Please try again.");
     } finally {

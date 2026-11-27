@@ -44,6 +44,7 @@ describe("TaskService", () => {
         boardId: MOCK_BOARD_ID,
         groupId: task.groupId,
         title: task.title,
+        description: task.description,
         position: task.position,
         createdBy: task.createdBy,
       };

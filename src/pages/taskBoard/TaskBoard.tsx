@@ -216,6 +216,7 @@ export default function TaskBoard() {
         boardId: parsedBoardId,
         groupId,
         title: task.title,
+        description: task.description,
         position: tasks.filter((item) => item.sectionId === task.sectionId)
           .length,
         createdBy: memberId,
@@ -276,6 +277,9 @@ export default function TaskBoard() {
 
     const patch = {
       ...(existing.title !== updated.title ? { title: updated.title } : {}),
+      ...(existing.description !== updated.description
+        ? { description: updated.description }
+        : {}),
       ...(existing.sectionId !== updated.sectionId
         ? { groupId: Number(updated.sectionId) }
         : {}),
@@ -309,6 +313,10 @@ export default function TaskBoard() {
                 ...(patch.title !== undefined && task.title === updated.title
                   ? { title: existing.title }
                   : {}),
+                ...(patch.description !== undefined &&
+                task.description === updated.description
+                  ? { description: existing.description }
+                  : {}),
                 ...(patch.groupId !== undefined &&
                 task.sectionId === updated.sectionId
                   ? { sectionId: existing.sectionId }
@@ -323,6 +331,10 @@ export default function TaskBoard() {
               ...current,
               ...(patch.title !== undefined && current.title === updated.title
                 ? { title: existing.title }
+                : {}),
+              ...(patch.description !== undefined &&
+              current.description === updated.description
+                ? { description: existing.description }
                 : {}),
               ...(patch.groupId !== undefined &&
               current.sectionId === updated.sectionId
@@ -513,7 +525,7 @@ function toBoardTask(task: BoardTaskResponse): Task {
     id: String(task.taskId),
     ticketNum: `T-${task.taskId}`,
     title: task.title,
-    description: "",
+    description: task.description,
     assignee: null,
     dueDate: null,
     priority: "none",

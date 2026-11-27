@@ -106,6 +106,7 @@ export const taskResponseFactory = (overrides = {}) => ({
   boardId: MOCK_BOARD_ID,
   groupId: 3,
   title: "Write tests",
+  description: "Add coverage for the board flow.",
   position: 1,
   createdBy: MOCK_MEMBER_ID,
   createdAt: "2026-09-05T00:00:00Z",
@@ -276,6 +277,8 @@ export const QUICK_ADD_MODAL_WHITESPACE_TITLE = `  ${QUICK_ADD_MODAL_TITLE}  `;
 export const QUICK_ADD_MODAL_BLANK_TITLE = "   ";
 export const QUICK_ADD_MODAL_DUE_DATE = "2026-09-05";
 export const QUICK_ADD_MODAL_TITLE_PLACEHOLDER = "Issue summary...";
+export const QUICK_ADD_MODAL_DESCRIPTION = "Describe the new issue.";
+export const QUICK_ADD_MODAL_DESCRIPTION_PLACEHOLDER = "Describe this issue...";
 export const QUICK_ADD_MODAL_GROUP_LABEL = "Group";
 export const QUICK_ADD_MODAL_PRIORITY_LABEL = "Priority";
 export const QUICK_ADD_MODAL_ASSIGNEE_LABEL = "Assignee";
@@ -304,7 +307,7 @@ export const addMemberModalSubmissionErrorFactory = () => new Error();
 
 export const quickAddModalPayloadFactory = (overrides = {}) => ({
   title: QUICK_ADD_MODAL_TITLE,
-  description: "",
+  description: QUICK_ADD_MODAL_DESCRIPTION,
   assignee: null,
   dueDate: null,
   priority: "medium" as const,
